@@ -1,0 +1,3 @@
+This directory is created to contain the ROOT files with cut sets.
+Cuts are saved as VarCut objects by the code residing in the directory
+above.

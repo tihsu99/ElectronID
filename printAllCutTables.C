@@ -1,0 +1,109 @@
+#include "TString.h"
+#include "TFile.h"
+#include "VarCut.hh"
+#include "Variables.hh"
+
+const int nWP = 4;
+const TString workingPointNames[nWP] = {
+  "veto",
+  "loose",
+  "medium",
+  "tight"
+};
+
+
+const TString barrelCutFiles[nWP] = {
+  "/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_barrel_pass1_20142407_154300_WP_Veto_fullSample.root",
+  "/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_barrel_pass2_20142407_154300_WP_Loose_fullSample.root",
+  "/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_barrel_pass3_20142407_154300_WP_Medium_fullSample.root",
+  "/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_barrel_20142108_163000_WP_Tight_300k_50nsFromWP_Medium_FullSample.root"
+};
+
+const TString endcapCutFiles[nWP] = {
+  "/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_endcap_20142407_154900_WP_Veto.root",
+"/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_endcap_20142407_154900_WP_Loose.root",
+"/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_endcap_20142407_154900_WP_Medium.root",
+"/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_endcap_20142407_154900_WP_Tight.root"
+};
+
+
+enum WorkingPointNames {
+  WP_VETO = 0,
+  WP_LOOSE,
+  WP_MEDIUM,
+  WP_TIGHT
+};
+
+void printAllCutTables(){
+
+  TFile *barrelFiles[nWP];
+  TFile *endcapFiles[nWP];
+  VarCut *barrelCuts[nWP];
+  VarCut *endcapCuts[nWP];
+  for(int i=0; i<nWP; i++){
+
+    // Load all barrel cuts
+    TString barrelFileName =  barrelCutFiles[i];
+    barrelFiles[i] = new TFile(barrelFileName);
+    if( !barrelFiles[i] ){
+      printf("Could not open the file %s\n", barrelFileName.Data());
+      assert(0);
+    }
+    barrelCuts[i] = (VarCut*) barrelFiles[i]->Get("cuts");
+    if( !barrelCuts[i] ){
+      printf("Could not find the cuts object in file %s\n", barrelFileName.Data());
+      assert(0);
+    }
+
+    // Load all endcap cuts
+    TString endcapFileName =  endcapCutFiles[i];
+    endcapFiles[i] = new TFile(endcapFileName);
+    if( !endcapFiles[i] ){
+      printf("Could not open the file %s\n", endcapFileName.Data());
+      assert(0);
+    }
+    endcapCuts[i] = (VarCut*) endcapFiles[i]->Get("cuts");
+    if( !endcapCuts[i] ){
+      printf("Could not find the cuts object in file %s\n", endcapFileName.Data());
+      assert(0);
+    }
+
+  }
+
+  // Print barrel table for the twiki
+  printf("\nAll cuts for barrel in a twiki table format:\n\n");
+  printf("|                                    |   Veto     |    Loose   |   Medium   |  Tight   |\n");
+  for(int i=0; i< Vars::nVariables; i++){
+    TString variableName     = Vars::variables[i]->name.Data();
+    TString variableTmvaName = Vars::variables[i]->nameTmva.Data();
+    TString sign = (i == Vars::nVariables-1)?"<=":"<";
+    printf("|  %30s %s  |  %g  |  %g  |  %g  | %g |\n", 
+	   variableTmvaName.Data(), 
+	   sign.Data(),
+	   barrelCuts[WP_VETO  ]->getCutValue(variableName),
+	   barrelCuts[WP_LOOSE ]->getCutValue(variableName),
+	   barrelCuts[WP_MEDIUM]->getCutValue(variableName),
+	   barrelCuts[WP_TIGHT ]->getCutValue(variableName)
+	   );
+  }
+  printf("\n");
+  
+  // Print endcap table for the twiki
+  printf("\nAll cuts for endcap in a twiki table format:\n\n");
+  printf("|                                    |   Veto     |    Loose   |   Medium   |  Tight   |\n");
+  for(int i=0; i< Vars::nVariables; i++){
+    TString variableName     = Vars::variables[i]->name.Data();
+    TString variableTmvaName = Vars::variables[i]->nameTmva.Data();
+    TString sign = (i == Vars::nVariables-1)?"<=":"<";
+    printf("|  %30s %s  |  %g  |  %g  |  %g  | %g |\n", 
+	   variableTmvaName.Data(), 
+	   sign.Data(),
+	   endcapCuts[WP_VETO  ]->getCutValue(variableName),
+	   endcapCuts[WP_LOOSE ]->getCutValue(variableName),
+	   endcapCuts[WP_MEDIUM]->getCutValue(variableName),
+	   endcapCuts[WP_TIGHT ]->getCutValue(variableName)
+	   );
+  }
+  printf("\n");
+  
+}

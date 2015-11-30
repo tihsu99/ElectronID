@@ -1,0 +1,156 @@
+
+This directory contains a package for rectangular cut optimization
+with TMVA.
+
+//-------------------------------------------------------
+         Files and their content
+//-------------------------------------------------------
+
+Variables.hh: This file contains the list of the variables
+     for TMVA optimization and the list of spectators. The
+     list of variables is structured so that it contains the
+     variable name exactly as in the input ntuple, the variable
+expression as it is passed to TMVA (such as "abs(d0)"),
+
+VariableLimits.hh: This file defines sets of user-imposed limits
+     for cut optimization. One may want to, e.g., enforce that
+     the H/E cut is no looser than 0.15 for whatever reason, or 
+     one may want to make some of the cuts to be no looser than 
+     HLT cuts. These limitations are defined here, and passed
+     as a parameter into optimize.cc code from a higher-level script.
+
+OptimizationConstants.hh: this file contains about all settings
+     for optimization (except for the variable list): input files/trees, 
+     working points specs, TMVA options, etc.
+
+VarCut.hh/.cc: The class that contains a single set of cut values.
+     It is a writable ROOT object. It has the same number of
+     variables as specified in Variables.hh, and one should refer
+     to Variables.hh to find out which variable has which name.
+
+optimize.hh/.cc: This is not a class, but plaine code with the main
+     function optimize(...). It runs a single optimization of rectangular cuts.
+     The parameters passed in:
+        - the location of the ROOT file with VarCut object that defines
+             the limits for cuts during optimization
+        - the base for the Root file name construction for the output VarCut
+             objects for working points.
+        - the base for dir and file names for the standard TMVA output
+        - one of the predefined sets of user-defined cut restrictions.
+           During optimization, the code chooses the tightest restriction
+           out of those imposed from the cut file passed as the first parameter
+           to this function above (usually 99.9% or the previous working point)
+           and these user-predefined cut restrictions (see VariableLimits.hh).
+
+rootlogon.C: automatically builds and loads several pieces of code
+     such as VarCut.cc, etc.
+
+simpleOptimization.C: runs simple one-pass optimization calling optimize().
+     Presently, it is suggested to run this code without compiling
+     (it compiles, but on exit ROOT gives segv, most likely while trying
+     to delete factories).
+        The output cuts for working points are found in the cut_repository/
+     subdirectory with the names configured in the code.
+
+fourPointOptimization.C: runs optimization in four passes. The first
+     pass uses 99.9% efficient cut range for optimization, the second
+     uses WP Veto cuts as cut limits, the third uses WP Loose as cut
+     limits, etc.
+       In addition to using the working point of the previous pass for the
+     next pass as cut limits, additionally user-defined restrictions are passed
+     to the optimize() function. These are defined in VariableLimits.hh. Presently,
+     for WP Veto in pass1, the object with effectively no restrictions is passed,
+     while for pass2,3,4 the object with reasonable common sense restrictions is
+     passed.
+       In the end, WP Veto, Loose, Medium, Tight are taken from the
+     pass1, pass2, pass3, pass4 output, respectively.
+        The output cuts for working points are found in the cut_repository/
+     subdirectory with the names configured in the code.
+       
+
+exampleFillCuts.C: an example of how to create ROOT files with VarCut objects
+     if cuts are known from somewhere else.
+     Compile and run it without parameters.
+
+fillCutsPreliminary.C and fillCutsEGM2012.C: these scripts create cuts files
+     that contain EGM2012 cuts and the preliminary safe cuts from Giovanni Zevi 
+     Della Porta. Compile and run it without parameters.
+
+findCutLimits.C: this code determines cut values that correspond to
+     99.9% efficiency for each variable separately. It uses all definitions
+     the same as the optimization: what is the preselection, what is the
+     signal ntuple, where to write cut object filled with 99.9% efficient cuts,
+     etc. The unique part of the cut file name is defined by the dateTag
+     string in the beginning of the file and should be changed as needed.
+     Note: the "sensible limits" for internal machinery are set for
+     the present electron variables in findVarLimits(..) function and
+     need to be updated if other variables are added.
+
+computeSingleCutEfficiency.C: this script computes the signal and background
+     efficiency of a single cut for a variable from the list defined in Variables.hh 
+     using preselection defined in OptimizationConstants.hh.
+     Use it as follows:
+        .L computeSingleCutEfficiency.C+
+        bool forBarrel = true;
+        float cutValue = 0.2;
+        computeSingleCutEfficiency("d0",cutValue, forBarrel);
+
+drawVariablesAndCuts.C: this script draws distributions of all variables
+     and if requested also draws cuts corresponding to four working points.
+     The behavior is controlled by global parameters in the beginning of
+     the script (barrel or endcap, which cuts to draw, etc). Some of the info
+     is taken from OptimizationConstants.hh, but the names of the ntuples
+     are inside of this script. Compile and run it without parameters.
+
+drawROCandWP.C: this script draws the ROC and up to three sets of 
+     working points. The settings are controlled by constants in the beginning
+     of the file.
+     - The ROC is taken from the specified file (TMVA output).
+     - Each set of cuts is taken from the list of files given (one can run with
+      only one set and not worry about the content of other constants for other sets).
+     - The efficiencies for working points are computed right in this script,
+      using the signal and background ntuples specfied explicitly in the beginning
+      of the file and preselection cuts taken from OptimizationConstants.hh
+      - Compile and run it without parameters.
+     
+correlations.C and tmvaglob.C: these are the standard pieces of code that come
+      from TMVA examples directory without any changes. To draw correlations, do:
+      .L correlations.C
+      correlations("path/to/your/TMVA.root");
+
+Directories:
+  
+   cut_repository/: created to contain ROOT files with individual cut sets
+      saved as VarCut objects.
+
+   trainingData/: created to contain subdirectories with the standard
+      output of TMVA (weights xml, ROOT file with training diagnostics).
+      WARNING: this directory can become large if not cleaned up
+      occasionally, because TMVA usually saves full testing and training
+      trees.
+
+//-------------------------------------------------------
+         Usage
+//-------------------------------------------------------
+
+To run cut optimization, first look through contents of the
+OptimizationConstants.hh and Variables.hh and adjust as necessary
+for your case. At the very least change input file and tree names
+and the numbers of train and test events for TMVA.
+
+To run simple one-pass optimization:
+
+root -b -q simpleOptimization.C >& test.log &
+tail -f test.log
+
+To run full four-pass optimization for four working points:
+
+root -b -q fourPointOptimization.C >& test.log &
+tail -f test.log
+
+The output for the working points is found in the cut_repository/
+
+To create a ROOT file with a stored cut set: edit cut values in
+exampleFillCuts.C, and then run:
+  root -b -q exampleFillCuts.C+
+and the files with cuts will appear in the cut_repository/.
