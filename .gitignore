@@ -27,3 +27,9 @@
 *.exe
 *.out
 *.app
+
+# ROOT files
+*.root
+
+# xml files
+*.xml

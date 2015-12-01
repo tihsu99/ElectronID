@@ -25,18 +25,19 @@ const bool doOverlayCuts = true;
 // (of doOverlayCuts above is false, no cuts will be shown, and the 
 // content of this array is ignored).
 const TString cutFileNamesBarrel[4] = { 
-  "cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "cut_repository/cuts_barrel_20151101_100000_WP_Tight.root",
-  "cut_repository/cuts_barrel_20151101_100000_WP_Medium.root",
-  "cut_repository/cuts_barrel_20151101_100000_WP_Loose.root"
+  // only WP Veto was optimized with the exercise purpose
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Tight.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Medium.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Loose.root"
 
 };
 const TString cutFileNamesEndcap[4] = {
   // for aestetics purpose, switch to real endcap files, once they are made
-  "cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "cut_repository/cuts_barrel_20151101_100000_WP_Tight.root",
-  "cut_repository/cuts_barrel_20151101_100000_WP_Medium.root",
-  "cut_repository/cuts_barrel_20151101_100000_WP_Loose.root"
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Tight.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Medium.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Loose.root"
 };
 
 static Int_t c_Canvas         = TColor::GetColor( "#f0f0f0" );

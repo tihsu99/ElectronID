@@ -13,17 +13,20 @@ const TString workingPointNames[nWP] = {
 
 
 const TString barrelCutFiles[nWP] = {
-  "/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_barrel_pass1_20142407_154300_WP_Veto_fullSample.root",
-  "/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_barrel_pass2_20142407_154300_WP_Loose_fullSample.root",
-  "/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_barrel_pass3_20142407_154300_WP_Medium_fullSample.root",
-  "/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_barrel_20142108_163000_WP_Tight_300k_50nsFromWP_Medium_FullSample.root"
+  // only WP Veto was optimized, other files are only for aestetics purpose here
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+
 };
 
 const TString endcapCutFiles[nWP] = {
-  "/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_endcap_20142407_154900_WP_Veto.root",
-"/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_endcap_20142407_154900_WP_Loose.root",
-"/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_endcap_20142407_154900_WP_Medium.root",
-"/afs/cern.ch/user/r/rkamalie/workspace/public/cuts_endcap_20142407_154900_WP_Tight.root"
+  // change to endcap files once the optimzation is made
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
 };
 
 

@@ -21,27 +21,27 @@ const bool verbose = true;
 
 // Files with signal and background trees (ideally the ntuples
 // that were used for TMVA optimization
-const TString fnameSignal = "/afs/cern.ch/user/r/rkamalie/workspace/public/DY_Run2Asympt25ns_miniAOD_sept18_flat_ntuple_withWeights.root";
+const TString fnameSignal = "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/samples/DY_Run2Asympt25ns_miniAOD_sept18_flat_ntuple_withWeights.root";
 const TString signalTreeName = "electronTree";
-const TString fnameBackground = "/afs/cern.ch/user/r/rkamalie/workspace/public/TT_Run2Asympt25ns_miniAOD_sept21_flat_ntuple_withWeights.root";
+const TString fnameBackground = "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/samples/TT_Run2Asympt25ns_miniAOD_sept21_flat_ntuple_withWeights.root";
 const TString backgroundTreeName = "electronTree";
 
 // Name TMVA output file that contains the pre-computed ROC, etc
 const TString tmvaFileNameBarrel[nROCs] = {
   //only 1st file was optimized and will be used
-  "trainingData/training_results_barrel_pass1_20151101_100000/TMVA_training_results_barrel_pass1_20151101_100000.root",
-  "trainingData/training_results_barrel_pass1_20151101_100000/TMVA_training_results_barrel_pass1_20151101_100000.root",
-  "trainingData/training_results_barrel_pass1_20151101_100000/TMVA_training_results_barrel_pass1_20151101_100000.root",
-  "trainingData/training_results_barrel_pass1_20151101_100000/TMVA_training_results_barrel_pass1_20151101_100000.root"
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root"
 
 };
 
 const TString tmvaFileNameEndcap[nROCs] ={
    //no optimization was done for endcap, only for aestetic purpose
-  "trainingData/training_results_barrel_pass1_20151101_100000/TMVA_training_results_barrel_pass1_20151101_100000.root",
-  "trainingData/training_results_barrel_pass1_20151101_100000/TMVA_training_results_barrel_pass1_20151101_100000.root",
-  "trainingData/training_results_barrel_pass1_20151101_100000/TMVA_training_results_barrel_pass1_20151101_100000.root",
-  "trainingData/training_results_barrel_pass1_20151101_100000/TMVA_training_results_barrel_pass1_20151101_100000.root"
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root",
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root"
 
 };
 
@@ -55,11 +55,11 @@ const int markerStyleSet1 = 20;
 const TString legendSet1 = "WP_Veto";
 const int nWP = 1;
 const TString cutFileNamesBarrelSet1[nWP] = { 
-  "cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
 
 };
 const TString cutFileNamesEndcapSet1[nWP] = {
-  "cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
 
 };
 
@@ -68,11 +68,11 @@ const int markerColorSet2 = kOrange;
 const int markerStyleSet2 = 20;
 const TString legendSet2 = "WP_Loose";
 const TString cutFileNamesBarrelSet2[nWP] = { 
-  "cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
 
 };
 const TString cutFileNamesEndcapSet2[nWP] = {
-  "cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
 };
 
 // Set 3
@@ -80,11 +80,11 @@ const int markerColorSet3 = kBlue;
 const int markerStyleSet3 = 20;
 const TString legendSet3 = "WP_Medium";
 const TString cutFileNamesBarrelSet3[nWP] = { 
-  "cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
 
 };
 const TString cutFileNamesEndcapSet3[nWP] = {
-  "cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
 };
 
 
@@ -94,10 +94,10 @@ const int markerColorSet4 = kGreen;
 const int markerStyleSet4 = 20;
 const TString legendSet4 = "WP_Tight";
 const TString cutFileNamesBarrelSet4[nWP] = { 
-  "cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
 };
 const TString cutFileNamesEndcapSet4[nWP] = {
-  "cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
 };
 
 void bazinga (std::string message){

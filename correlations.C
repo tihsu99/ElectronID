@@ -9,7 +9,7 @@
 // input: - Input file (result from TMVA),
 //        - use of colors or grey scale
 //        - use of TMVA plotting TStyle
-void correlations( TString fin = "TMVA.root", Bool_t isRegression = kFALSE, 
+void correlations( TString fin = "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root", Bool_t isRegression = kFALSE, 
                    Bool_t greyScale = kFALSE, Bool_t useTMVAStyle = kTRUE )
 {
 
