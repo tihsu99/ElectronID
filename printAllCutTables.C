@@ -14,19 +14,19 @@ const TString workingPointNames[nWP] = {
 
 const TString barrelCutFiles[nWP] = {
   // only WP Veto was optimized, other files are only for aestetics purpose here
-  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
 
 };
 
 const TString endcapCutFiles[nWP] = {
   // change to endcap files once the optimzation is made
-  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
+  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
 };
 
 
