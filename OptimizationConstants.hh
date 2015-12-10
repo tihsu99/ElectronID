@@ -17,7 +17,7 @@ namespace Opt {
   const int nTest_Signal      = 100000;
   const int nTest_Background  = 100000;
   // Cut repository directory
-  const TString cutRepositoryDir = "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository";
+  const TString cutRepositoryDir = "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository";
   
   // TMVA options for MethodCuts
   const TString methodCutsBaseOptions = "!H:!V:FitMethod=GA:EffMethod=EffSel";
@@ -37,9 +37,9 @@ namespace Opt {
   //
   TFile *fileSignal = 0;
   TFile *fileBackground = 0;
-  const TString fnameSignal = "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/reweight29sept_v10.root";
+  const TString fnameSignal = "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/reweight29sept_v10.root";
   const TString signalTreeName = "electronTree_S";
-  const TString fnameBackground = "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/reweight29sept_v10.root";
+  const TString fnameBackground = "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/reweight29sept_v10.root";
   const TString backgroundTreeName = "electronTree_B";
   
   //
