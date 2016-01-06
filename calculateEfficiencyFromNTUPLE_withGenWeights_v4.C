@@ -34,12 +34,12 @@ TFile *DYfile= new TFile (fileOut + ".root","recreate");
 
 //======================================================
 const TString cutFileNameBarrel[] = {
-  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
 };
 
 const TString cutFileNameEndcap[] = {
   // for aestetics putpose only, endcap has not been oprimized for the exercises 
-  "/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
 };
 
 // for eff vs nPV 
@@ -189,11 +189,11 @@ void calculateEfficiencyFromNTUPLE_withGenWeights_v4(){
   if (variable_for_which_plot_eff == "etaSC") 
     doBarrel = true; // correct etaMode for eta variable
   
-  TFile fi("/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/samples/DY_Run2Asympt25ns_miniAOD_sept18_flat_ntuple_withWeights.root");   
+  TFile fi("root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/samples/DY_Run2Asympt25ns_miniAOD_sept18_flat_ntuple_withWeights.root");   
   gDirectory->ls();
   TTree *tr          = (TTree*)gDirectory->Get("electronTree");
 
-  TFile fiBG("/eos/uscms/store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/samples/TT_Run2Asympt25ns_miniAOD_sept21_flat_ntuple_withWeights.root");   
+  TFile fiBG("root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/samples/TT_Run2Asympt25ns_miniAOD_sept21_flat_ntuple_withWeights.root");   
   gDirectory->ls();
   TTree *trBG          = (TTree*)fiBG.Get("electronTree");
  
