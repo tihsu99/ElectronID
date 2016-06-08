@@ -8,16 +8,16 @@
 namespace Opt {
 
   // Global parameters
-  const bool useBarrel = true;
+  const bool useBarrel = false;
   // Events to test and train. 
   // To use ALL available events, split 50/50, set
   // all of the nTrain and nTest to 0
-  const int nTrain_Signal     = 100000;
-  const int nTrain_Background = 100000;
-  const int nTest_Signal      = 100000;
-  const int nTest_Background  = 100000;
+  const int nTrain_Signal     = 300000;
+  const int nTrain_Background = 300000;
+  const int nTest_Signal      = 0;
+  const int nTest_Background  = 0;
   // Cut repository directory
-  const TString cutRepositoryDir = "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository";
+  const TString cutRepositoryDir = "./cut_repository";
   
   // TMVA options for MethodCuts
   const TString methodCutsBaseOptions = "!H:!V:FitMethod=GA:EffMethod=EffSel";
@@ -37,10 +37,10 @@ namespace Opt {
   //
   TFile *fileSignal = 0;
   TFile *fileBackground = 0;
-  const TString fnameSignal = "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/reweight29sept_v10.root";
-  const TString signalTreeName = "electronTree_S";
-  const TString fnameBackground = "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/reweight29sept_v10.root";
-  const TString backgroundTreeName = "electronTree_B";
+  const TString fnameSignal = "./DYJetsToLL_may29_flat_ntuple_withWeights_5M.root";
+  const TString signalTreeName = "electronTree";
+  const TString fnameBackground = "./TTJets_may29_flat_ntuple_withWeights_5M.root";
+  const TString backgroundTreeName = "electronTree";
   
   //
   // Various preselection and truth matching cuts

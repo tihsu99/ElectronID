@@ -15,7 +15,6 @@
 // For debug purposes, set the flag below to true, for regular
 // computation set it to false
 const bool useSmallEventCount = false;
-const int onlyVeto = 1;
 // Draw barrel or endcap
 const bool drawBarrel = true;
 
@@ -26,18 +25,18 @@ const bool doOverlayCuts = true;
 // content of this array is ignored).
 const TString cutFileNamesBarrel[4] = { 
   // only WP Veto was optimized with the exercise purpose
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Tight.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Medium.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Loose.root"
+  "./cut_repository/cuts_barrel_20160529_200000_WP_Veto.root",
+  "./cut_repository/cuts_barrel_20160529_200000_WP_Tight.root",
+  "./cut_repository/cuts_barrel_20160529_200000_WP_Medium.root",
+  "./cut_repository/cuts_barrel_20160529_200000_WP_Loose.root"
 
 };
 const TString cutFileNamesEndcap[4] = {
   // for aestetics purpose, switch to real endcap files, once they are made
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Tight.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Medium.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Loose.root"
+  "./cut_repository/cuts_barrel_20160529_200000_WP_Veto.root",
+  "./cut_repository/cuts_barrel_20160529_200000_WP_Tight.root",
+  "./cut_repository/cuts_barrel_20160529_200000_WP_Medium.root",
+  "./cut_repository/cuts_barrel_20160529_200000_WP_Loose.root"
 };
 
 static Int_t c_Canvas         = TColor::GetColor( "#f0f0f0" );
@@ -81,20 +80,22 @@ void drawVariablesAndCuts_3bg(){
   //
   // Open files
   //
-  TString fname1 = "~/workspace/public/DY_Run2Asympt25ns_miniAOD_sept21_flat_ntuple_withWeights.root";
+  TString fname1 = "DYJetsToLL_may29_flat_ntuple_withWeights_2M.root";
   TFile *input1 = new TFile( fname1 );
   //  input1->cd("wp3");
   TTree *signalTree     = (TTree*) input1->Get("electronTree");
   
-  TString fname2 = "~/workspace/public/TT_Run2Asympt25ns_miniAOD_sept21_flat_ntuple_withWeights.root";
+  TString fname2 = "TTJets_may29_flat_ntuple_withWeights_2M.root";
   TFile *input2 = new TFile( fname2 );
   //  input2->cd("wp3");
   TTree *backgroundTree     = (TTree*) input2->Get("electronTree");
   
-  TString fname3 = "~/workspace/public/GJets_Run2Asympt25ns_miniAOD_11aug_flat_ntuple_withEAandWeights.root";
+  TString fname3 = "GJet_may29_flat_ntuple_withWeights_2M.root";
   TFile *input3 = new TFile( fname3 );
   //  input3->cd("wp3");
-  TTree *backgroundTreeAdditional     = (TTree*) input3->Get("electronTree");
+  TTree *backgroundTreeAdditional     = 0;
+  if( input3 )
+    backgroundTreeAdditional = (TTree*) input3->Get("electronTree");
  
  //
   // Define cuts
@@ -354,7 +355,7 @@ void overlayCuts(TCanvas *canvas, TString variable){
   if( Opt::nWP != 4 )
     assert(0);
   // Pull up the cuts
-  for(int iwp=0; iwp<onlyVeto /*Opt::nWP*/; iwp++){
+  for(int iwp=0; iwp<Opt::nWP; iwp++){
     TString cutFileName = "";
     if( drawBarrel )
       cutFileName = cutFileNamesBarrel[iwp];
@@ -381,7 +382,7 @@ void overlayCuts(TCanvas *canvas, TString variable){
   TArrow *arrowUpper[Opt::nWP];
   TArrow *arrowLower[Opt::nWP];
   float arXmin, arXmax, arYmin, arYmax;
-  for(int i=0; i<onlyVeto /*Opt::nWP*/; i++){
+  for(int i=0; i<Opt::nWP; i++){
     arXmin = arXmax = cutVal[i];
     arYmin = ymax*0.35 + ymax*i*0.05;
     arYmax = 0;

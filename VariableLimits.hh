@@ -20,7 +20,7 @@ namespace VarLims{
     new VariableLimits("dEtaIn"                  ,1e30),
     new VariableLimits("dPhiIn"                  ,1e30),
     new VariableLimits("hOverE"                  ,1e30),
-    new VariableLimits("relIsoWithEA"         ,1e30),
+    new VariableLimits("relIsoWithEA"            ,1e30),
     new VariableLimits("ooEmooP"                 ,1e30),
     new VariableLimits("d0"                      ,1e30),
     new VariableLimits("dz"                      ,1e30),
@@ -38,10 +38,10 @@ namespace VarLims{
 
   VariableLimits * limitsWPAnyV1[nVarLimits] = {
     new VariableLimits("full5x5_sigmaIetaIeta"   ,1e30),
-    new VariableLimits("dEtaIn"                  ,0.03), // Endcap 99.9%
-    new VariableLimits("dPhiIn"                  ,0.27), // Endcap 99.9%
-    new VariableLimits("hOverE"                  ,0.29), // Endcap 99.9%
-    new VariableLimits("relIsoWithEA"         ,1e30),
+    new VariableLimits("dEtaIn"                  ,0.03), // Endcap 99.9+%
+    new VariableLimits("dPhiIn"                  ,0.27), // Endcap 99.9+%
+    new VariableLimits("hOverE"                  ,0.37), // Barrel 99.9%
+    new VariableLimits("relIsoWithEA"            ,1e30),
     new VariableLimits("ooEmooP"                 ,1e30),
     new VariableLimits("d0"                      ,0.40), // Endcap 99.9%
     new VariableLimits("dz"                      ,1e30),
@@ -51,8 +51,8 @@ namespace VarLims{
 
   VariableLimits * limitsWP4barrel[nVarLimits] = {
     new VariableLimits("full5x5_sigmaIetaIeta"   ,0.011),// Loose trig
-    new VariableLimits("dEtaIn"                  ,0.03), // Endcap 99.9%
-    new VariableLimits("dPhiIn"                  ,0.27), // Endcap 99.9%
+    new VariableLimits("dEtaIn"                  ,0.03), // Endcap 99.9+%
+    new VariableLimits("dPhiIn"                  ,0.27), // Endcap 99.9+%
     new VariableLimits("hOverE"                  ,0.06), // Loose trig
     new VariableLimits("relIsoWithEA"         ,1e30),
     new VariableLimits("ooEmooP"                 ,0.012),// Loose trig
@@ -64,8 +64,8 @@ namespace VarLims{
 
   VariableLimits * limitsWP4endcap [nVarLimits] = {
     new VariableLimits("full5x5_sigmaIetaIeta"   ,0.032), // Loose trig
-    new VariableLimits("dEtaIn"                  ,0.03), // Endcap 99.9%
-    new VariableLimits("dPhiIn"                  ,0.27), // Endcap 99.9%
+    new VariableLimits("dEtaIn"                  ,0.03), // Endcap 99.9+%
+    new VariableLimits("dPhiIn"                  ,0.27), // Endcap 99.9+%
     new VariableLimits("hOverE"                  ,0.31), // Loose trig
     new VariableLimits("relIsoWithEA"         ,1e30),
     new VariableLimits("ooEmooP"                 ,0.01), // Loose trig

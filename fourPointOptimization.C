@@ -5,22 +5,23 @@
 #include "VariableLimits.hh"
 #include "optimize.hh"
 
-const int optimizeTightOnly = 1;
+// set this to 4 to optimize all WP. Rami's logic.
+const int optimizeTightOnly = 4;
 
 void fourPointOptimization(){
 
   // Define source for the initial cut range
   TString startingCutMaxFileName 
-    = "cuts_barrel_eff_0999_20161101_090000.root";
+    = "cuts_barrel_eff_0999_20160529_140000.root";
   if( !Opt::useBarrel )
     startingCutMaxFileName 
-      = "cuts_endcap_eff_0999_20161101_090000.root";
+      = "cuts_endcap_eff_0999_20160529_140000.root";
 
   TString namePrefix = "cuts_barrel_";
   if( !Opt::useBarrel )
     namePrefix = "cuts_endcap_";
   TString namePass[Opt::nWP] = {"pass1_","pass2_","pass3_","pass4_"};
-  TString nameTime = "20151101_100000";
+  TString nameTime = "20160529_200000";
 
   for( int ipass = 0; ipass < optimizeTightOnly; ipass++){
 

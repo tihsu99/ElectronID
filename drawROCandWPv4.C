@@ -21,28 +21,24 @@ const bool verbose = true;
 
 // Files with signal and background trees (ideally the ntuples
 // that were used for TMVA optimization
-const TString fnameSignal = "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/samples/DY_Run2Asympt25ns_miniAOD_sept18_flat_ntuple_withWeights.root";
+const TString fnameSignal = "DYJetsToLL_may29_flat_ntuple_withWeights_2M.root";
 const TString signalTreeName = "electronTree";
-const TString fnameBackground = "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/samples/TT_Run2Asympt25ns_miniAOD_sept21_flat_ntuple_withWeights.root";
+const TString fnameBackground = "TTJets_may29_flat_ntuple_withWeights_2M.root";
 const TString backgroundTreeName = "electronTree";
 
 // Name TMVA output file that contains the pre-computed ROC, etc
 const TString tmvaFileNameBarrel[nROCs] = {
-  //only 1st file was optimized and will be used
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root"
-
+  "./trainingData/training_results_barrel_pass1_20160529_200000/TMVA_training_results_barrel_pass1_20160529_200000.root",
+  "./trainingData/training_results_barrel_pass2_20160529_200000/TMVA_training_results_barrel_pass2_20160529_200000.root",
+  "./trainingData/training_results_barrel_pass3_20160529_200000/TMVA_training_results_barrel_pass3_20160529_200000.root",
+  "./trainingData/training_results_barrel_pass4_20160529_200000/TMVA_training_results_barrel_pass4_20160529_200000.root"
 };
 
 const TString tmvaFileNameEndcap[nROCs] ={
-   //no optimization was done for endcap, only for aestetic purpose
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/trainingData/TMVA_training_results_barrel_pass1_20151101_100000.root"
-
+  "./trainingData/training_results_barrel_pass1_20160529_200000/TMVA_training_results_endcap_pass1_20160529_200000.root",
+  "./trainingData/training_results_barrel_pass2_20160529_200000/TMVA_training_results_endcap_pass2_20160529_200000.root",
+  "./trainingData/training_results_barrel_pass3_20160529_200000/TMVA_training_results_endcap_pass3_20160529_200000.root",
+  "./trainingData/training_results_barrel_pass4_20160529_200000/TMVA_training_results_endcap_pass4_20160529_200000.root"
 };
 
 //
@@ -55,11 +51,11 @@ const int markerStyleSet1 = 20;
 const TString legendSet1 = "WP_Veto";
 const int nWP = 1;
 const TString cutFileNamesBarrelSet1[nWP] = { 
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "cut_repository/cuts_barrel_20160529_200000_WP_Veto.root"
 
 };
 const TString cutFileNamesEndcapSet1[nWP] = {
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "cut_repository/cuts_endcap_20160529_200000_WP_Veto.root"
 
 };
 
@@ -68,11 +64,11 @@ const int markerColorSet2 = kOrange;
 const int markerStyleSet2 = 20;
 const TString legendSet2 = "WP_Loose";
 const TString cutFileNamesBarrelSet2[nWP] = { 
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "cut_repository/cuts_barrel_20160529_200000_WP_Loose.root"
 
 };
 const TString cutFileNamesEndcapSet2[nWP] = {
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "cut_repository/cuts_endcap_20160529_200000_WP_Loose.root"
 };
 
 // Set 3
@@ -80,11 +76,11 @@ const int markerColorSet3 = kBlue;
 const int markerStyleSet3 = 20;
 const TString legendSet3 = "WP_Medium";
 const TString cutFileNamesBarrelSet3[nWP] = { 
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "cut_repository/cuts_barrel_20160529_200000_WP_Medium.root"
 
 };
 const TString cutFileNamesEndcapSet3[nWP] = {
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "cut_repository/cuts_endcap_20160529_200000_WP_Medium.root"
 };
 
 
@@ -94,10 +90,10 @@ const int markerColorSet4 = kGreen;
 const int markerStyleSet4 = 20;
 const TString legendSet4 = "WP_Tight";
 const TString cutFileNamesBarrelSet4[nWP] = { 
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "cut_repository/cuts_barrel_20160529_200000_WP_Tight.root"
 };
 const TString cutFileNamesEndcapSet4[nWP] = {
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "cut_repository/cuts_endcap_20160529_200000_WP_Tight.root"
 };
 
 void bazinga (std::string message){
@@ -186,11 +182,12 @@ void drawROCandWPv4(){
       if(1<=iBin && iBin<=70)
 	hROC->SetBinContent(iBin, hROC3->GetBinContent(iBin)) ;
       else if(71 <= iBin && iBin<=89)
-	hROC->SetBinContent(iBin, hROC2->GetBinContent(iBin)) ;
+      hROC->SetBinContent(iBin, hROC2->GetBinContent(iBin)) ;
       else if(90 <=iBin && iBin<=100)
 	hROC->SetBinContent(iBin, hROC1->GetBinContent(iBin)) ;
     }
-    
+    // else 
+    //   printf("\nThis should never happen!");
   }
   
   bazinga("Step #5");
@@ -211,14 +208,12 @@ void drawROCandWPv4(){
   }
 
   c1->cd();
-  // hROC->Draw("L");
+  hROC->Draw("L");
   hROC1->SetLineColor(kRed);
   hROC2->SetLineColor(kOrange);
   hROC3->SetLineColor(kBlue);
   hROC4->SetLineColor(kGreen);
-  hROC1->GetYaxis()->SetRangeUser(0.9, 1.0);
-  hROC1->SetStats(0);
-  hROC1->Draw("L");
+  //hROC1->Draw("L");
   //hROC1->Draw("Lsame");
   //hROC2->Draw("Lsame");
   //hROC3->Draw("Lsame");
@@ -247,33 +242,33 @@ void drawROCandWPv4(){
   TTree *backgroundTree = getTreeFromFile( fnameBackground, backgroundTreeName);
   bazinga("Step #8");
   // Next, draw all working point sets
-  if( nWorkingPointSets==4 ){
+  if( 1 ){
 
     TLegend *leg = new TLegend(0.15, 0.45, 0.5, 0.7);
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
     overlayWorkingPoints(c1, signalTree, backgroundTree, cutFileNamesSet1, 
 			 markerColorSet1, markerStyleSet1, leg, legendSet1);
-    // bazinga("Step #9");
-    // overlayWorkingPoints(c1, signalTree, backgroundTree, cutFileNamesSet2, 
-    // 			 markerColorSet2, markerStyleSet2, leg, legendSet2);
-    // bazinga("Step #10");
-    // overlayWorkingPoints(c1, signalTree, backgroundTree, cutFileNamesSet3,
-    // 			 markerColorSet3, markerStyleSet3, leg, legendSet3);
-    // bazinga("Step #11");
-    // overlayWorkingPoints(c1, signalTree, backgroundTree, cutFileNamesSet4,  			   
-    // 			 markerColorSet4, markerStyleSet4, leg, legendSet4);
-    // bazinga("Step #12");
+    bazinga("Step #9");
+    overlayWorkingPoints(c1, signalTree, backgroundTree, cutFileNamesSet2, 
+			 markerColorSet2, markerStyleSet2, leg, legendSet2);
+    bazinga("Step #10");
+    overlayWorkingPoints(c1, signalTree, backgroundTree, cutFileNamesSet3,
+			 markerColorSet3, markerStyleSet3, leg, legendSet3);
+    bazinga("Step #11");
+    overlayWorkingPoints(c1, signalTree, backgroundTree, cutFileNamesSet4,  			   
+			 markerColorSet4, markerStyleSet4, leg, legendSet4);
+    bazinga("Step #12");
     leg->Draw("same");
     
   }
   
   
     // Save the figure into a file
-    TString outname = "figures/plot_ROCandWP_barrel.png";
+    TString outname = "figures/plot_ROCandWP_barrel_27july.png";
     bazinga("Step #13");
     if( !drawBarrel )
-      outname = "figures/plot_ROCandWP_endcap.png";
+      outname = "figures/plot_ROCandWP_endcap_27july.png";
     c1->Print(outname);
     
     return;
@@ -370,13 +365,22 @@ void findEfficiencies(TTree *signalTree, TTree *backgroundTree,
  
 
   // draw the histogram
-  signalTree->Draw("pt>>hS_num", "genWeight"*(selectionCuts && signalCuts), "goff", 100000);
-  signalTree->Draw("pt>>hS_den", "genWeight"*(signalCuts), "goff", 100000);
+  signalTree->Draw("pt>>hS_num", "genWeight"*(selectionCuts && signalCuts), "goff");
+  signalTree->Draw("pt>>hS_den", "genWeight"*(signalCuts), "goff");
+  
+  // effSignal = (1.0*signalTree->GetEntries(selectionCuts && signalCuts) )
+  //   / signalTree->GetEntries(signalCuts);
+  //effSignal = hS_num->GetEffectiveEntries()/ hS_den->GetEffectiveEntries();
   effSignal = hS_num->GetSumOfWeights()/ hS_den->GetSumOfWeights();
+  // effBackground = (1.0*backgroundTree->GetEntries(selectionCuts 
+  // 						  && backgroundCuts) )
+  //   / backgroundTree->GetEntries(backgroundCuts);
   
   // draw the histogram
-  backgroundTree->Draw("pt>>hBG_num", "genWeight"*(selectionCuts && backgroundCuts), "goff", 100000);
-  backgroundTree->Draw("pt>>hBG_den", "genWeight"*(backgroundCuts), "goff", 100000);
+  backgroundTree->Draw("pt>>hBG_num", "genWeight"*(selectionCuts && backgroundCuts), "goff");
+  backgroundTree->Draw("pt>>hBG_den", "genWeight"*(backgroundCuts), "goff");
+  
+  //effBackground = hBG_num->GetEffectiveEntries()/ hBG_den->GetEffectiveEntries();
   effBackground = hBG_num->GetSumOfWeights()/ hBG_den->GetSumOfWeights();
 
   delete hS_num ; hS_num = nullptr;

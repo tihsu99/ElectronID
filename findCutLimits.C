@@ -13,7 +13,7 @@
 #include "VarCut.hh"
 
 // Define unique part of the file name for saving the cuts
-TString dateTag = "20161101_090000";
+TString dateTag = "20160529_140000";
 
 // For debug purposes, set the flag below to true, for regular
 // computation set it to false
@@ -147,26 +147,26 @@ void findCutLimits(){
   }
   cutBarrel0999->print();
 
-  // //
-  // // Endcap second
-  // //
-  // printf("\nFind cuts for endcap electrons\n");
-  // preselectionCuts = Opt::ptCut && Opt::etaCutEndcap
-  //   && Opt::otherPreselectionCuts && Opt::trueEleCut;
-  // useBarrel = false;
+  //
+  // Endcap second
+  //
+  printf("\nFind cuts for endcap electrons\n");
+  preselectionCuts = Opt::ptCut && Opt::etaCutEndcap
+    && Opt::otherPreselectionCuts && Opt::trueEleCut;
+  useBarrel = false;
 
-  // VarCut *cutEndcap0999 = new VarCut();
-  // for(int i=0; i<Vars::nVariables-8; i++){
-  //   float xlow = 0;
-  //   float xhigh = 1000; // just a large number, overwritten below
-  //   findVarLimits( Vars::variables[i]->name, useBarrel, xlow, xhigh);
-  //   // Note: use nameTmva below, so that the var string will contain
-  //   // the abs() as needed.
-  //   VarInfo var(Vars::variables[i]->nameTmva, xlow, xhigh);
-  //   float cutValue = var.findUpperCut(tree, preselectionCuts, eff);
-  //   cutEndcap0999->setCutValue(Vars::variables[i]->name, cutValue);
-  // }
-  // cutEndcap0999->print();
+  VarCut *cutEndcap0999 = new VarCut();
+  for(int i=0; i<Vars::nVariables; i++){
+    float xlow = 0;
+    float xhigh = 1000; // just a large number, overwritten below
+    findVarLimits( Vars::variables[i]->name, useBarrel, xlow, xhigh);
+    // Note: use nameTmva below, so that the var string will contain
+    // the abs() as needed.
+    VarInfo var(Vars::variables[i]->nameTmva, xlow, xhigh);
+    float cutValue = var.findUpperCut(tree, preselectionCuts, eff);
+    cutEndcap0999->setCutValue(Vars::variables[i]->name, cutValue);
+  }
+  cutEndcap0999->print();
 
   //
   // Save the cuts
@@ -180,14 +180,14 @@ void findCutLimits(){
   cutBarrel0999->Write("cuts");
   fileBarrel->Close();
 
-  // TString fileEndcapName = Opt::cutRepositoryDir + TString("/")
-  //   + TString("cuts_endcap_eff_0999_") + dateTag + TString(".root");
-  // printf("\nSave endcap cuts into the file %s\n", fileEndcapName.Data());
-  // TFile *fileEndcap = new TFile(fileEndcapName, "recreate");
-  // if(fileEndcap == 0)
-  //   assert(0);
-  // cutEndcap0999->Write("cuts");
-  // fileEndcap->Close();
+  TString fileEndcapName = Opt::cutRepositoryDir + TString("/")
+    + TString("cuts_endcap_eff_0999_") + dateTag + TString(".root");
+  printf("\nSave endcap cuts into the file %s\n", fileEndcapName.Data());
+  TFile *fileEndcap = new TFile(fileEndcapName, "recreate");
+  if(fileEndcap == 0)
+    assert(0);
+  cutEndcap0999->Write("cuts");
+  fileEndcap->Close();
 
 }
 
