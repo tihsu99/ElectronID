@@ -118,6 +118,13 @@ correlations.C and tmvaglob.C: these are the standard pieces of code that come
       .L correlations.C
       correlations("path/to/your/TMVA.root");
 
+convert_EventStrNtuple_To_FlatNtuple.C: converts event-structured ntuple to
+      the flat ntuple for ID tuning
+
+computeHLTBounds.C: applies UCCOM method to find the offline cut bounds on isolation
+      from the HLT cuts and variables. Requires a special ntuple that contains
+      HLT-like ecal/hcal/trk isolations.
+
 Directories:
   
    cut_repository/: created to contain ROOT files with individual cut sets
@@ -128,6 +135,7 @@ Directories:
       WARNING: this directory can become large if not cleaned up
       occasionally, because TMVA usually saves full testing and training
       trees.
+
 
 //-------------------------------------------------------
          Usage
