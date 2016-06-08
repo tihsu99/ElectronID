@@ -28,7 +28,7 @@ const float boundaryEBEE = 1.479;
 const float maxEta       = 2.5;
 
 const float ptMin = 20;
-const float ptMax = 200;
+const float ptMax = 1000;
 
 const bool smallEventCount = false;
 
@@ -58,6 +58,7 @@ const float hltTrkIsoCut [nHltEtaBins] = {0.080, 0.080};
 int findOfflineEtaBin(float eta);
 int findHltEtaBin(float eta);
 TGraph *runUCCOM(TH1F *hnum, TH1F *hden);
+float findMax(TGraph *graph);
 
 // Main function
 void computeHLTBounds(bool doBarrel = true){
@@ -240,8 +241,22 @@ void computeHLTBounds(bool doBarrel = true){
   grTrk->Draw("ALP");
 
   TCanvas *c4 = new TCanvas("c4","c4",400,10,600,600);
+  gPad->SetLeftMargin(0.15);
   TGraph *grFull = runUCCOM(histFullNum, histFullDen);
+  grFull->SetLineWidth(2);
+  grFull->SetLineColor(kBlue);
   grFull->Draw("ALP");
+  grFull->GetXaxis()->SetTitle("rel. comb. PF isolation cut value");
+  grFull->GetYaxis()->SetTitle("f = (offline && ! HLT)/offline");
+  grFull->GetYaxis()->SetTitleOffset(2);
+  grFull->GetYaxis()->SetRangeUser(0, 1.2*findMax(grFull));
+  
+  TString region = "Barrel";
+  if( !doBarrel)
+    region = "Endcap";
+  TLatex *lat = new TLatex(0.7, 0.2, region);
+  lat->SetNDC(kTRUE);
+  lat->Draw("same");
 
 }
 
@@ -289,3 +304,18 @@ TGraph *runUCCOM(TH1F *hnum, TH1F *hden){
 
   return gr;
 }
+
+float findMax(TGraph *graph){
+
+  float max = 0;
+  double xtmp, ytmp;
+  for(int i=0; i<graph->GetN(); i++){
+    graph->GetPoint(i,xtmp,ytmp);
+    if( max < ytmp )
+      max = ytmp;
+  }
+  return max;
+}
+
+
+
