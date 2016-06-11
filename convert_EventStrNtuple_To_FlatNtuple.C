@@ -20,41 +20,51 @@
 #include <signal.h>
 #include "TMath.h"
 
+#include "OptimizationConstants.hh"
 
-bool isDY = false;
 
+bool processSignal = false;
+bool processBarrel = false;
+
+// Preselection cuts: must match or be looser than 
+// cuts in OptimizatioConstants.hh
+const float ptMin = 20;
+const float etaMax = 2.5;
+const float dzMax = 1.0;
+const float boundaryEBEE = 1.479;
 
 //====================================================
 const bool talkativeRegime = false;
-const bool smallEventCount = true;   //5000k
-const float etaMin = -2.5;
-const float etaMax = +2.5;
+const bool smallEventCount = false;   
+const int maxEventsSmall = 1000000;
 
-const int ptMin = 20;
-const int ptMax = 170;
-const int etaBins = 120;
-const int ptBins = 120;
+//const TCut trueEleCut = "isTrue == 1";
+//const TCut fakeEleCut = "isTrue == 0 || isTrue == 3";
 
-const TCut trueEleCut = "isTrue == 1";
-const TCut fakeEleCut = "isTrue == 0 || isTrue == 3";
+//const  TCut psCut = "pt>=20 && pt<=200 && abs(etaSC) < 2.5";
+// const  TCut gapPScut = "abs(etaSC)>1.4442 && abs(etaSC)<1.566";
 
-const  TCut psCut = "pt>=20 && pt<=170 && abs(etaSC) < 2.5";
-const  TCut gapPScut = "abs(etaSC)>1.4442 && abs(etaSC)<1.566";
-
-const  TCut passConv_dZ = "passConversionVeto && abs(dZ)<1";
-const  TCut preselectionS = trueEleCut && psCut && !gapPScut && passConv_dZ;
-const  TCut preselectionBG = fakeEleCut && psCut && !gapPScut && passConv_dZ;
+// const  TCut passConv_dZ = "passConversionVeto && abs(dZ)<1";
+// const  TCut preselectionS = trueEleCut && psCut && !gapPScut && passConv_dZ;
+// const  TCut preselectionBG = fakeEleCut && psCut && !gapPScut && passConv_dZ;
  
 //  Files IN 
-const TString fileNameS = "~/DYJetsToLL_madgraph_80X.root";
-const TString fileNameBG = "~/TTJets_amcatnlo_80X.root";
+const TString fileNameS 
+= "/afs/cern.ch/user/i/ikrav/workspace/ntuples/Spring16/DYJetsToLL_madgraph_80X_v3.root";
+const TString fileNameBG 
+= "/afs/cern.ch/user/i/ikrav/workspace/ntuples/Spring16/TTJets_amcatnlo_80X_v3.root";
 // Tree Name (file IN):
 const TString treeName = "ntupler/ElectronTree";
-//  Files OUT
-const TString flatNtupleNameS = "DYJetsToLL_may29_flat_ntuple_withWeights_5M.root";
-const TString flatNtupleNameBG = "TTJets_may29_flat_ntuple_withWeights_5M.root";
+// File and histogram with kinematic weights
+const TString fileNameWeights = "kinematicWeights_20160611.root";
+const TString histNameWeights = "hKinematicWeights";
 
-// Effective areas for electrons derived by Rami and ILya for 25ns Spring16 DY sample in May 2016
+//  Files OUT
+const TString flatNtupleNameBaseS = "DYJetsToLL_may29_flat_ntuple";
+const TString flatNtupleNameBaseBG = "TTJets_may29_flat_ntuple";
+
+// Effective areas for electrons derived by Ilya for Summer16
+// https://indico.cern.ch/event/482673/contributions/2187022/attachments/1282446/1905912/talk_electron_ID_spring16.pdf
 namespace EffectiveAreas {
   const int nEtaBins = 7;
   const float etaBinLimits[nEtaBins+1] = {
@@ -74,14 +84,23 @@ void bazinga (std::string mes){
     std::cout<<"\n"<<mes<<endl;
 }
 
+// Forward declarations
+float findKinematicWeight(TH2D *hist, float pt, float etaSC);
+bool passPreselection(int isTrue, float pt, float eta, 
+		      int passConversionVeto, float dz);
+TString eventCountString();
+
 //
 // Main program
 //
 
 void convert_EventStrNtuple_To_FlatNtuple(){
+
+  bazinga("Start main function");
   gBenchmark->Start("Timing");
 
-  //  Generate  a dictionary, so that CINT will have all the information it needs about type or variable at anytime.
+  //  Generate  a dictionary, so that CINT will have all the information 
+  // it needs about type or variable at anytime.
   gROOT->ProcessLine("#include <vector>"); 
   //  Same as above, since <float> goes by default
   //gInterpreter->GenerateDictionary("vector<float>");
@@ -95,19 +114,28 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   //
   // Open file with event structure 
   //
+  bazinga("Set up input tree\n");
 
   TFile *myFile = nullptr;
   TFile *fileOut = nullptr;
   TTree *tree  = nullptr;
   TTree *electronTree_ = nullptr;  
 
-  if (isDY){
+  TString flatNtupleNameEnding = eventCountString();
+  if( processBarrel ) 
+    flatNtupleNameEnding += "_barrel.root";
+  else
+    flatNtupleNameEnding += "_endcap.root";
+
+  if (processSignal){
     myFile  = new TFile(fileNameS);
+    TString flatNtupleNameS = flatNtupleNameBaseS + flatNtupleNameEnding;
     fileOut = TFile::Open(flatNtupleNameS,"RECREATE");
     printf("\n Work with true electrons\n");
   }
   else {
     myFile  = new TFile(fileNameBG);
+    TString flatNtupleNameBG = flatNtupleNameBaseBG + flatNtupleNameEnding;
     fileOut = TFile::Open(flatNtupleNameBG,"RECREATE");
     printf("\n Work with fake electrons\n");
   }
@@ -142,7 +170,7 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   std::vector <float> *eleD0 = 0;      // r-phi plane impact parameter
   std::vector <float> *eleDZ = 0;      // r-z plane impact parameter
   // Matching track-supercluster
-  std::vector <float> *eleDEtaIn = 0;  // deltaEtaIn
+  std::vector <float> *eleDEtaSeed = 0;  // deltaEtaIn
   std::vector <float> *eleDPhiIn = 0;  // deltaPhiIn
   // Misc ID variables
   std::vector <float> *eleHoverE = 0;  // H/E  
@@ -151,7 +179,6 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   // Conversion rejection
   std::vector <int> *eleExpectedMissingInnerHits = 0;
   std::vector <int> *electronPassConversionVeto = 0;
-
 
   // Declare branches
   TBranch *b_eleNEle = 0;
@@ -169,7 +196,7 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   // Other vars
   TBranch *b_eleD0 = 0;
   TBranch *b_eleDZ = 0;
-  TBranch *b_eleDEtaIn = 0;
+  TBranch *b_eleDEtaSeed = 0;
   TBranch *b_eleDPhiIn = 0;
   TBranch *b_eleHoverE = 0;
   TBranch *b_eleFull5x5SigmaIEtaIEta = 0;
@@ -192,7 +219,7 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   tree->SetBranchAddress("isTrue",    &eleIsTrueElectron,    &b_eleIsTrueElectron);
   tree->SetBranchAddress("d0",                &eleD0,             &b_eleD0);
   tree->SetBranchAddress("dz",                &eleDZ,             &b_eleDZ);
-  tree->SetBranchAddress("dEtaIn",            &eleDEtaIn,         &b_eleDEtaIn);
+  tree->SetBranchAddress("dEtaSeed",            &eleDEtaSeed,         &b_eleDEtaSeed);
   tree->SetBranchAddress("dPhiIn",            &eleDPhiIn,         &b_eleDPhiIn);
   tree->SetBranchAddress("hOverE",            &eleHoverE,         &b_eleHoverE);
   tree->SetBranchAddress("full5x5_sigmaIetaIeta", &eleFull5x5SigmaIEtaIEta,
@@ -204,8 +231,20 @@ void convert_EventStrNtuple_To_FlatNtuple(){
 			  &b_electronPassConversionVeto);
 
   
-  
-
+  //
+  // Get the histogram with kinematic weights
+  //  
+  TFile *fweights = new TFile(fileNameWeights);
+  if( !fweights ){
+    printf("File with kinematic weights %s is not found\n", fileNameWeights.Data());
+    assert(0);
+  }
+  TH2D *hKinematicWeights = (TH2D*)fweights->Get("hKinematicWeights");
+  if( !hKinematicWeights ){
+    printf("The histogram %s is not found in file %s\n", 
+	   histNameWeights.Data(), fileNameWeights.Data());
+    assert(0);
+  }
   
   //
   //*************************************************************************//
@@ -214,23 +253,24 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   //
   //************************************************************************//
   //
-
+  bazinga("Set up output tree\n");
 
   fileOut->cd();  //?????????
   
   // Vars for pile-up
   // Int_t nPUTrue_;    // true pile-up
   // Int_t nPU_;        // generated pile-up
-  Int_t nPV_ =0;        // number of reconsrtucted primary vertices
+  // Int_t nPV_ =0;        // number of reconsrtucted primary vertices
   
-  Float_t rho_ = 0.0;      // the rho variable
+  // Float_t rho_ = 0.0;      // the rho variable
   Float_t gweight_ = 0.0;      // gen Weight
+  Float_t kweight_ = 0.0;      // kinematic Weight
 
-  Int_t nEle_ =0;
+  // Int_t nEle_ =0;
   // all electron variables
   Float_t pt_ = 0.0;
   Float_t etaSC_= 0.0;
-  Float_t dEtaIn_= 0.0;
+  Float_t dEtaSeed_= 0.0;
   Float_t dPhiIn_= 0.0;
   Float_t hOverE_= 0.0;
   Float_t full5x5_sigmaIetaIeta_= 0.0;
@@ -247,23 +287,15 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   Int_t   passConversionVeto_= 0;
   Int_t   isTrueEle_= 0;
     
-  // electronTree_->Branch("nPU"        ,  &nPU_     , "nPU/I");
-  // electronTree_->Branch("nPUTrue"    ,  &nPUTrue_ , "nPUTrue/I");
-  // electronTree_->Branch("sigmaIetaIeta",         &sigmaIetaIeta_, "sigmaIetaIeta/F");
-  // electronTree_->Branch("isoChargedHadrons"      , &isoChargedHadrons_);
-  // electronTree_->Branch("isoNeutralHadrons"      , &isoNeutralHadrons_);
-  // electronTree_->Branch("isoPhotons"             , &isoPhotons_);
-  // electronTree_->Branch("isoChargedFromPU"       , &isoChargedFromPU_);
-  // electronTree_->Branch("relIsoWithDBeta"      , &relIsoWithDBeta_, "relIsoWithDBeta/F");
-
   electronTree_->Branch("genWeight"  ,  &gweight_ , "gweight/F");  
+  electronTree_->Branch("kinWeight"  ,  &kweight_ , "kweight/F");  
  
-  electronTree_->Branch("nPV"        ,  &nPV_     , "nPV/I");
-  electronTree_->Branch("rho"        ,  &rho_ , "rho/F");
-  electronTree_->Branch("nEle"       ,  &nEle_ , "nEle/I");
+  // electronTree_->Branch("nPV"        ,  &nPV_     , "nPV/I");
+  // electronTree_->Branch("rho"        ,  &rho_ , "rho/F");
+  // electronTree_->Branch("nEle"       ,  &nEle_ , "nEle/I");
   electronTree_->Branch("pt"    ,  &pt_    , "pt/F");			    
   electronTree_->Branch("etaSC" ,  &etaSC_ , "etaSC/F");
-  electronTree_->Branch("dEtaIn",  &dEtaIn_, "dEtaIn/F");
+  electronTree_->Branch("dEtaSeed",  &dEtaSeed_, "dEtaSeed/F");
   electronTree_->Branch("dPhiIn",  &dPhiIn_, "dPhiIn/F");
   electronTree_->Branch("hOverE",  &hOverE_, "hOverE/F");
   electronTree_->Branch("full5x5_sigmaIetaIeta", &full5x5_sigmaIetaIeta_, "full5x5_sigmaIetaIeta/F");
@@ -279,7 +311,7 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   UInt_t maxEventsOver10000 =   maxEvents/10000.;
 
   if( smallEventCount )
-    maxEvents = 5000000;
+    maxEvents = maxEventsSmall;
 
   printf("\nStart drawing into hists with total # of events = %u\n", maxEvents );
 
@@ -313,7 +345,7 @@ void convert_EventStrNtuple_To_FlatNtuple(){
     b_eleD0->GetEntry(tentry);
     b_nPV->GetEntry(tentry);
     b_eleDZ->GetEntry(tentry);
-    b_eleDEtaIn->GetEntry(tentry);
+    b_eleDEtaSeed->GetEntry(tentry);
     b_eleDPhiIn->GetEntry(tentry);
     b_eleHoverE->GetEntry(tentry);
     b_eleFull5x5SigmaIEtaIEta->GetEntry(tentry);
@@ -325,10 +357,12 @@ void convert_EventStrNtuple_To_FlatNtuple(){
     for(int iele = 0; iele < eleNEle; iele++){
      
       gweight_ = genWeight;
-      nEle_ = eleNEle;
+      // nEle_ = eleNEle;
       pt_ = elePt->at(iele);
       etaSC_ = eleEtaSC->at(iele);
-      dEtaIn_ = eleDEtaIn->at(iele);
+      kweight_ = findKinematicWeight(hKinematicWeights, pt_, etaSC_);
+      
+      dEtaSeed_ = eleDEtaSeed->at(iele);
       dPhiIn_ = eleDPhiIn->at(iele);
       full5x5_sigmaIetaIeta_ = eleFull5x5SigmaIEtaIEta->at(iele);
       hOverE_ =  eleHoverE->at(iele);
@@ -338,10 +372,10 @@ void convert_EventStrNtuple_To_FlatNtuple(){
       isoNeutralHadrons_ = isoNeutralHadrons->at(iele);
       isoPhotons_ = eleIsoPhotons->at(iele);
       expectedMissingInnerHits_ = eleExpectedMissingInnerHits->at(iele);
-      nPV_ = nPV;
+      // nPV_ = nPV;
       // // nPU_ = nPU->at(iele);
       // // nPUTrue_ = nPUTrue->at(iele);
-      rho_ = eleRho; //->at(iele);
+      // rho_ = eleRho; //->at(iele);
       ooEmooP_ = eleOOEMOOP->at(iele);
       passConversionVeto_ = electronPassConversionVeto->at(iele);
       isTrueEle_ =  eleIsTrueElectron->at(iele); 
@@ -355,8 +389,9 @@ void convert_EventStrNtuple_To_FlatNtuple(){
       double area = EffectiveAreas::effectiveAreaValues[etaBin];
       relIsoWithEA_ = (  isoChargedHadrons_
 			 + max(0.0, isoNeutralHadrons_ + isoPhotons_ 
-			       - rho_ * area ) )/pt_;
-      
+			       - eleRho * area ) )/pt_;
+      if( ! passPreselection( isTrueEle_, pt_, etaSC_, passConversionVeto_, dz_) )
+	  continue;
       electronTree_->Fill();// IK will kill me next time, if this line is not at the right place!
       
     } // end loop over the electrons
@@ -375,3 +410,89 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   bazinga("I'm finished with calculation, here is the info from dBenchmark:");  
   printf("\n");  gBenchmark->Show("Timing");  // get timing info
 } // end of main fcn
+
+float findKinematicWeight(TH2D *hist, float pt, float etaSC){
+  
+  // For signal electrons from Drell-Yan, use kinematic weights,
+  // for background electrons from ttbar, do not use any weights
+  float weight = 1.0;
+  if( processSignal ){
+    // Retrieve kinematic weight
+    int ipt = hist->GetXaxis()->FindBin(pt);
+    int npt = hist->GetNbinsX();
+    int ieta = hist->GetYaxis()->FindBin(etaSC);
+    int neta = hist->GetNbinsY();
+    if( ipt < 1 || ipt > npt || ieta < 1 || ieta > neta ){      
+      // If pt and eta are outside of the limits of the weight histogram,
+      // set the weight to the edge value
+      if( ipt < 1 ) 
+  	ipt = 1;
+      if( ipt > npt )
+  	ipt = npt;
+      if( ieta < 1 ) 
+  	ieta = 1;
+      if( ieta > neta ) 
+  	ieta = neta;
+      weight = hist->GetBinContent(ipt, ieta);
+    } else {
+      // Normal case, pt and eta are within limits of the weight histogram
+      weight = hist->Interpolate(pt, etaSC);
+    } // end is within hist limits
+  } // end is signal 
+
+  return weight;
+}
+
+bool passPreselection(int isTrue, float pt, float eta, 
+		      int passConversionVeto, float dz){
+
+  bool pass = true;
+
+  if( processSignal ){
+    if( !(isTrue==1) )
+      pass = false;
+  }else{
+    if( !(isTrue==0 || isTrue==3) )
+      pass = false;
+  }
+    
+  if( pt < ptMin )
+    pass = false;
+
+  if( processBarrel ){
+    if( !(abs(eta) <= boundaryEBEE ) )
+      pass = false;
+  }else{
+    if( !(abs(eta) >= boundaryEBEE  && abs(eta) <= etaMax ) )
+      pass = false;
+  }
+
+  if( !passConversionVeto )
+    pass = false;
+
+  if( ! (abs(dz) < dzMax ) )
+    pass = false;
+
+  return pass;
+
+}
+
+const int maxPowersBin = 6;
+TString powers[maxPowersBin] = {"","K","M","G","T","P"};
+
+TString eventCountString(){
+
+  TString result = "_full";
+
+  if( smallEventCount ){
+    int powerOfTen = log10(maxEventsSmall);
+    int powersBin = powerOfTen/3;
+    if( powersBin >= maxPowersBin )
+      powersBin = maxPowersBin-1;
+    int neventsShort = maxEventsSmall / TMath::Power(10, 3*powersBin);
+    result = TString::Format("_%d%s", neventsShort, powers[powersBin].Data());
+  }
+
+  return result;
+}
+

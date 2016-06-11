@@ -36,6 +36,8 @@ const int nIsoBins = 1000;
 const float isoMin = 0;
 const float isoMax = 1;
 
+const float offlineIsoCut = 0.1;
+
 // Offline effective areas
 const int nEtaBins = 7;
 const float etaBinLimits[nEtaBins+1] = {
@@ -50,8 +52,12 @@ const float hltEtaBinLimits[nHltEtaBins+1] = {0.0, 1.479, 2.5};
 const float hltEAEcal[nHltEtaBins] = {0.165, 0.132};
 const float hltEAHcal[nHltEtaBins] = {0.060, 0.131};
 // HLT cuts: WP Loose
-const float hltEcalIsoCut[nHltEtaBins] = {0.145, 0.135}; 
-const float hltHcalIsoCut[nHltEtaBins] = {0.150, 0.130}; 
+// const float hltEcalIsoCut[nHltEtaBins] = {0.145, 0.135}; 
+// const float hltHcalIsoCut[nHltEtaBins] = {0.150, 0.130}; 
+// const float hltTrkIsoCut [nHltEtaBins] = {0.080, 0.080}; 
+// HLT emulation on offline quantities for WPLoose from GDZP
+const float hltEcalIsoCut[nHltEtaBins] = {0.160, 0.120}; 
+const float hltHcalIsoCut[nHltEtaBins] = {0.120, 0.120}; 
 const float hltTrkIsoCut [nHltEtaBins] = {0.080, 0.080}; 
 
 // Forward declarations
@@ -59,6 +65,7 @@ int findOfflineEtaBin(float eta);
 int findHltEtaBin(float eta);
 TGraph *runUCCOM(TH1F *hnum, TH1F *hden);
 float findMax(TGraph *graph);
+float findFractionAtCutValue(float cut, TGraph *graph);
 
 // Main function
 void computeHLTBounds(bool doBarrel = true){
@@ -258,6 +265,10 @@ void computeHLTBounds(bool doBarrel = true){
   lat->SetNDC(kTRUE);
   lat->Draw("same");
 
+  // Print the f fraction at the chosen offline cut value
+  printf("For offline cut iso < %f fraction f= %f\n", offlineIsoCut,
+	 findFractionAtCutValue(offlineIsoCut, grFull));
+
 }
 
 
@@ -317,5 +328,16 @@ float findMax(TGraph *graph){
   return max;
 }
 
+float findFractionAtCutValue(float cut, TGraph *graph){
 
-
+  float result = 0;
+  double xtmp, ytmp;
+  for(int i=0; i<graph->GetN(); i++){
+    graph->GetPoint(i,xtmp,ytmp);
+    if( xtmp > cut ){
+      result = ytmp;
+      break;
+    }
+  }
+  return result;
+}
