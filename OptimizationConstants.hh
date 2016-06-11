@@ -52,7 +52,7 @@ namespace Opt {
   // Kinematics
   const TCut ptCut = "pt>=20";
   const TCut etaCutBarrel = " abs(etaSC) < 1.4442 " ;
-  const TCut etaCutEndcap = " abs(etaSC) > 1.566 " ;
+  const TCut etaCutEndcap = " abs(etaSC) > 1.566 && abs(etaSC)<2.5" ;
   
   // Anything else
   const TCut otherPreselectionCuts = "passConversionVeto && abs(dz)<1";
