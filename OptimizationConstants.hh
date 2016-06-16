@@ -8,14 +8,14 @@
 namespace Opt {
 
   // Global parameters
-  const bool useBarrel = false;
+  const bool useBarrel = true;
   // Events to test and train. 
   // To use ALL available events, split 50/50, set
   // all of the nTrain and nTest to 0
   const int nTrain_Signal     = 300000;
   const int nTrain_Background = 300000;
-  const int nTest_Signal      = 0;
-  const int nTest_Background  = 0;
+  const int nTest_Signal      =1000000;
+  const int nTest_Background  =1000000;
   // Cut repository directory
   const TString cutRepositoryDir = "./cut_repository";
   
@@ -37,9 +37,13 @@ namespace Opt {
   //
   TFile *fileSignal = 0;
   TFile *fileBackground = 0;
-  const TString fnameSignal = "./DYJetsToLL_may29_flat_ntuple_withWeights_5M.root";
+  const TString fnameSignalBarrel = "./DYJetsToLL_may29_flat_ntuple_full_barrel.root";
+  const TString fnameSignalEndcap = "./DYJetsToLL_may29_flat_ntuple_full_endcap.root";
+  const TString fnameSignal = useBarrel ? fnameSignalBarrel : fnameSignalEndcap;
   const TString signalTreeName = "electronTree";
-  const TString fnameBackground = "./TTJets_may29_flat_ntuple_withWeights_5M.root";
+  const TString fnameBackgroundBarrel = "./TTJets_may29_flat_ntuple_full_barrel.root";
+  const TString fnameBackgroundEndcap = "./TTJets_may29_flat_ntuple_full_endcap.root";
+  const TString fnameBackground = useBarrel ? fnameBackgroundBarrel : fnameBackgroundEndcap;
   const TString backgroundTreeName = "electronTree";
   
   //

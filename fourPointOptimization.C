@@ -12,16 +12,16 @@ void fourPointOptimization(){
 
   // Define source for the initial cut range
   TString startingCutMaxFileName 
-    = "cuts_barrel_eff_0999_20160529_140000.root";
+    = "cuts_barrel_eff_0999_20160611_200000.root";
   if( !Opt::useBarrel )
     startingCutMaxFileName 
-      = "cuts_endcap_eff_0999_20160529_140000.root";
+      = "cuts_endcap_eff_0999_20160611_200000.root";
 
   TString namePrefix = "cuts_barrel_";
   if( !Opt::useBarrel )
     namePrefix = "cuts_endcap_";
   TString namePass[Opt::nWP] = {"pass1_","pass2_","pass3_","pass4_"};
-  TString nameTime = "20160529_200000";
+  TString nameTime = "20160611_200000";
 
   for( int ipass = 0; ipass < optimizeTightOnly; ipass++){
 
@@ -60,8 +60,8 @@ void fourPointOptimization(){
     }
 
     if( ipass == 3 ){
-      userDefinedCutLimits = VarLims::limitsWP4endcap;	
-      if (Opt::useBarrel)      userDefinedCutLimits = VarLims::limitsWP4barrel;	
+      userDefinedCutLimits = VarLims::limitsHLTSafeEndcap;	
+      if (Opt::useBarrel)      userDefinedCutLimits = VarLims::limitsHLTSafeBarrel;	
     }
 
     printf("\n-----------------------------------------------------------------\n");

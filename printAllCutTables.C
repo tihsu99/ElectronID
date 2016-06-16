@@ -14,19 +14,19 @@ const TString workingPointNames[nWP] = {
 
 const TString barrelCutFiles[nWP] = {
   // only WP Veto was optimized, other files are only for aestetics purpose here
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "cut_repository/cuts_barrel_pass1_20160611_200000_WP_Veto.root",
+  "cut_repository/cuts_barrel_pass2_20160611_200000_WP_Loose.root",
+  "cut_repository/cuts_barrel_pass3_20160611_200000_WP_Medium.root",
+  "cut_repository/cuts_barrel_pass3_20160611_200000_WP_Tight.root"
 
 };
 
 const TString endcapCutFiles[nWP] = {
   // change to endcap files once the optimzation is made
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root",
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "cut_repository/cuts_barrel_pass1_20160611_200000_WP_Veto.root",
+  "cut_repository/cuts_barrel_pass1_20160611_200000_WP_Veto.root",
+  "cut_repository/cuts_barrel_pass1_20160611_200000_WP_Veto.root",
+  "cut_repository/cuts_barrel_pass1_20160611_200000_WP_Veto.root"
 };
 
 
@@ -80,7 +80,7 @@ void printAllCutTables(){
     TString variableName     = Vars::variables[i]->name.Data();
     TString variableTmvaName = Vars::variables[i]->nameTmva.Data();
     TString sign = (i == Vars::nVariables-1)?"<=":"<";
-    printf("|  %30s %s  |  %g  |  %g  |  %g  | %g |\n", 
+    printf("|  %30s %s  |  %8g  |  %8g  |  %8g  | %8g |\n", 
 	   variableTmvaName.Data(), 
 	   sign.Data(),
 	   barrelCuts[WP_VETO  ]->getCutValue(variableName),
