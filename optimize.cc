@@ -53,8 +53,8 @@ void optimize(TString cutMaxFileName, TString cutsOutFileNameBase,
   factory->AddSignalTree    ( signalTree,     signalWeight     );
   factory->AddBackgroundTree( backgroundTree, backgroundWeight );
 
-  factory->SetBackgroundWeightExpression("genWeight");
-  factory->SetSignalWeightExpression("genWeight");
+  factory->SetBackgroundWeightExpression("genWeight*kinWeight");
+  factory->SetSignalWeightExpression("genWeight*kinWeight");
 
   // Configure training and test trees  
   TString trainAndTestOptions = getTrainAndTestOptions();
