@@ -5,8 +5,8 @@
 
 namespace Vars {
 
-  const int nVariables = 9;
-  const int nSpectatorVariables = 2;
+  const int nVariables = 8;
+  const int nSpectatorVariables = 3;
   
   struct Variables{
     TString name;
@@ -26,13 +26,13 @@ namespace Vars {
     new Variables("relIsoWithEA"      ,"relIsoWithEA"      ,'F',false),
     new Variables("ooEmooP"              ,"ooEmooP"              ,'F',false),
     new Variables("d0"                   ,"abs(d0)"              ,'F',true),
-    new Variables("dz"                   ,"abs(dz)"              ,'F',true),
-    new Variables("expectedMissingInnerHits","expectedMissingInnerHits",'I',false)
+    new Variables("dz"                   ,"abs(dz)"              ,'F',true)
   };
   
   Variables *spectatorVariables [nSpectatorVariables] = {
     new Variables("pt"   , "pt"   , 'F',   false),
-    new Variables("etaSC", "etaSC", 'F',   false)
+    new Variables("etaSC", "etaSC", 'F',   false),
+    new Variables("expectedMissingInnerHits","expectedMissingInnerHits",'I',false)
   };
   
 };

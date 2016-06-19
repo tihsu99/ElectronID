@@ -8,7 +8,7 @@
 namespace Opt {
 
   // Global parameters
-  const bool useBarrel = true;
+  const bool useBarrel = false;
   // Events to test and train. 
   // To use ALL available events, split 50/50, set
   // all of the nTrain and nTest to 0

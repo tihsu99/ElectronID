@@ -13,7 +13,7 @@
 #include "VarCut.hh"
 
 // Define unique part of the file name for saving the cuts
-TString dateTag = "20160611_200000";
+TString dateTag = "20160616_200000";
 
 // For debug purposes, set the flag below to true, for regular
 // computation set it to false
@@ -74,10 +74,10 @@ double VarInfo::findUpperCut(TTree *tree, TCut &preselectionCut, double eff){
   drawCommand += ">>";
   drawCommand += _hist->GetName();
   if( !useSmallEventCount ){
-    tree->Draw(drawCommand, preselectionCut);
+    tree->Draw(drawCommand, preselectionCut, "goff");
   }else{
     printf("DEBUG MODE: using small event count\n");
-    tree->Draw(drawCommand, preselectionCut, "", 100000);
+    tree->Draw(drawCommand, preselectionCut, "goff", 100000);
   }
   
   // DEBUG
@@ -118,10 +118,14 @@ double VarInfo::findUpperCut(TTree *tree, TCut &preselectionCut, double eff){
 //
 void findCutLimits(){
 
-  // Get the signal tree
-  TFile *input = new TFile( Opt::fnameSignal );
-  TTree *tree = (TTree*)input->Get(Opt::signalTreeName);
-  if( !tree ) 
+  // Get the signal trees
+  TFile *inputBarrel = new TFile( Opt::fnameSignalBarrel );
+  TTree *treeBarrel = (TTree*)inputBarrel->Get(Opt::signalTreeName);
+  if( !treeBarrel ) 
+    assert(0);
+  TFile *inputEndcap = new TFile( Opt::fnameSignalEndcap );
+  TTree *treeEndcap = (TTree*)inputEndcap->Get(Opt::signalTreeName);
+  if( !treeEndcap ) 
     assert(0);
 
   const float eff = 0.999;
@@ -142,7 +146,7 @@ void findCutLimits(){
     // Note: use nameTmva below, so that the var string will contain
     // the abs() as needed.
     VarInfo var(Vars::variables[i]->nameTmva, xlow, xhigh);
-    float cutValue = var.findUpperCut(tree, preselectionCuts, eff);
+    float cutValue = var.findUpperCut(treeBarrel, preselectionCuts, eff);
     cutBarrel0999->setCutValue(Vars::variables[i]->name, cutValue);
   }
   cutBarrel0999->print();
@@ -163,7 +167,7 @@ void findCutLimits(){
     // Note: use nameTmva below, so that the var string will contain
     // the abs() as needed.
     VarInfo var(Vars::variables[i]->nameTmva, xlow, xhigh);
-    float cutValue = var.findUpperCut(tree, preselectionCuts, eff);
+    float cutValue = var.findUpperCut(treeEndcap, preselectionCuts, eff);
     cutEndcap0999->setCutValue(Vars::variables[i]->name, cutValue);
   }
   cutEndcap0999->print();

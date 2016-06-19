@@ -5,25 +5,22 @@
 #include "VariableLimits.hh"
 #include "optimize.hh"
 
-// set this to 4 to optimize all WP. Rami's logic.
-const int optimizeTightOnly = 4;
-
 void fourPointOptimization(){
 
   // Define source for the initial cut range
   TString startingCutMaxFileName 
-    = "cuts_barrel_eff_0999_20160611_200000.root";
+    = "cuts_barrel_eff_0999_20160616_200000.root";
   if( !Opt::useBarrel )
     startingCutMaxFileName 
-      = "cuts_endcap_eff_0999_20160611_200000.root";
+      = "cuts_endcap_eff_0999_20160616_200000.root";
 
   TString namePrefix = "cuts_barrel_";
   if( !Opt::useBarrel )
     namePrefix = "cuts_endcap_";
   TString namePass[Opt::nWP] = {"pass1_","pass2_","pass3_","pass4_"};
-  TString nameTime = "20160611_200000";
+  TString nameTime = "20160616_200000";
 
-  for( int ipass = 0; ipass < optimizeTightOnly; ipass++){
+  for( int ipass = 3; ipass < Opt::nWP; ipass++){
 
     // This string is the file name that contains the ROOT file
     // with the VarCut object that defines the range of cut variation.
@@ -88,7 +85,13 @@ void fourPointOptimization(){
   printf("Final definition of working points\n");
   printf("====================================================\n");
   printf("Copy files with working points info into the final locations\n");
-  for(int i=0; i<optimizeTightOnly /*Opt::nWP*/; i++){
+  printf("Current path:\n");
+  gSystem->Exec("pwd"); 
+  printf("Content of this dir:\n");
+  gSystem->Exec("ls -rtl"); 
+  printf("Content of cut_repository subdir\n");
+  gSystem->Exec("ls -rtl cut_repository/"); 
+  for(int i=0; i<Opt::nWP; i++){
 
     TString wpPassFileName = Opt::cutRepositoryDir + TString("/")
       + namePrefix + namePass[i] + nameTime + TString("_")

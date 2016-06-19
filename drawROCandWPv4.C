@@ -21,24 +21,24 @@ const bool verbose = true;
 
 // Files with signal and background trees (ideally the ntuples
 // that were used for TMVA optimization
-const TString fnameSignal = "DYJetsToLL_may29_flat_ntuple_withWeights_2M.root";
+const TString fnameSignal = drawBarrel ? Opt::fnameSignalBarrel : Opt::fnameSignalEndcap;
 const TString signalTreeName = "electronTree";
-const TString fnameBackground = "TTJets_may29_flat_ntuple_withWeights_2M.root";
+const TString fnameBackground = drawBarrel ? Opt::fnameBackgroundBarrel : Opt::fnameBackgroundEndcap;
 const TString backgroundTreeName = "electronTree";
 
 // Name TMVA output file that contains the pre-computed ROC, etc
 const TString tmvaFileNameBarrel[nROCs] = {
-  "./trainingData/training_results_barrel_pass1_20160529_200000/TMVA_training_results_barrel_pass1_20160529_200000.root",
-  "./trainingData/training_results_barrel_pass2_20160529_200000/TMVA_training_results_barrel_pass2_20160529_200000.root",
-  "./trainingData/training_results_barrel_pass3_20160529_200000/TMVA_training_results_barrel_pass3_20160529_200000.root",
-  "./trainingData/training_results_barrel_pass4_20160529_200000/TMVA_training_results_barrel_pass4_20160529_200000.root"
+  "./trainingData/training_results_barrel_pass1_20160616_200000/TMVA_training_results_barrel_pass1_20160616_200000.root",
+  "./trainingData/training_results_barrel_pass2_20160616_200000/TMVA_training_results_barrel_pass2_20160616_200000.root",
+  "./trainingData/training_results_barrel_pass3_20160616_200000/TMVA_training_results_barrel_pass3_20160616_200000.root",
+  "./trainingData/training_results_barrel_pass4_20160616_200000/TMVA_training_results_barrel_pass4_20160616_200000.root"
 };
 
 const TString tmvaFileNameEndcap[nROCs] ={
-  "./trainingData/training_results_barrel_pass1_20160529_200000/TMVA_training_results_endcap_pass1_20160529_200000.root",
-  "./trainingData/training_results_barrel_pass2_20160529_200000/TMVA_training_results_endcap_pass2_20160529_200000.root",
-  "./trainingData/training_results_barrel_pass3_20160529_200000/TMVA_training_results_endcap_pass3_20160529_200000.root",
-  "./trainingData/training_results_barrel_pass4_20160529_200000/TMVA_training_results_endcap_pass4_20160529_200000.root"
+  "./trainingData/training_results_endcap_pass1_20160616_200000/TMVA_training_results_endcap_pass1_20160616_200000.root",
+  "./trainingData/training_results_endcap_pass2_20160616_200000/TMVA_training_results_endcap_pass2_20160616_200000.root",
+  "./trainingData/training_results_endcap_pass3_20160616_200000/TMVA_training_results_endcap_pass3_20160616_200000.root",
+  "./trainingData/training_results_endcap_pass4_20160616_200000/TMVA_training_results_endcap_pass4_20160616_200000.root"
 };
 
 //
@@ -51,11 +51,11 @@ const int markerStyleSet1 = 20;
 const TString legendSet1 = "WP_Veto";
 const int nWP = 1;
 const TString cutFileNamesBarrelSet1[nWP] = { 
-  "cut_repository/cuts_barrel_20160529_200000_WP_Veto.root"
+  "cut_repository/cuts_barrel_20160616_200000_WP_Veto.root"
 
 };
 const TString cutFileNamesEndcapSet1[nWP] = {
-  "cut_repository/cuts_endcap_20160529_200000_WP_Veto.root"
+  "cut_repository/cuts_endcap_20160616_200000_WP_Veto.root"
 
 };
 
@@ -64,11 +64,11 @@ const int markerColorSet2 = kOrange;
 const int markerStyleSet2 = 20;
 const TString legendSet2 = "WP_Loose";
 const TString cutFileNamesBarrelSet2[nWP] = { 
-  "cut_repository/cuts_barrel_20160529_200000_WP_Loose.root"
+  "cut_repository/cuts_barrel_20160616_200000_WP_Loose.root"
 
 };
 const TString cutFileNamesEndcapSet2[nWP] = {
-  "cut_repository/cuts_endcap_20160529_200000_WP_Loose.root"
+  "cut_repository/cuts_endcap_20160616_200000_WP_Loose.root"
 };
 
 // Set 3
@@ -76,11 +76,11 @@ const int markerColorSet3 = kBlue;
 const int markerStyleSet3 = 20;
 const TString legendSet3 = "WP_Medium";
 const TString cutFileNamesBarrelSet3[nWP] = { 
-  "cut_repository/cuts_barrel_20160529_200000_WP_Medium.root"
+  "cut_repository/cuts_barrel_20160616_200000_WP_Medium.root"
 
 };
 const TString cutFileNamesEndcapSet3[nWP] = {
-  "cut_repository/cuts_endcap_20160529_200000_WP_Medium.root"
+  "cut_repository/cuts_endcap_20160616_200000_WP_Medium.root"
 };
 
 
@@ -90,10 +90,10 @@ const int markerColorSet4 = kGreen;
 const int markerStyleSet4 = 20;
 const TString legendSet4 = "WP_Tight";
 const TString cutFileNamesBarrelSet4[nWP] = { 
-  "cut_repository/cuts_barrel_20160529_200000_WP_Tight.root"
+  "cut_repository/cuts_barrel_20160616_200000_WP_Tight.root"
 };
 const TString cutFileNamesEndcapSet4[nWP] = {
-  "cut_repository/cuts_endcap_20160529_200000_WP_Tight.root"
+  "cut_repository/cuts_endcap_20160616_200000_WP_Tight.root"
 };
 
 void bazinga (std::string message){
@@ -306,7 +306,7 @@ void   overlayWorkingPoints(TCanvas *c1,
     float effSignal, effBackground;
     findEfficiencies(signalTree, backgroundTree, effSignal, effBackground,
 		     cutObject);
-    printf("Computed eff for cut from %s, effS= %.3f effB= %.3f\n",
+    printf("Computed eff for cut from %s, effS= %.4f effB= %.4f\n",
 	   cutFileNames[iwp].Data(), effSignal, effBackground);
     
     // Make a marker and draw it.
@@ -365,9 +365,15 @@ void findEfficiencies(TTree *signalTree, TTree *backgroundTree,
  
 
   // draw the histogram
-  signalTree->Draw("pt>>hS_num", "genWeight"*(selectionCuts && signalCuts), "goff");
-  signalTree->Draw("pt>>hS_den", "genWeight"*(signalCuts), "goff");
+  TString sigCutsStringNum = TString::Format("genWeight*kinWeight*(%s)", (selectionCuts && signalCuts).GetTitle());
+  TString sigCutsStringDen = TString::Format("genWeight*kinWeight*(%s)", (signalCuts).GetTitle());
+  signalTree->Draw("pt>>hS_num", sigCutsStringNum, "goff");
+  signalTree->Draw("pt>>hS_den", sigCutsStringDen, "goff");
   
+  printf("DEBUG: \n");
+  printf("  num= %f  denom= %f\n", hS_num->GetSumOfWeights(), hS_den->GetSumOfWeights());
+  printf("  num cuts are %s\n", sigCutsStringNum.Data());
+
   // effSignal = (1.0*signalTree->GetEntries(selectionCuts && signalCuts) )
   //   / signalTree->GetEntries(signalCuts);
   //effSignal = hS_num->GetEffectiveEntries()/ hS_den->GetEffectiveEntries();
@@ -377,8 +383,10 @@ void findEfficiencies(TTree *signalTree, TTree *backgroundTree,
   //   / backgroundTree->GetEntries(backgroundCuts);
   
   // draw the histogram
-  backgroundTree->Draw("pt>>hBG_num", "genWeight"*(selectionCuts && backgroundCuts), "goff");
-  backgroundTree->Draw("pt>>hBG_den", "genWeight"*(backgroundCuts), "goff");
+  TString bgCutsStringNum = TString::Format("genWeight*kinWeight*(%s)", (selectionCuts && backgroundCuts).GetTitle());
+  TString bgCutsStringDen = TString::Format("genWeight*kinWeight*(%s)", (backgroundCuts).GetTitle());
+  backgroundTree->Draw("pt>>hBG_num", "genWeight*kinWeight"*(selectionCuts && backgroundCuts), "goff");
+  backgroundTree->Draw("pt>>hBG_den", "genWeight*kinWeight"*(backgroundCuts), "goff");
   
   //effBackground = hBG_num->GetEffectiveEntries()/ hBG_den->GetEffectiveEntries();
   effBackground = hBG_num->GetSumOfWeights()/ hBG_den->GetSumOfWeights();

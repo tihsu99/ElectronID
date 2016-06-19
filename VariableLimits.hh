@@ -5,7 +5,7 @@
 
 namespace VarLims{
 
-  const int nVarLimits = 9;
+  const int nVarLimits = 8;
   
   struct VariableLimits {
     TString name;
@@ -23,8 +23,8 @@ namespace VarLims{
     new VariableLimits("relIsoWithEA"            ,1e30),
     new VariableLimits("ooEmooP"                 ,1e30),
     new VariableLimits("d0"                      ,1e30),
-    new VariableLimits("dz"                      ,1e30),
-    new VariableLimits("expectedMissingInnerHits",1e30)
+    new VariableLimits("dz"                      ,1e30)
+    // new VariableLimits("expectedMissingInnerHits",1e30) // Removed from optimization
   };
 
   // For Loose, Medium, Tight working points:
@@ -44,8 +44,8 @@ namespace VarLims{
     new VariableLimits("relIsoWithEA"            ,1e30),
     new VariableLimits("ooEmooP"                 ,1e30),
     new VariableLimits("d0"                      ,0.40), // Endcap 99.9%
-    new VariableLimits("dz"                      ,1e30),
-    new VariableLimits("expectedMissingInnerHits",1e30)  //NO Endcap 99.9%
+    new VariableLimits("dz"                      ,1e30)
+    // new VariableLimits("expectedMissingInnerHits",1e30)  //NO Endcap 99.9%  // Removed from optimization
   };
 
   // For Medium and Tight working point, impose HLT-safe restrictions
@@ -60,8 +60,8 @@ namespace VarLims{
     new VariableLimits("relIsoWithEA"            ,0.100), // UCCOM application
     new VariableLimits("ooEmooP"                 ,0.013), // HLT WPLoose emulation
     new VariableLimits("d0"                      ,0.40),  // Endcap 99.9%
-    new VariableLimits("dz"                      ,1e30),  // No restriction
-    new VariableLimits("expectedMissingInnerHits",1e30)   // No restriction
+    new VariableLimits("dz"                      ,1e30)  // No restriction
+    // new VariableLimits("expectedMissingInnerHits",1e30)   // No restriction  // Removed from optimization
   };
 
 
@@ -73,8 +73,8 @@ namespace VarLims{
     new VariableLimits("relIsoWithEA"            ,0.100), // UCCOM application
     new VariableLimits("ooEmooP"                 ,0.013), // HLT WPLoose emulation
     new VariableLimits("d0"                      ,0.40),  // Endcap 99.9%
-    new VariableLimits("dz"                      ,1e30),  // No restriction
-    new VariableLimits("expectedMissingInnerHits",2.05)   // HLT WPLoose emulation
+    new VariableLimits("dz"                      ,1e30)  // No restriction
+    // new VariableLimits("expectedMissingInnerHits",2.05)   // HLT WPLoose emulation  // Removed from optimization
   };
 
 
