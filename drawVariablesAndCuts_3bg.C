@@ -80,17 +80,21 @@ void drawVariablesAndCuts_3bg(){
   //
   // Open files
   //
-  TString fname1 = "DYJetsToLL_may29_flat_ntuple_withWeights_2M.root";
+  TString fname1 = "DYJetsToLL_jun14_flat_ntuple_trueAndFake_barrel_full.root";
+  if( !drawBarrel )
+    fname1 = "DYJetsToLL_jun14_flat_ntuple_trueAndFake_endcap_full.root";
   TFile *input1 = new TFile( fname1 );
   //  input1->cd("wp3");
   TTree *signalTree     = (TTree*) input1->Get("electronTree");
   
-  TString fname2 = "TTJets_may29_flat_ntuple_withWeights_2M.root";
+  TString fname2 = "TTJets_may29_flat_ntuple_full_barrel.root";
+  if( !drawBarrel )
+    fname2 = "TTJets_may29_flat_ntuple_full_endcap.root";
   TFile *input2 = new TFile( fname2 );
   //  input2->cd("wp3");
   TTree *backgroundTree     = (TTree*) input2->Get("electronTree");
   
-  TString fname3 = "GJet_may29_flat_ntuple_withWeights_2M.root";
+  TString fname3 = "GJet_jun14_flat_ntuple_trueAndFake_alleta_full.root";
   TFile *input3 = new TFile( fname3 );
   //  input3->cd("wp3");
   TTree *backgroundTreeAdditional     = 0;
@@ -189,10 +193,10 @@ TCanvas *drawOneVariable(TTree *signalTree, TTree *backgroundTree1, TTree *backg
   TString projectCommandBg3 = var+TString(">>hbg3_")+var;
   
   if( !useSmallEventCount ){
-    signalTree->Draw(projectCommandSig, "genWeight"*signalCuts);
+    signalTree->Draw(projectCommandSig, "genWeight*kinWeight"*signalCuts);
   }else{
     printf("DEBUG MODE: using small event count\n");
-    signalTree->Draw(projectCommandSig, "genWeight"*signalCuts, "", 100000);
+    signalTree->Draw(projectCommandSig, "genWeight*kinWeight"*signalCuts, "", 100000);
   }
   TGaxis::SetMaxDigits(3);
   hsig->GetXaxis()->SetTitle(var);
@@ -200,10 +204,10 @@ TCanvas *drawOneVariable(TTree *signalTree, TTree *backgroundTree1, TTree *backg
 
   if(backgroundTree1 != 0){
     if( !useSmallEventCount ){
-      backgroundTree1->Draw(projectCommandBg1, "genWeight"*backgroundCuts);
+      backgroundTree1->Draw(projectCommandBg1, "genWeight*kinWeight"*backgroundCuts);
     }else{
       printf("DEBUG MODE: using small event count\n");
-      backgroundTree1->Draw(projectCommandBg1, "genWeight"*backgroundCuts, "", 100000);
+      backgroundTree1->Draw(projectCommandBg1, "genWeight*kinWeight"*backgroundCuts, "", 100000);
     }
     hbg1->Scale(hsig->GetSumOfWeights() / hbg1->GetSumOfWeights());
     hbg1->SetDirectory(0);
@@ -214,10 +218,10 @@ TCanvas *drawOneVariable(TTree *signalTree, TTree *backgroundTree1, TTree *backg
 
   if(backgroundTree2 != 0){
     if( !useSmallEventCount ){
-      backgroundTree2->Draw(projectCommandBg2, "genWeight"*backgroundCuts);
+      backgroundTree2->Draw(projectCommandBg2, "genWeight*kinWeight"*backgroundCuts);
     }else{
       printf("DEBUG MODE: using small event count\n");
-      backgroundTree2->Draw(projectCommandBg2, "genWeight"*backgroundCuts, "", 100000);
+      backgroundTree2->Draw(projectCommandBg2, "genWeight*kinWeight"*backgroundCuts, "", 100000);
     }
     hbg2->Scale(hsig->GetSumOfWeights() / hbg2->GetSumOfWeights());
     hbg2->SetDirectory(0);
@@ -229,10 +233,10 @@ TCanvas *drawOneVariable(TTree *signalTree, TTree *backgroundTree1, TTree *backg
 
   if(backgroundTree3 != 0){
     if( !useSmallEventCount ){
-      backgroundTree3->Draw(projectCommandBg3, "genWeight"*backgroundCuts);
+      backgroundTree3->Draw(projectCommandBg3, "genWeight*kinWeight"*backgroundCuts);
     }else{
       printf("DEBUG MODE: using small event count\n");
-      backgroundTree3->Draw(projectCommandBg3, "genWeight"*backgroundCuts, "", 100000);
+      backgroundTree3->Draw(projectCommandBg3, "genWeight*kinWeight"*backgroundCuts, "", 100000);
     }
     hbg3->Scale(hsig->GetSumOfWeights() / hbg3->GetSumOfWeights());
     hbg3->SetDirectory(0);
@@ -257,7 +261,7 @@ TCanvas *drawOneVariable(TTree *signalTree, TTree *backgroundTree1, TTree *backg
   }
   if( hbg3 ){
 
-    //hbg3->Draw("same");
+    hbg3->Draw("same");
   }
   TLegend *leg = new TLegend(0.55, 0.65, 0.95, 0.80); // 0.6 0.9
   leg->SetFillStyle(0);
@@ -265,7 +269,7 @@ TCanvas *drawOneVariable(TTree *signalTree, TTree *backgroundTree1, TTree *backg
   leg->AddEntry(hsig, sigLegend, "lf");
   leg->AddEntry(hbg1, bg1Legend, "lf");
   leg->AddEntry(hbg2, bg2Legend, "lf");
-  //  leg->AddEntry(hbg3, bg3Legend, "lf");
+  leg->AddEntry(hbg3, bg3Legend, "lf");
   leg->Draw("same");
 
   TLatex *lat = new TLatex(0.5, 0.95, comment); // 0.85
