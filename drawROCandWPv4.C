@@ -14,7 +14,7 @@
 using std::cout;
 
 // Draw barrel or endcap
-const bool drawBarrel = true;
+const bool drawBarrel = false;
 const int nROCs = 4;
 
 const bool verbose = true;
@@ -51,11 +51,11 @@ const int markerStyleSet1 = 20;
 const TString legendSet1 = "WP_Veto";
 const int nWP = 1;
 const TString cutFileNamesBarrelSet1[nWP] = { 
-  "cut_repository/cuts_barrel_20160616_200000_WP_Veto.root"
+  "cut_repository/cuts_barrel_20160616_200000_WP_Veto_adjusted.root"
 
 };
 const TString cutFileNamesEndcapSet1[nWP] = {
-  "cut_repository/cuts_endcap_20160616_200000_WP_Veto.root"
+  "cut_repository/cuts_endcap_20160616_200000_WP_Veto_adjusted.root"
 
 };
 
@@ -64,11 +64,11 @@ const int markerColorSet2 = kOrange;
 const int markerStyleSet2 = 20;
 const TString legendSet2 = "WP_Loose";
 const TString cutFileNamesBarrelSet2[nWP] = { 
-  "cut_repository/cuts_barrel_20160616_200000_WP_Loose.root"
+  "cut_repository/cuts_barrel_20160616_200000_WP_Loose_adjusted.root"
 
 };
 const TString cutFileNamesEndcapSet2[nWP] = {
-  "cut_repository/cuts_endcap_20160616_200000_WP_Loose.root"
+  "cut_repository/cuts_endcap_20160616_200000_WP_Loose_adjusted.root"
 };
 
 // Set 3
@@ -76,11 +76,11 @@ const int markerColorSet3 = kBlue;
 const int markerStyleSet3 = 20;
 const TString legendSet3 = "WP_Medium";
 const TString cutFileNamesBarrelSet3[nWP] = { 
-  "cut_repository/cuts_barrel_20160616_200000_WP_Medium.root"
+  "cut_repository/cuts_barrel_20160616_200000_WP_Medium_adjusted.root"
 
 };
 const TString cutFileNamesEndcapSet3[nWP] = {
-  "cut_repository/cuts_endcap_20160616_200000_WP_Medium.root"
+  "cut_repository/cuts_endcap_20160616_200000_WP_Medium_adjusted.root"
 };
 
 
@@ -90,11 +90,17 @@ const int markerColorSet4 = kGreen;
 const int markerStyleSet4 = 20;
 const TString legendSet4 = "WP_Tight";
 const TString cutFileNamesBarrelSet4[nWP] = { 
-  "cut_repository/cuts_barrel_20160616_200000_WP_Tight.root"
+  "cut_repository/cuts_barrel_20160616_200000_WP_Tight_adjusted.root"
 };
 const TString cutFileNamesEndcapSet4[nWP] = {
-  "cut_repository/cuts_endcap_20160616_200000_WP_Tight.root"
+  "cut_repository/cuts_endcap_20160616_200000_WP_Tight_adjusted.root"
 };
+
+// Cuts on expected missing hits are separate from VarCut cuts, tuned by hand.
+// These are summer 2016 values:
+const int missingHitsBarrel[Opt::nWP] = { 2, 1, 1, 1};
+const int missingHitsEndcap[Opt::nWP] = { 3, 1, 1, 1};
+const int *missingHitsCut = drawBarrel ? missingHitsBarrel : missingHitsEndcap;
 
 void bazinga (std::string message){
   if (verbose)
@@ -110,7 +116,7 @@ void overlayWorkingPoints(TCanvas *c1,
 			  TLegend *leg, const TString legendText);
 void   findEfficiencies(TTree *signalTree, TTree *backgroundTree,
 			float &effSignal, float &effBackground, 
-			VarCut *cutObject);
+			VarCut *cutObject, int iWorkingPoint);
 //
 // Main function
 //
@@ -305,7 +311,7 @@ void   overlayWorkingPoints(TCanvas *c1,
     // Compute the efficiencies
     float effSignal, effBackground;
     findEfficiencies(signalTree, backgroundTree, effSignal, effBackground,
-		     cutObject);
+		     cutObject, iwp);
     printf("Computed eff for cut from %s, effS= %.4f effB= %.4f\n",
 	   cutFileNames[iwp].Data(), effSignal, effBackground);
     
@@ -334,7 +340,8 @@ void   overlayWorkingPoints(TCanvas *c1,
 
 // Compute signal and background efficiencies for given cuts
 void findEfficiencies(TTree *signalTree, TTree *backgroundTree,
-		      float &effSignal, float &effBackground, VarCut *cutObject){
+		      float &effSignal, float &effBackground, VarCut *cutObject,
+		      int iWorkingPoint){
 
   TCut etaCut = "";
   if( drawBarrel ){
@@ -350,6 +357,11 @@ void findEfficiencies(TTree *signalTree, TTree *backgroundTree,
   TCut backgroundCuts = preselectionCuts && Opt::fakeEleCut;  
  
   TCut selectionCuts = *(cutObject->getCut());
+
+  TCut missingHits = TString::Format("expectedMissingInnerHits<=%d", missingHitsCut[iWorkingPoint]).Data();
+  selectionCuts = selectionCuts && missingHits;
+  printf("\nNOTE: the missing hits cuts are not taken from optimization, but are added by hand!\n\n");
+  std::cout << selectionCuts.GetTitle() << endl;
 
   // printf("\nSelecton cuts:\n");
   // selectionCuts.Print();
@@ -370,14 +382,16 @@ void findEfficiencies(TTree *signalTree, TTree *backgroundTree,
   signalTree->Draw("pt>>hS_num", sigCutsStringNum, "goff");
   signalTree->Draw("pt>>hS_den", sigCutsStringDen, "goff");
   
-  printf("DEBUG: \n");
-  printf("  num= %f  denom= %f\n", hS_num->GetSumOfWeights(), hS_den->GetSumOfWeights());
-  printf("  num cuts are %s\n", sigCutsStringNum.Data());
-
   // effSignal = (1.0*signalTree->GetEntries(selectionCuts && signalCuts) )
   //   / signalTree->GetEntries(signalCuts);
   //effSignal = hS_num->GetEffectiveEntries()/ hS_den->GetEffectiveEntries();
   effSignal = hS_num->GetSumOfWeights()/ hS_den->GetSumOfWeights();
+  printf("DEBUG signal: \n");
+  printf("  num= %f  denom= %f   eff= %f\n", hS_num->GetSumOfWeights(), hS_den->GetSumOfWeights(), effSignal);
+  printf("  num cuts are %s\n", sigCutsStringNum.Data());
+
+
+
   // effBackground = (1.0*backgroundTree->GetEntries(selectionCuts 
   // 						  && backgroundCuts) )
   //   / backgroundTree->GetEntries(backgroundCuts);
@@ -390,6 +404,11 @@ void findEfficiencies(TTree *signalTree, TTree *backgroundTree,
   
   //effBackground = hBG_num->GetEffectiveEntries()/ hBG_den->GetEffectiveEntries();
   effBackground = hBG_num->GetSumOfWeights()/ hBG_den->GetSumOfWeights();
+
+  printf("DEBUG bg: \n");
+  printf("  num= %f  denom= %f   eff= %f\n", hBG_num->GetSumOfWeights(), hBG_den->GetSumOfWeights(), effBackground);
+  printf("  num cuts are %s\n", bgCutsStringNum.Data());
+
 
   delete hS_num ; hS_num = nullptr;
   delete hS_den ; hS_den = nullptr;

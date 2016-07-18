@@ -112,6 +112,11 @@ drawROCandWP.C: this script draws the ROC and up to three sets of
       using the signal and background ntuples specfied explicitly in the beginning
       of the file and preselection cuts taken from OptimizationConstants.hh
       - Compile and run it without parameters.
+
+drawKinematics.C: the script draws unweighted and weighted pt and eta distributions.
+
+drawEfficiencies.C: the script draws efficiencies for all working points as a function
+      of pt, eta, Nvtx.
      
 correlations.C and tmvaglob.C: these are the standard pieces of code that come
       from TMVA examples directory without any changes. To draw correlations, do:
@@ -124,6 +129,12 @@ convert_EventStrNtuple_To_FlatNtuple.C: converts event-structured ntuple to
 computeHLTBounds.C: applies UCCOM method to find the offline cut bounds on isolation
       from the HLT cuts and variables. Requires a special ntuple that contains
       HLT-like ecal/hcal/trk isolations.
+
+repackageCuts.C: this script loads VarCut objects with cuts, and changes some of them,
+      those that are adjusted by hand. The script writes out new files with adjusted
+      VarCut objects.
+
+
 
 Directories:
   

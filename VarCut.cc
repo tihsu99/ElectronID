@@ -37,7 +37,11 @@ TCut *VarCut::getCut(){
   cut = new TCut("");
   for(int i=0; i<Vars::nVariables; i++){
     // The += adds all cuts with &&:
-    (*cut) += TString::Format(" %s < %f ",
+    TString formatString = " %s < %f ";
+    if( Vars::variables[i]->name == "expectedMissingInnerHits")
+      formatString = " %s <= %f ";
+
+    (*cut) += TString::Format(formatString.Data(),
 			      Vars::variables[i]->nameTmva.Data(),
 			      _cuts[i]);
   }

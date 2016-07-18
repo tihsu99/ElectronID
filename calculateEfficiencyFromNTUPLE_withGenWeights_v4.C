@@ -14,18 +14,20 @@
 #include "TLegend.h"
 #include "TPad.h"
 #include "VarCut.hh"
+
+#include "OptimizationConstants.hh"
+
 using namespace std;
 
-
 const int smallCount = 100000;  // 1M is fine, if not - set to 10-100M
-const TString variable_for_which_plot_eff = "etaSC";  // use etaSC or nPV, or pt
+const TString variable_for_which_plot_eff = "pt";  // use etaSC or nPV, or pt
 
 bool doBarrel = true;  // for etaSC keep it in the "barrel" mode
 int nBins = 100; 
 
 
 const TString etaRegion = (doBarrel)?"barrel":"endcap";
-const TString fileOut = TString::Format("DY_Spring15_25ns_eff_vs_%s_%s_withWeight",variable_for_which_plot_eff.Data(),etaRegion.Data() );
+const TString fileOut = TString::Format("DY_Spring16_eff_vs_%s_%s_withWeight",variable_for_which_plot_eff.Data(),etaRegion.Data() );
 
 enum class WPType { VETO=0, LOOSE, MEDIUM, TIGHT };
 enum variableAndOptimizationRange  {ptOrPVBarrel=1 ,ptOrPVEndcap, etaFullRange};
@@ -34,12 +36,17 @@ TFile *DYfile= new TFile (fileOut + ".root","recreate");
 
 //======================================================
 const TString cutFileNameBarrel[] = {
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "./cut_repository/cuts_barrel_20160616_200000_WP_Veto_adjusted.root",
+  "./cut_repository/cuts_barrel_20160616_200000_WP_Loose_adjusted.root",
+  "./cut_repository/cuts_barrel_20160616_200000_WP_Medium_adjusted.root",
+  "./cut_repository/cuts_barrel_20160616_200000_WP_Tight_adjusted.root"
 };
 
 const TString cutFileNameEndcap[] = {
-  // for aestetics putpose only, endcap has not been oprimized for the exercises 
-  "root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/cut_repository/cuts_barrel_20151101_100000_WP_Veto.root"
+  "./cut_repository/cuts_endcap_20160616_200000_WP_Veto_adjusted.root",
+  "./cut_repository/cuts_endcap_20160616_200000_WP_Loose_adjusted.root",
+  "./cut_repository/cuts_endcap_20160616_200000_WP_Medium_adjusted.root",
+  "./cut_repository/cuts_endcap_20160616_200000_WP_Tight_adjusted.root"
 };
 
 // for eff vs nPV 
@@ -178,9 +185,10 @@ void applyCutsAndFillHist(const TString cutFileName, TH1F * histo, TTree * tree,
 }
 
 
-void useHistograms( TH1F *  hV,  const TString * pToCutsFile, TTree * tree, bool denom, int passNumber, bool isBG, const TString * pToCutsFile_EtaEndcap ){
+void useHistograms( TH1F *  hV,  const TString * pToCutsFile, TTree * tree, bool denom, int passNumber, bool isBG, const TString * pToCutsFile_EtaEndcap , WPType wpType){
 
-  applyCutsAndFillHist(pToCutsFile[static_cast<int>(WPType::VETO)],   hV, tree, denom, passNumber, isBG, pToCutsFile_EtaEndcap[static_cast<int>(WPType::VETO)]);
+  // applyCutsAndFillHist(pToCutsFile[static_cast<int>(WPType::VETO)],   hV, tree, denom, passNumber, isBG, pToCutsFile_EtaEndcap[static_cast<int>(WPType::VETO)]);
+  applyCutsAndFillHist(pToCutsFile[static_cast<int>(wpType)],   hV, tree, denom, passNumber, isBG, pToCutsFile_EtaEndcap[static_cast<int>(wpType)]);
  
 }
 
@@ -189,11 +197,13 @@ void calculateEfficiencyFromNTUPLE_withGenWeights_v4(){
   if (variable_for_which_plot_eff == "etaSC") 
     doBarrel = true; // correct etaMode for eta variable
   
-  TFile fi("root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/samples/DY_Run2Asympt25ns_miniAOD_sept18_flat_ntuple_withWeights.root");   
+  TString signalNtuple = doBarrel ? Opt::fnameSignalBarrel : Opt::fnameSignalEndcap;
+  TFile fi(signalNtuple);
   gDirectory->ls();
   TTree *tr          = (TTree*)gDirectory->Get("electronTree");
 
-  TFile fiBG("root://cmsxrootd.fnal.gov///store/user/cmsdas/2016/SHORT_EXERCISES/ElectronsAndPhotons/samples/TT_Run2Asympt25ns_miniAOD_sept21_flat_ntuple_withWeights.root");   
+  TString backgroundNtuple = doBarrel ? Opt::fnameBackgroundBarrel : Opt::fnameBackgroundEndcap;
+  TFile fiBG(backgroundNtuple);
   gDirectory->ls();
   TTree *trBG          = (TTree*)fiBG.Get("electronTree");
  
@@ -223,6 +233,24 @@ void calculateEfficiencyFromNTUPLE_withGenWeights_v4(){
   TH1F *bg_histVeto;
   TH1F *bg_histVetoTot;
 
+  TH1F *histLoose;
+  TH1F *histLooseTot;
+ 
+  TH1F *bg_histLoose;
+  TH1F *bg_histLooseTot;
+
+  TH1F *histMedium;
+  TH1F *histMediumTot;
+ 
+  TH1F *bg_histMedium;
+  TH1F *bg_histMediumTot;
+
+  TH1F *histTight;
+  TH1F *histTightTot;
+ 
+  TH1F *bg_histTight;
+  TH1F *bg_histTightTot;
+
 
   if (variable_for_which_plot_eff != "nPV") {
 
@@ -233,14 +261,57 @@ void calculateEfficiencyFromNTUPLE_withGenWeights_v4(){
     bg_histVetoTot=new TH1F("bg_histVetoTot","",nBins,binLimitLow, binLimitUpper);
 
     
+    histLoose=new TH1F("histLoose","",nBins,binLimitLow, binLimitUpper);
+    bg_histLoose=new TH1F("bg_histLoose","",nBins,binLimitLow, binLimitUpper);
+
+    histLooseTot=new TH1F("histLooseTot","",nBins,binLimitLow, binLimitUpper);
+    bg_histLooseTot=new TH1F("bg_histLooseTot","",nBins,binLimitLow, binLimitUpper);
+
+    
+    histMedium=new TH1F("histMedium","",nBins,binLimitLow, binLimitUpper);
+    bg_histMedium=new TH1F("bg_histMedium","",nBins,binLimitLow, binLimitUpper);
+
+    histMediumTot=new TH1F("histMediumTot","",nBins,binLimitLow, binLimitUpper);
+    bg_histMediumTot=new TH1F("bg_histMediumTot","",nBins,binLimitLow, binLimitUpper);
+
+    
+    histTight=new TH1F("histTight","",nBins,binLimitLow, binLimitUpper);
+    bg_histTight=new TH1F("bg_histTight","",nBins,binLimitLow, binLimitUpper);
+
+    histTightTot=new TH1F("histTightTot","",nBins,binLimitLow, binLimitUpper);
+    bg_histTightTot=new TH1F("bg_histTightTot","",nBins,binLimitLow, binLimitUpper);
+
+    
   }
   else {
     nBins =24;
+
     histVeto=new TH1F("histVeto","",nBins,binLimits);
     bg_histVeto=new TH1F("bg_histVeto","",nBins,binLimits);
      
     histVetoTot=new TH1F("histVetoTot","",nBins,binLimits);
     bg_histVetoTot=new TH1F("bg_histVetoTot","",nBins,binLimits);
+
+
+    histLoose=new TH1F("histLoose","",nBins,binLimits);
+    bg_histLoose=new TH1F("bg_histLoose","",nBins,binLimits);
+     
+    histLooseTot=new TH1F("histLooseTot","",nBins,binLimits);
+    bg_histLooseTot=new TH1F("bg_histLooseTot","",nBins,binLimits);
+
+
+    histMedium=new TH1F("histMedium","",nBins,binLimits);
+    bg_histMedium=new TH1F("bg_histMedium","",nBins,binLimits);
+     
+    histMediumTot=new TH1F("histMediumTot","",nBins,binLimits);
+    bg_histMediumTot=new TH1F("bg_histMediumTot","",nBins,binLimits);
+
+
+    histTight=new TH1F("histTight","",nBins,binLimits);
+    bg_histTight=new TH1F("bg_histTight","",nBins,binLimits);
+     
+    histTightTot=new TH1F("histTightTot","",nBins,binLimits);
+    bg_histTightTot=new TH1F("bg_histTightTot","",nBins,binLimits);
     
   }
   
@@ -271,14 +342,14 @@ void calculateEfficiencyFromNTUPLE_withGenWeights_v4(){
     std::cout<<"\nI'm here 3 "<<std::endl;
     // signal
     // pt/nPV barrel
-    useHistograms( histVeto,    pToCutsFile, tr, false, ptOrPVBarrel, false,  pToCutsFile_EtaEndcap);  
-    useHistograms( histVetoTot, pToCutsFile, tr, true, ptOrPVBarrel, false,  pToCutsFile_EtaEndcap);
+    useHistograms( histVeto,    pToCutsFile, tr, false, ptOrPVBarrel, false,  pToCutsFile_EtaEndcap, WPType::VETO);  
+    useHistograms( histVetoTot, pToCutsFile, tr, true, ptOrPVBarrel, false,  pToCutsFile_EtaEndcap, WPType::VETO);
 
     std::cout<<"\nI'm here 4 "<<std::endl;
     // BG
     // pt/nPV barrel
-    useHistograms( bg_histVeto,    pToCutsFile, trBG, false, ptOrPVBarrel, true,  pToCutsFile_EtaEndcap); 
-    useHistograms( bg_histVetoTot, pToCutsFile, trBG, true, ptOrPVBarrel, true,  pToCutsFile_EtaEndcap);  
+    useHistograms( bg_histVeto,    pToCutsFile, trBG, false, ptOrPVBarrel, true,  pToCutsFile_EtaEndcap, WPType::VETO); 
+    useHistograms( bg_histVetoTot, pToCutsFile, trBG, true, ptOrPVBarrel, true,  pToCutsFile_EtaEndcap, WPType::VETO);  
 
 
   }

@@ -26,9 +26,9 @@ enum MatchType  {MATCH_TRUE, MATCH_FAKE, MATCH_ANY};
 enum SampleType {SAMPLE_UNDEF, SAMPLE_DY, SAMPLE_TT, SAMPLE_GJ};
 enum EtaRegion  {ETA_EB, ETA_EE, ETA_FULL};
 
-const MatchType  matchType      = MATCH_ANY; // MC truth matching to signal or bg electrons
-const EtaRegion  etaRegion      = ETA_FULL;   // barrel, endcap, or all etas
-const SampleType sample         = SAMPLE_GJ;
+const MatchType  matchType      = MATCH_FAKE; // MC truth matching to signal or bg electrons
+const EtaRegion  etaRegion      = ETA_EE;   // barrel, endcap, or all etas
+const SampleType sample         = SAMPLE_TT;
 
 // Preselection cuts: must match or be looser than 
 // cuts in OptimizatioConstants.hh
@@ -43,9 +43,9 @@ const bool smallEventCount = false;
 const int maxEventsSmall = 1000000;
 
 // Files input
-const TString fileNameDY = "~/DYJetsToLL_madgraph_80X_v3.root";
-const TString fileNameTT = "~/TTJets_amcatnlo_80X_v3.root";
-const TString fileNameGJ = "~/GJet_pythia8_80X_v1.root";
+const TString fileNameDY = "~/DYJetsToLL_madgraph_80X_v4.root";
+const TString fileNameTT = "~/TTJets_amcatnlo_80X_v4.root";
+const TString fileNameGJ = "~/GJet_pythia8_80X_Pt40.root";
 // Tree name input 
 const TString treeName = "ntupler/ElectronTree";
 // File and histogram with kinematic weights
@@ -53,9 +53,9 @@ const TString fileNameWeights = "kinematicWeights_20160611.root";
 const TString histNameWeights = "hKinematicWeights";
 
 // Files output
-const TString flatNtupleFileNameBaseDY = "DYJetsToLL_jun14_flat_ntuple";
-const TString flatNtupleFileNameBaseTT = "TTJets_jun14_flat_ntuple";
-const TString flatNtupleFileNameBaseGJ = "GJet_jun14_flat_ntuple";
+const TString flatNtupleFileNameBaseDY = "DYJetsToLL_jun21_flat_ntuple";
+const TString flatNtupleFileNameBaseTT = "TTJets_jun21_flat_ntuple";
+const TString flatNtupleFileNameBaseGJ = "GJet_jun20_Pt40_flat_ntuple";
 
 
 // //  Files IN 
@@ -280,6 +280,8 @@ void convert_EventStrNtuple_To_FlatNtuple(){
 
   //bazinga("Set up output tree\n");
   fileOut->cd();  //?????????
+
+  Int_t nPV_ =0;        // number of reconsrtucted primary vertices
   
   Float_t gweight_ = 0.0;      // gen Weight
   Float_t kweight_ = 0.0;      // kinematic Weight
@@ -304,6 +306,8 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   Int_t   passConversionVeto_= 0;
   Int_t   isTrueEle_= 0;
     
+  treeOut->Branch("nPV"        ,  &nPV_     , "nPV/I");
+
   treeOut->Branch("genWeight"  ,  &gweight_ , "gweight/F");  
   treeOut->Branch("kinWeight"  ,  &kweight_ , "kweight/F");  
 
@@ -373,8 +377,12 @@ void convert_EventStrNtuple_To_FlatNtuple(){
       // nEle_ = eleNEle;
       pt_ = elePt->at(iele);
       etaSC_ = eleEtaSC->at(iele);
-      kweight_ = findKinematicWeight(hKinematicWeights, pt_, etaSC_);
-      
+      // Reweight only signal electron of the DY sample
+      if( sample == SAMPLE_DY && matchType == MATCH_TRUE )
+	kweight_ = findKinematicWeight(hKinematicWeights, pt_, etaSC_);
+      else
+	kweight_ = 1;
+
       dEtaSeed_ = eleDEtaSeed->at(iele);
       dPhiIn_ = eleDPhiIn->at(iele);
       full5x5_sigmaIetaIeta_ = eleFull5x5SigmaIEtaIEta->at(iele);
@@ -385,7 +393,7 @@ void convert_EventStrNtuple_To_FlatNtuple(){
       isoNeutralHadrons_ = isoNeutralHadrons->at(iele);
       isoPhotons_ = eleIsoPhotons->at(iele);
       expectedMissingInnerHits_ = eleExpectedMissingInnerHits->at(iele);
-      // nPV_ = nPV;
+      nPV_ = nPV;
       // // nPU_ = nPU->at(iele);
       // // nPUTrue_ = nPUTrue->at(iele);
       // rho_ = eleRho; //->at(iele);
@@ -429,29 +437,27 @@ float findKinematicWeight(TH2D *hist, float pt, float etaSC){
   // For signal electrons from Drell-Yan, use kinematic weights,
   // for background electrons from ttbar, do not use any weights
   float weight = 1.0;
-  if( matchType == MATCH_TRUE ){
-    // Retrieve kinematic weight
-    int ipt = hist->GetXaxis()->FindBin(pt);
-    int npt = hist->GetNbinsX();
-    int ieta = hist->GetYaxis()->FindBin(etaSC);
-    int neta = hist->GetNbinsY();
-    if( ipt < 1 || ipt > npt || ieta < 1 || ieta > neta ){      
-      // If pt and eta are outside of the limits of the weight histogram,
-      // set the weight to the edge value
-      if( ipt < 1 ) 
-  	ipt = 1;
-      if( ipt > npt )
-  	ipt = npt;
-      if( ieta < 1 ) 
-  	ieta = 1;
-      if( ieta > neta ) 
-  	ieta = neta;
-      weight = hist->GetBinContent(ipt, ieta);
-    } else {
-      // Normal case, pt and eta are within limits of the weight histogram
-      weight = hist->Interpolate(pt, etaSC);
-    } // end is within hist limits
-  } // end is signal 
+  // Retrieve kinematic weight
+  int ipt = hist->GetXaxis()->FindBin(pt);
+  int npt = hist->GetNbinsX();
+  int ieta = hist->GetYaxis()->FindBin(etaSC);
+  int neta = hist->GetNbinsY();
+  if( ipt < 1 || ipt > npt || ieta < 1 || ieta > neta ){      
+    // If pt and eta are outside of the limits of the weight histogram,
+    // set the weight to the edge value
+    if( ipt < 1 ) 
+      ipt = 1;
+    if( ipt > npt )
+      ipt = npt;
+    if( ieta < 1 ) 
+      ieta = 1;
+    if( ieta > neta ) 
+      ieta = neta;
+    weight = hist->GetBinContent(ipt, ieta);
+  } else {
+    // Normal case, pt and eta are within limits of the weight histogram
+    weight = hist->Interpolate(pt, etaSC);
+  } // end is within hist limits
 
   return weight;
 }

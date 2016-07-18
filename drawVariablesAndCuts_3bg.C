@@ -16,7 +16,7 @@
 // computation set it to false
 const bool useSmallEventCount = false;
 // Draw barrel or endcap
-const bool drawBarrel = true;
+const bool drawBarrel = false;
 
 const bool doOverlayCuts = true;
 
@@ -25,19 +25,24 @@ const bool doOverlayCuts = true;
 // content of this array is ignored).
 const TString cutFileNamesBarrel[4] = { 
   // only WP Veto was optimized with the exercise purpose
-  "./cut_repository/cuts_barrel_20160529_200000_WP_Veto.root",
-  "./cut_repository/cuts_barrel_20160529_200000_WP_Tight.root",
-  "./cut_repository/cuts_barrel_20160529_200000_WP_Medium.root",
-  "./cut_repository/cuts_barrel_20160529_200000_WP_Loose.root"
-
+  "./cut_repository/cuts_barrel_20160616_200000_WP_Veto_adjusted.root",
+  "./cut_repository/cuts_barrel_20160616_200000_WP_Loose_adjusted.root",
+  "./cut_repository/cuts_barrel_20160616_200000_WP_Medium_adjusted.root",
+  "./cut_repository/cuts_barrel_20160616_200000_WP_Tight_adjusted.root"
 };
 const TString cutFileNamesEndcap[4] = {
   // for aestetics purpose, switch to real endcap files, once they are made
-  "./cut_repository/cuts_barrel_20160529_200000_WP_Veto.root",
-  "./cut_repository/cuts_barrel_20160529_200000_WP_Tight.root",
-  "./cut_repository/cuts_barrel_20160529_200000_WP_Medium.root",
-  "./cut_repository/cuts_barrel_20160529_200000_WP_Loose.root"
+  "./cut_repository/cuts_endcap_20160616_200000_WP_Veto_adjusted.root",
+  "./cut_repository/cuts_endcap_20160616_200000_WP_Loose_adjusted.root",
+  "./cut_repository/cuts_endcap_20160616_200000_WP_Medium_adjusted.root",
+  "./cut_repository/cuts_endcap_20160616_200000_WP_Tight_adjusted.root"
 };
+
+// Cuts on expected missing hits are separate from VarCut cuts, tuned by hand.
+// These are summer 2016 values:
+const int missingHitsBarrel[Opt::nWP] = { 2, 1, 1, 1};
+const int missingHitsEndcap[Opt::nWP] = { 3, 1, 1, 1};
+const int *missingHitsCut = drawBarrel ? missingHitsBarrel : missingHitsEndcap;
 
 static Int_t c_Canvas         = TColor::GetColor( "#f0f0f0" );
 static Int_t c_FrameFill      = TColor::GetColor( "#fffffd" );
@@ -94,7 +99,7 @@ void drawVariablesAndCuts_3bg(){
   //  input2->cd("wp3");
   TTree *backgroundTree     = (TTree*) input2->Get("electronTree");
   
-  TString fname3 = "GJet_jun14_flat_ntuple_trueAndFake_alleta_full.root";
+  TString fname3 = "GJet_jun19_Pt40_flat_ntuple_trueAndFake_alleta_full.root";
   TFile *input3 = new TFile( fname3 );
   //  input3->cd("wp3");
   TTree *backgroundTreeAdditional     = 0;
@@ -115,6 +120,12 @@ void drawVariablesAndCuts_3bg(){
   }
   preselectionCuts += Opt::otherPreselectionCuts;
 
+
+  // Apply a loose cut on missing hits, since it is not part of the tuned ID anymore.
+  // This helps to clean up GJets plots, background from photons
+  TCut missingHitsCut = "expectedMissingInnerHits<=2";
+  preselectionCuts += missingHitsCut;
+
   TCut signalCuts     = preselectionCuts && Opt::trueEleCut;
   TCut backgroundCuts = preselectionCuts && Opt::fakeEleCut;
 
@@ -126,20 +137,18 @@ void drawVariablesAndCuts_3bg(){
   //
   // The constructor below takes: (<variable name>, <nbins>, <var_min>, <var max for plotting>)
 
- 
   vPlotSettings.push_back( new VarPlotSettings("full5x5_sigmaIetaIeta", 100, 0, drawBarrel ? 0.018 : 0.06));
-  /*
-    vPlotSettings.push_back( new VarPlotSettings("full5x5_sigmaIetaIeta", 100, 0.004, drawBarrel ? 0.018 : 0.06));
-    vPlotSettings.push_back( new VarPlotSettings("dEtaIn", 100, drawBarrel ? -0.0125 : -0.03 , drawBarrel ? 0.0125 : 0.03 ));
-    vPlotSettings.push_back( new VarPlotSettings("dPhiIn", 100, drawBarrel ? -0.1 : -0.4, drawBarrel ? 0.1 : 0.4 ));
-    vPlotSettings.push_back( new VarPlotSettings("hOverE", 100, 0.0, 0.1 ));
-    vPlotSettings.push_back( new VarPlotSettings("relIsoWithEA", 100, 0, drawBarrel ? 0.25 : 0.3 ));
-    vPlotSettings.push_back( new VarPlotSettings("ooEmooP", 100, 0.0, 0.15));
-    vPlotSettings.push_back( new VarPlotSettings("d0", 100, -0.1, 0.1));
-    vPlotSettings.push_back( new VarPlotSettings("dz", 100, -0.9, 0.9));
-    
-    vPlotSettings.push_back( new VarPlotSettings("expectedMissingInnerHits", 5, -0.5, 4.5));
-  */
+  vPlotSettings.push_back( new VarPlotSettings("dEtaSeed", 100, drawBarrel ? -0.0125 : -0.03 , drawBarrel ? 0.0125 : 0.03 ));
+  vPlotSettings.push_back( new VarPlotSettings("dPhiIn", 100, drawBarrel ? -0.1 : -0.2, drawBarrel ? 0.1 : 0.2 ));
+  vPlotSettings.push_back( new VarPlotSettings("hOverE", 100, 0.0, 0.1 ));
+  vPlotSettings.push_back( new VarPlotSettings("relIsoWithEA", 100, 0, drawBarrel ? 0.25 : 0.3 ));
+  vPlotSettings.push_back( new VarPlotSettings("ooEmooP", 100, 0.0, 0.15));
+
+  vPlotSettings.push_back( new VarPlotSettings("d0", 100, -0.1, 0.1));
+  vPlotSettings.push_back( new VarPlotSettings("dz", 100, -0.2, 0.2));
+
+  vPlotSettings.push_back( new VarPlotSettings("expectedMissingInnerHits", 5, -0.5, 4.5));
+
   TCanvas *c1;
   TString variable = "";
   float xmin, xmax;
@@ -354,31 +363,40 @@ void overlayCuts(TCanvas *canvas, TString variable){
   //
   float cutVal[Opt::nWP];
   bool symmetric = false;
-  // Only four working points are listed in the array of file names 
-  // in the beginning of this file.
-  if( Opt::nWP != 4 )
-    assert(0);
-  // Pull up the cuts
-  for(int iwp=0; iwp<Opt::nWP; iwp++){
-    TString cutFileName = "";
-    if( drawBarrel )
-      cutFileName = cutFileNamesBarrel[iwp];
-    else
-      cutFileName = cutFileNamesEndcap[iwp];
-    TFile *fcut = new TFile(cutFileName);
-    if( !fcut )
+  if( variable == "expectedMissingInnerHits"){
+    // Special treatment for missing hits
+    printf("\nNOTE: the missing hits cuts are not taken from optimization, but are added by hand!\n\n");
+    for(int iWP=0; iWP<Opt::nWP; iWP++){
+      cutVal[iWP] = missingHitsCut[iWP];
+    }
+  }else{
+    // Process a regular cut, look up cut values for all working points
+    // Only four working points are listed in the array of file names 
+    // in the beginning of this file.
+    if( Opt::nWP != 4 )
       assert(0);
-    VarCut *thisCut = (VarCut*)fcut->Get("cuts");
-    if( !thisCut )
-      assert(0);
-    cutVal[iwp] = thisCut->getCutValue(variable);
-    if (variable == "expectedMissingInnerHits") 
-      cutVal[iwp] = int(cutVal[iwp]);
-    // This flag below is overwritten every iteration, but that's ok
-    // since all cuts of the same set should be the same wrt this.
-    symmetric = thisCut->isSymmetric(variable);
-    fcut->Close();
-  }
+    // Pull up the cuts
+    for(int iwp=0; iwp<Opt::nWP; iwp++){
+      TString cutFileName = "";
+      if( drawBarrel )
+	cutFileName = cutFileNamesBarrel[iwp];
+      else
+	cutFileName = cutFileNamesEndcap[iwp];
+      TFile *fcut = new TFile(cutFileName);
+      if( !fcut )
+	assert(0);
+      VarCut *thisCut = (VarCut*)fcut->Get("cuts");
+      if( !thisCut )
+	assert(0);
+      cutVal[iwp] = thisCut->getCutValue(variable);
+      if (variable == "expectedMissingInnerHits") 
+	cutVal[iwp] = int(cutVal[iwp]);
+      // This flag below is overwritten every iteration, but that's ok
+      // since all cuts of the same set should be the same wrt this.
+      symmetric = thisCut->isSymmetric(variable);
+      fcut->Close();
+    }
+  } // end if missing hits or everything else
 
   // 
   // Draw the cut values as arrows

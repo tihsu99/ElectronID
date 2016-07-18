@@ -55,7 +55,7 @@ namespace VarLims{
   VariableLimits * limitsHLTSafeBarrel[nVarLimits] = {
     new VariableLimits("full5x5_sigmaIetaIeta"   ,0.011), // HLT WPLoose emulation
     new VariableLimits("dEtaSeed"                ,0.004), // HLT WPLoose emulation
-    new VariableLimits("dPhiIn"                  ,0.020), // HLT WPLoose emulation
+    new VariableLimits("dPhiIn"                  ,1.000), // DISABLED HLT WPLoose emulation (default 0.020) because it won't be applied before ICHEP16   
     new VariableLimits("hOverE"                  ,0.06),  // HLT WPLoose emulation
     new VariableLimits("relIsoWithEA"            ,0.100), // UCCOM application
     new VariableLimits("ooEmooP"                 ,0.013), // HLT WPLoose emulation
@@ -68,20 +68,14 @@ namespace VarLims{
   VariableLimits * limitsHLTSafeEndcap [nVarLimits] = {
     new VariableLimits("full5x5_sigmaIetaIeta"   ,0.031), // HLT WPLoose emulation
     new VariableLimits("dEtaSeed"                ,0.007), // HLT WPLoose emulation
-    new VariableLimits("dPhiIn"                  ,0.020), // HLT WPLoose emulation
+    new VariableLimits("dPhiIn"                  ,1.000), // DISABLED HLT WPLoose emulation (default 0.020) because it won't be applied before ICHEP16
     new VariableLimits("hOverE"                  ,0.065), // HLT WPLoose emulation
     new VariableLimits("relIsoWithEA"            ,0.100), // UCCOM application
-    new VariableLimits("ooEmooP"                 ,0.013), // HLT WPLoose emulation
+    new VariableLimits("ooEmooP"                 ,0.013),  // HLT WPLoose emulation
     new VariableLimits("d0"                      ,0.40),  // Endcap 99.9%
-    new VariableLimits("dz"                      ,1e30)  // No restriction
+    new VariableLimits("dz"                      ,1e30)   // No restriction
     // new VariableLimits("expectedMissingInnerHits",2.05)   // HLT WPLoose emulation  // Removed from optimization
   };
-
-
-
-
-
-
 
 }
 

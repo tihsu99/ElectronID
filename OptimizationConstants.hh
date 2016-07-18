@@ -26,7 +26,10 @@ namespace Opt {
   // Constants related to working points of interest
   // The sequence needs to be ordered from most loose to most tight
   const int nWP = 4;
-  const float eff[nWP]       = {0.95      , 0.90       , 0.80      , 0.70     };
+  const float effBarrel[nWP]       = {0.95      , 0.90       , 0.80      , 0.70     };
+  // Make it possible to have a lower target efficieny for endcap:
+  const float effEndcap[nWP]       = {0.95      , 0.90       , 0.80      , 0.70     };
+  const float *eff = useBarrel ? effBarrel : effEndcap;
   const TString wpNames[nWP] = {"WP_Veto", "WP_Loose", "WP_Medium", "WP_Tight"};
   enum WorkingPointIndex       {WP_VETO  , WP_LOOSE  , WP_MEDIUM  , WP_TIGHT  };
   
