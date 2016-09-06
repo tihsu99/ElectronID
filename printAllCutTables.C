@@ -14,19 +14,19 @@ const TString workingPointNames[nWP] = {
 
 const TString barrelCutFiles[nWP] = {
   // only WP Veto was optimized, other files are only for aestetics purpose here
-  "cut_repository/cuts_barrel_20160616_200000_WP_Veto_adjusted.root",
-  "cut_repository/cuts_barrel_20160616_200000_WP_Loose_adjusted.root",
-  "cut_repository/cuts_barrel_20160616_200000_WP_Medium_adjusted.root",
-  "cut_repository/cuts_barrel_20160616_200000_WP_Tight_adjusted.root"
+  "cut_repository/cuts_barrel_20160718_200000_WP_Veto.root",
+  "cut_repository/cuts_barrel_20160718_200000_WP_Loose.root",
+  "cut_repository/cuts_barrel_20160718_200000_WP_Medium.root",
+  "cut_repository/cuts_barrel_20160718_200000_WP_Tight.root"
 
 };
 
 const TString endcapCutFiles[nWP] = {
   // change to endcap files once the optimzation is made
-  "cut_repository/cuts_endcap_20160616_200000_WP_Veto_adjusted.root",
-  "cut_repository/cuts_endcap_20160616_200000_WP_Loose_adjusted.root",
-  "cut_repository/cuts_endcap_20160616_200000_WP_Medium_adjusted.root",
-  "cut_repository/cuts_endcap_20160616_200000_WP_Tight_adjusted.root"
+  "cut_repository/cuts_endcap_20160718_200000_WP_Veto.root",
+  "cut_repository/cuts_endcap_20160718_200000_WP_Loose.root",
+  "cut_repository/cuts_endcap_20160718_200000_WP_Medium.root",
+  "cut_repository/cuts_endcap_20160718_200000_WP_Tight.root"
 };
 
 

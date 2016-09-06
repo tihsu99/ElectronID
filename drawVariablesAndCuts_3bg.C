@@ -25,17 +25,17 @@ const bool doOverlayCuts = true;
 // content of this array is ignored).
 const TString cutFileNamesBarrel[4] = { 
   // only WP Veto was optimized with the exercise purpose
-  "./cut_repository/cuts_barrel_20160616_200000_WP_Veto_adjusted.root",
-  "./cut_repository/cuts_barrel_20160616_200000_WP_Loose_adjusted.root",
-  "./cut_repository/cuts_barrel_20160616_200000_WP_Medium_adjusted.root",
-  "./cut_repository/cuts_barrel_20160616_200000_WP_Tight_adjusted.root"
+  "./cut_repository/cuts_barrel_20160718_200000_WP_Veto.root",
+  "./cut_repository/cuts_barrel_20160718_200000_WP_Loose.root",
+  "./cut_repository/cuts_barrel_20160718_200000_WP_Medium.root",
+  "./cut_repository/cuts_barrel_20160718_200000_WP_Tight.root"
 };
 const TString cutFileNamesEndcap[4] = {
   // for aestetics purpose, switch to real endcap files, once they are made
-  "./cut_repository/cuts_endcap_20160616_200000_WP_Veto_adjusted.root",
-  "./cut_repository/cuts_endcap_20160616_200000_WP_Loose_adjusted.root",
-  "./cut_repository/cuts_endcap_20160616_200000_WP_Medium_adjusted.root",
-  "./cut_repository/cuts_endcap_20160616_200000_WP_Tight_adjusted.root"
+  "./cut_repository/cuts_endcap_20160718_200000_WP_Veto.root",
+  "./cut_repository/cuts_endcap_20160718_200000_WP_Loose.root",
+  "./cut_repository/cuts_endcap_20160718_200000_WP_Medium.root",
+  "./cut_repository/cuts_endcap_20160718_200000_WP_Tight.root"
 };
 
 // Cuts on expected missing hits are separate from VarCut cuts, tuned by hand.
@@ -43,6 +43,14 @@ const TString cutFileNamesEndcap[4] = {
 const int missingHitsBarrel[Opt::nWP] = { 2, 1, 1, 1};
 const int missingHitsEndcap[Opt::nWP] = { 3, 1, 1, 1};
 const int *missingHitsCut = drawBarrel ? missingHitsBarrel : missingHitsEndcap;
+//
+const float d0Barrel[Opt::nWP] = {0.05, 0.05, 0.05, 0.05};
+const float d0Endcap[Opt::nWP] = {0.10, 0.10, 0.10, 0.10};
+const float *d0Cut = drawBarrel ? d0Barrel : d0Endcap;
+//
+const float dzBarrel[Opt::nWP] = {0.10, 0.10, 0.10, 0.10};
+const float dzEndcap[Opt::nWP] = {0.20, 0.20, 0.20, 0.20};
+const float *dzCut = drawBarrel ? dzBarrel : dzEndcap;
 
 static Int_t c_Canvas         = TColor::GetColor( "#f0f0f0" );
 static Int_t c_FrameFill      = TColor::GetColor( "#fffffd" );
@@ -369,6 +377,21 @@ void overlayCuts(TCanvas *canvas, TString variable){
     for(int iWP=0; iWP<Opt::nWP; iWP++){
       cutVal[iWP] = missingHitsCut[iWP];
     }
+    symmetric = false;
+  }else if( variable == "d0"){
+    // Special treatment for d0
+    printf("\nNOTE: the d0 cuts are not taken from optimization, but are added by hand!\n\n");
+    for(int iWP=0; iWP<Opt::nWP; iWP++){
+      cutVal[iWP] = d0Cut[iWP];
+    }
+    symmetric = true;
+  }else if( variable == "dz"){
+    // Special treatment for dz
+    printf("\nNOTE: the dz cuts are not taken from optimization, but are added by hand!\n\n");
+    for(int iWP=0; iWP<Opt::nWP; iWP++){
+      cutVal[iWP] = dzCut[iWP];
+    }
+    symmetric = true;
   }else{
     // Process a regular cut, look up cut values for all working points
     // Only four working points are listed in the array of file names 

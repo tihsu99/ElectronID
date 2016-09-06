@@ -31,16 +31,16 @@ Mode mode = EFF_NVTX; // If mode is EFF_ETA, set drawBarrel to true!
 
 // File name with working point cuts
 const TString cutFileNamesBarrel[4] = { 
-  "./cut_repository/cuts_barrel_20160616_200000_WP_Veto_adjusted.root",
-  "./cut_repository/cuts_barrel_20160616_200000_WP_Loose_adjusted.root",
-  "./cut_repository/cuts_barrel_20160616_200000_WP_Medium_adjusted.root",
-  "./cut_repository/cuts_barrel_20160616_200000_WP_Tight_adjusted.root"
+  "./cut_repository/cuts_barrel_20160718_200000_WP_Veto.root",
+  "./cut_repository/cuts_barrel_20160718_200000_WP_Loose.root",
+  "./cut_repository/cuts_barrel_20160718_200000_WP_Medium.root",
+  "./cut_repository/cuts_barrel_20160718_200000_WP_Tight.root"
 };
 const TString cutFileNamesEndcap[4] = {
-  "./cut_repository/cuts_endcap_20160616_200000_WP_Veto_adjusted.root",
-  "./cut_repository/cuts_endcap_20160616_200000_WP_Loose_adjusted.root",
-  "./cut_repository/cuts_endcap_20160616_200000_WP_Medium_adjusted.root",
-  "./cut_repository/cuts_endcap_20160616_200000_WP_Tight_adjusted.root"
+  "./cut_repository/cuts_endcap_20160718_200000_WP_Veto.root",
+  "./cut_repository/cuts_endcap_20160718_200000_WP_Loose.root",
+  "./cut_repository/cuts_endcap_20160718_200000_WP_Medium.root",
+  "./cut_repository/cuts_endcap_20160718_200000_WP_Tight.root"
 };
 const TString *cutFileNames = drawBarrel ? cutFileNamesBarrel : cutFileNamesEndcap;
 

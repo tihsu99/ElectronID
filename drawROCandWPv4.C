@@ -28,17 +28,17 @@ const TString backgroundTreeName = "electronTree";
 
 // Name TMVA output file that contains the pre-computed ROC, etc
 const TString tmvaFileNameBarrel[nROCs] = {
-  "./trainingData/training_results_barrel_pass1_20160616_200000/TMVA_training_results_barrel_pass1_20160616_200000.root",
-  "./trainingData/training_results_barrel_pass2_20160616_200000/TMVA_training_results_barrel_pass2_20160616_200000.root",
-  "./trainingData/training_results_barrel_pass3_20160616_200000/TMVA_training_results_barrel_pass3_20160616_200000.root",
-  "./trainingData/training_results_barrel_pass4_20160616_200000/TMVA_training_results_barrel_pass4_20160616_200000.root"
+  "./trainingData/training_results_barrel_pass1_20160718_200000/TMVA_training_results_barrel_pass1_20160718_200000.root",
+  "./trainingData/training_results_barrel_pass2_20160718_200000/TMVA_training_results_barrel_pass2_20160718_200000.root",
+  "./trainingData/training_results_barrel_pass3_20160718_200000/TMVA_training_results_barrel_pass3_20160718_200000.root",
+  "./trainingData/training_results_barrel_pass4_20160718_200000/TMVA_training_results_barrel_pass4_20160718_200000.root"
 };
 
 const TString tmvaFileNameEndcap[nROCs] ={
-  "./trainingData/training_results_endcap_pass1_20160616_200000/TMVA_training_results_endcap_pass1_20160616_200000.root",
-  "./trainingData/training_results_endcap_pass2_20160616_200000/TMVA_training_results_endcap_pass2_20160616_200000.root",
-  "./trainingData/training_results_endcap_pass3_20160616_200000/TMVA_training_results_endcap_pass3_20160616_200000.root",
-  "./trainingData/training_results_endcap_pass4_20160616_200000/TMVA_training_results_endcap_pass4_20160616_200000.root"
+  "./trainingData/training_results_endcap_pass1_20160718_200000/TMVA_training_results_endcap_pass1_20160718_200000.root",
+  "./trainingData/training_results_endcap_pass2_20160718_200000/TMVA_training_results_endcap_pass2_20160718_200000.root",
+  "./trainingData/training_results_endcap_pass3_20160718_200000/TMVA_training_results_endcap_pass3_20160718_200000.root",
+  "./trainingData/training_results_endcap_pass4_20160718_200000/TMVA_training_results_endcap_pass4_20160718_200000.root"
 };
 
 //
@@ -51,11 +51,11 @@ const int markerStyleSet1 = 20;
 const TString legendSet1 = "WP_Veto";
 const int nWP = 1;
 const TString cutFileNamesBarrelSet1[nWP] = { 
-  "cut_repository/cuts_barrel_20160616_200000_WP_Veto_adjusted.root"
+  "cut_repository/cuts_barrel_20160718_200000_WP_Veto.root"
 
 };
 const TString cutFileNamesEndcapSet1[nWP] = {
-  "cut_repository/cuts_endcap_20160616_200000_WP_Veto_adjusted.root"
+  "cut_repository/cuts_endcap_20160718_200000_WP_Veto.root"
 
 };
 
@@ -64,11 +64,11 @@ const int markerColorSet2 = kOrange;
 const int markerStyleSet2 = 20;
 const TString legendSet2 = "WP_Loose";
 const TString cutFileNamesBarrelSet2[nWP] = { 
-  "cut_repository/cuts_barrel_20160616_200000_WP_Loose_adjusted.root"
+  "cut_repository/cuts_barrel_20160718_200000_WP_Loose.root"
 
 };
 const TString cutFileNamesEndcapSet2[nWP] = {
-  "cut_repository/cuts_endcap_20160616_200000_WP_Loose_adjusted.root"
+  "cut_repository/cuts_endcap_20160718_200000_WP_Loose.root"
 };
 
 // Set 3
@@ -76,11 +76,11 @@ const int markerColorSet3 = kBlue;
 const int markerStyleSet3 = 20;
 const TString legendSet3 = "WP_Medium";
 const TString cutFileNamesBarrelSet3[nWP] = { 
-  "cut_repository/cuts_barrel_20160616_200000_WP_Medium_adjusted.root"
+  "cut_repository/cuts_barrel_20160718_200000_WP_Medium.root"
 
 };
 const TString cutFileNamesEndcapSet3[nWP] = {
-  "cut_repository/cuts_endcap_20160616_200000_WP_Medium_adjusted.root"
+  "cut_repository/cuts_endcap_20160718_200000_WP_Medium.root"
 };
 
 
@@ -90,10 +90,10 @@ const int markerColorSet4 = kGreen;
 const int markerStyleSet4 = 20;
 const TString legendSet4 = "WP_Tight";
 const TString cutFileNamesBarrelSet4[nWP] = { 
-  "cut_repository/cuts_barrel_20160616_200000_WP_Tight_adjusted.root"
+  "cut_repository/cuts_barrel_20160718_200000_WP_Tight.root"
 };
 const TString cutFileNamesEndcapSet4[nWP] = {
-  "cut_repository/cuts_endcap_20160616_200000_WP_Tight_adjusted.root"
+  "cut_repository/cuts_endcap_20160718_200000_WP_Tight.root"
 };
 
 // Cuts on expected missing hits are separate from VarCut cuts, tuned by hand.

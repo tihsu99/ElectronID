@@ -18,9 +18,9 @@ void fourPointOptimization(){
   if( !Opt::useBarrel )
     namePrefix = "cuts_endcap_";
   TString namePass[Opt::nWP] = {"pass1_","pass2_","pass3_","pass4_"};
-  TString nameTime = "20160616_200000";
+  TString nameTime = "20160718_200000";
 
-  for( int ipass = 3; ipass < Opt::nWP; ipass++){
+  for( int ipass = 0; ipass < Opt::nWP; ipass++){
 
     // This string is the file name that contains the ROOT file
     // with the VarCut object that defines the range of cut variation.
