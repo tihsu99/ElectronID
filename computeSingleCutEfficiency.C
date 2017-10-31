@@ -7,9 +7,9 @@
 
 // Files with signal and background trees (ideally the ntuples
 // that were used for TMVA optimization
-const TString fnameSignal = "../../ntuples/DYJetsToLL_50ns.root";
+const TString fnameSignal = "~/DYJetsToLL_cutID_tuning_92X_v1.roo";
 const TString signalTreeName = "ntupler/ElectronTree";
-const TString fnameBackground = "../../ntuples/TTJets_50ns.root";
+const TString fnameBackground = "~/TTJets_cutID_92X_v1.root";
 const TString backgroundTreeName = "ntupler/ElectronTree";
 
 // Forward declarations

@@ -14,7 +14,7 @@
 using std::cout;
 
 // Draw barrel or endcap
-const bool drawBarrel = false;
+const bool drawBarrel = true;
 const int nROCs = 4;
 
 const bool verbose = true;
@@ -28,17 +28,17 @@ const TString backgroundTreeName = "electronTree";
 
 // Name TMVA output file that contains the pre-computed ROC, etc
 const TString tmvaFileNameBarrel[nROCs] = {
-  "./trainingData/training_results_barrel_pass1_20160718_200000/TMVA_training_results_barrel_pass1_20160718_200000.root",
-  "./trainingData/training_results_barrel_pass2_20160718_200000/TMVA_training_results_barrel_pass2_20160718_200000.root",
-  "./trainingData/training_results_barrel_pass3_20160718_200000/TMVA_training_results_barrel_pass3_20160718_200000.root",
-  "./trainingData/training_results_barrel_pass4_20160718_200000/TMVA_training_results_barrel_pass4_20160718_200000.root"
+  "./trainingData/training_results_barrel_pass1_20171030_200000/TMVA_training_results_barrel_pass1_20171030_200000.root",
+  "./trainingData/training_results_barrel_pass2_20171030_200000/TMVA_training_results_barrel_pass2_20171030_200000.root",
+  "./trainingData/training_results_barrel_pass3_20171030_200000/TMVA_training_results_barrel_pass3_20171030_200000.root",
+  "./trainingData/training_results_barrel_pass4_20171030_200000/TMVA_training_results_barrel_pass4_20171030_200000.root"
 };
 
 const TString tmvaFileNameEndcap[nROCs] ={
-  "./trainingData/training_results_endcap_pass1_20160718_200000/TMVA_training_results_endcap_pass1_20160718_200000.root",
-  "./trainingData/training_results_endcap_pass2_20160718_200000/TMVA_training_results_endcap_pass2_20160718_200000.root",
-  "./trainingData/training_results_endcap_pass3_20160718_200000/TMVA_training_results_endcap_pass3_20160718_200000.root",
-  "./trainingData/training_results_endcap_pass4_20160718_200000/TMVA_training_results_endcap_pass4_20160718_200000.root"
+  "./trainingData/training_results_endcap_pass1_20171030_200000/TMVA_training_results_endcap_pass1_20171030_200000.root",
+  "./trainingData/training_results_endcap_pass2_20171030_200000/TMVA_training_results_endcap_pass2_20171030_200000.root",
+  "./trainingData/training_results_endcap_pass3_20171030_200000/TMVA_training_results_endcap_pass3_20171030_200000.root",
+  "./trainingData/training_results_endcap_pass4_20171030_200000/TMVA_training_results_endcap_pass4_20171030_200000.root"
 };
 
 //
@@ -51,11 +51,11 @@ const int markerStyleSet1 = 20;
 const TString legendSet1 = "WP_Veto";
 const int nWP = 1;
 const TString cutFileNamesBarrelSet1[nWP] = { 
-  "cut_repository/cuts_barrel_20160718_200000_WP_Veto.root"
+  "cut_repository/cuts_barrel_20171030_200000_WP_Veto.root"
 
 };
 const TString cutFileNamesEndcapSet1[nWP] = {
-  "cut_repository/cuts_endcap_20160718_200000_WP_Veto.root"
+  "cut_repository/cuts_endcap_20171030_200000_WP_Veto.root"
 
 };
 
@@ -64,11 +64,11 @@ const int markerColorSet2 = kOrange;
 const int markerStyleSet2 = 20;
 const TString legendSet2 = "WP_Loose";
 const TString cutFileNamesBarrelSet2[nWP] = { 
-  "cut_repository/cuts_barrel_20160718_200000_WP_Loose.root"
+  "cut_repository/cuts_barrel_20171030_200000_WP_Loose.root"
 
 };
 const TString cutFileNamesEndcapSet2[nWP] = {
-  "cut_repository/cuts_endcap_20160718_200000_WP_Loose.root"
+  "cut_repository/cuts_endcap_20171030_200000_WP_Loose.root"
 };
 
 // Set 3
@@ -76,11 +76,11 @@ const int markerColorSet3 = kBlue;
 const int markerStyleSet3 = 20;
 const TString legendSet3 = "WP_Medium";
 const TString cutFileNamesBarrelSet3[nWP] = { 
-  "cut_repository/cuts_barrel_20160718_200000_WP_Medium.root"
+  "cut_repository/cuts_barrel_20171030_200000_WP_Medium.root"
 
 };
 const TString cutFileNamesEndcapSet3[nWP] = {
-  "cut_repository/cuts_endcap_20160718_200000_WP_Medium.root"
+  "cut_repository/cuts_endcap_20171030_200000_WP_Medium.root"
 };
 
 
@@ -90,10 +90,10 @@ const int markerColorSet4 = kGreen;
 const int markerStyleSet4 = 20;
 const TString legendSet4 = "WP_Tight";
 const TString cutFileNamesBarrelSet4[nWP] = { 
-  "cut_repository/cuts_barrel_20160718_200000_WP_Tight.root"
+  "cut_repository/cuts_barrel_20171030_200000_WP_Tight.root"
 };
 const TString cutFileNamesEndcapSet4[nWP] = {
-  "cut_repository/cuts_endcap_20160718_200000_WP_Tight.root"
+  "cut_repository/cuts_endcap_20171030_200000_WP_Tight.root"
 };
 
 // Cuts on expected missing hits are separate from VarCut cuts, tuned by hand.
@@ -158,12 +158,14 @@ void drawROCandWPv4(){
   // 
   //  Draw the ROC curve
   //
-  TH1F *hROC1 = (TH1F*)tmvaFile1->Get("Method_Cuts/Cuts/MVA_Cuts_rejBvsS");
-  TH1F *hROC2 = (TH1F*)tmvaFile2->Get("Method_Cuts/Cuts/MVA_Cuts_rejBvsS");
-  TH1F *hROC3 = (TH1F*)tmvaFile3->Get("Method_Cuts/Cuts/MVA_Cuts_rejBvsS");
-  TH1F *hROC4 = (TH1F*)tmvaFile4->Get("Method_Cuts/Cuts/MVA_Cuts_rejBvsS");
-  if( !hROC1 || !hROC2 || !hROC3|| !hROC3 )
+  TH1F *hROC1 = (TH1F*)tmvaFile1->Get("dataset/Method_Cuts/Cuts/MVA_Cuts_rejBvsS");
+  TH1F *hROC2 = (TH1F*)tmvaFile2->Get("dataset/Method_Cuts/Cuts/MVA_Cuts_rejBvsS");
+  TH1F *hROC3 = (TH1F*)tmvaFile3->Get("dataset/Method_Cuts/Cuts/MVA_Cuts_rejBvsS");
+  TH1F *hROC4 = (TH1F*)tmvaFile4->Get("dataset/Method_Cuts/Cuts/MVA_Cuts_rejBvsS");
+  if( !hROC1 || !hROC2 || !hROC3|| !hROC3 ){
+    printf("Couldn't find ROCs!\n");
     assert(0);
+  }
 
   //c1->cd();
   //hROC1->Draw();

@@ -16,7 +16,7 @@ const int nEtaBins = 50;
 // We are interested to start with pt from 20 GeV, but we actually start
 // from 14 GeV so that there is data for interpolation
 const float ptMin = 14; 
-float dptMin = 2; // ptMin + dptMin should be 20
+float dptMin = 2; // ptMin + dptMin should be 20 (REVISED: not necessarily?)
 const float ptMax = 200;
 const int nPtBins = 35; // Variable pt bins are actually used
 
@@ -24,8 +24,8 @@ const bool smallEventCount = false;
 const int smallMaxEvents = 100000;
 
 //  Files IN 
-const TString fileNameS = "/afs/cern.ch/user/i/ikrav/workspace/ntuples/Spring16/DYJetsToLL_madgraph_80X_v3.root";
-const TString fileNameB = "/afs/cern.ch/user/i/ikrav/workspace/ntuples/Spring16/TTJets_amcatnlo_80X_v3.root";
+const TString fileNameS = "~/DYJetsToLL_cutID_tuning_92X_v1.root";
+const TString fileNameB = "~/TTJets_cutID_92X_v1.root";
 // Tree Name (file IN):
 const TString treeName = "ntupler/ElectronTree";
 // File with weights OUT:

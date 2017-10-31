@@ -2,6 +2,10 @@
 
 #include "optimize.hh"
 
+// Manipulations with this is a guess, not documented in TMVA 
+// at this point.
+const TString datasetname = "dataset";
+
 //
 // Main method
 //
@@ -41,35 +45,53 @@ void optimize(TString cutMaxFileName, TString cutsOutFileNameBase,
   printf("The ROOT file with train/test distributions from TMVA:\n");
   printf("         %s\n", outfileName.Data());
 
-  // Create factory
+  // Create the factory object. Later you can choose the methods.
+  // The factory is the only TMVA object you have to interact with
+  //
+  // The first argument is the base of the name of all the
+  // weightfiles in the directory weight/
+  //
+  // The second argument is the output file for the training results
+  // All TMVA output can be suppressed by removing the "!" (not) in
+  // front of the "Silent" argument in the option string
   TString factoryOptions = "!V:!Silent:Color:DrawProgressBar:Transformations=I";
   TMVA::Factory *factory = new TMVA::Factory( "TMVAClassification",
 					      outputFile, factoryOptions);
-  configureFactoryVariables(factory);
 
-  // Define weights and add trees to the factory
+  // Data loader handles trees, variables, etc
+  TMVA::DataLoader *dataloader=new TMVA::DataLoader(datasetname);
+
+  // Define the input variables that shall be used in the optimization
+  configureVariables(dataloader);
+
+  // Define per-tree weights and add trees to the data loader
   Double_t signalWeight     = 1.0;
   Double_t backgroundWeight = 1.0;
-  factory->AddSignalTree    ( signalTree,     signalWeight     );
-  factory->AddBackgroundTree( backgroundTree, backgroundWeight );
-
-  factory->SetBackgroundWeightExpression("genWeight*kinWeight");
-  factory->SetSignalWeightExpression("genWeight*kinWeight");
+  dataloader->AddSignalTree    ( signalTree,     signalWeight     );
+  dataloader->AddBackgroundTree( backgroundTree, backgroundWeight );
+    
+  // Set individual event weights (the variables must exist in the original TTree)
+  // -  for signal    : `dataloader->SetSignalWeightExpression    ("weight1*weight2");`
+  // -  for background: `dataloader->SetBackgroundWeightExpression("weight1*weight2");`
+  dataloader->SetSignalWeightExpression("genWeight*kinWeight");
+  dataloader->SetBackgroundWeightExpression("genWeight*kinWeight");
 
   // Configure training and test trees  
   TString trainAndTestOptions = getTrainAndTestOptions();
 
+  // Apply additional cuts on the signal and background samples (can be different)
   TCut signalCuts = "";
   TCut backgroundCuts = "";
   configureCuts(signalCuts, backgroundCuts);
 
-  factory->PrepareTrainingAndTestTree( signalCuts, backgroundCuts,
-				       trainAndTestOptions );
+  // Tell the dataloader how to use the training and testing events
+  dataloader->PrepareTrainingAndTestTree( signalCuts, backgroundCuts,
+					  trainAndTestOptions );
   
   // Book the Cuts method with the factory
   TString methodName = "Cuts";
   TString methodOptions = getMethodOptions(cutMaxFileName, userDefinedCutLimits);
-  factory->BookMethod( TMVA::Types::kCuts, methodName,methodOptions);
+  factory->BookMethod( dataloader, TMVA::Types::kCuts, methodName,methodOptions);
   
   // Do the work: optimization, testing, and evaluation
   factory->TrainAllMethods();
@@ -94,6 +116,9 @@ void optimize(TString cutMaxFileName, TString cutsOutFileNameBase,
     Opt::fileBackground->Close();
   }
 
+  delete factory;
+  delete dataloader;
+
   return;
 }
 
@@ -108,24 +133,28 @@ TTree *getTreeFromFile(TString fname, TString tname, TFile **file){
   return tree;
 }
 
-void configureFactoryVariables(TMVA::Factory *factory){
+void configureVariables(TMVA::DataLoader *dataloader){
+
+  // Define the input variables that shall be used for the MVA training
+  // note that you may also use variable expressions, such as: "3*var1/var2*abs(var3)"
+  // [all types of expressions that can also be parsed by TTree::Draw( "expression" )]
 
   // Variables for cut optimization
-  printf("Configure factory variables for optimization\n");
+  printf("Configure data loader variables for optimization\n");
   for(int i=0; i<Vars::nVariables; i++){
     TString varName = Vars::variables[i]->nameTmva;
     char varType = Vars::variables[i]->type;
     printf("    add variable %s of the type %c\n", varName.Data(), varType);
-    factory->AddVariable( varName, varType );
+    dataloader->AddVariable( varName, varType );
   }
   
   // Spectator variables
-  printf("Configure factory spectator variables\n");
+  printf("Configure data loader spectator variables\n");
   for(int i=0; i<Vars::nSpectatorVariables; i++){
     TString varName = Vars::spectatorVariables[i]->nameTmva;
     char varType = Vars::spectatorVariables[i]->type;
     printf("    add spectator variable %s of the type %c\n", varName.Data(), varType);
-    factory->AddSpectator( varName, varType );
+    dataloader->AddSpectator( varName, varType );
   }
   
 }
@@ -240,7 +269,8 @@ void writeWorkingPoints(const TMVA::Factory *factory, TString cutsOutFileNameBas
       assert(0);
     VarCut *cutMax = new VarCut();
     
-    const TMVA::MethodCuts *method = dynamic_cast<TMVA::MethodCuts*> (factory->GetMethod("Cuts"));
+    const TMVA::MethodCuts *method = dynamic_cast<TMVA::MethodCuts*> 
+      (factory->GetMethod(datasetname,"Cuts"));
     if( method == 0 )
       assert(0);
 

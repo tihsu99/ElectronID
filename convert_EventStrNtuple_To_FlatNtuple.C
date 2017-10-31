@@ -26,15 +26,20 @@ enum MatchType  {MATCH_TRUE, MATCH_FAKE, MATCH_ANY};
 enum SampleType {SAMPLE_UNDEF, SAMPLE_DY, SAMPLE_TT, SAMPLE_GJ};
 enum EtaRegion  {ETA_EB, ETA_EE, ETA_FULL};
 
-const MatchType  matchType      = MATCH_FAKE; // MC truth matching to signal or bg electrons
-const EtaRegion  etaRegion      = ETA_EE;   // barrel, endcap, or all etas
-const SampleType sample         = SAMPLE_TT;
+// For electron ID tuning, use MATCH_TRUE with SAMPLE_DY
+// and MATCH_FAKE with SAMPLE_TT.
+// NOTE: kinematic weights are meaningful only for the combination DY/TRUE.
+// for all other choices of flags kinematic weights are 1.0
+const MatchType  matchType      = MATCH_TRUE; // MC truth matching to signal or bg electrons
+const EtaRegion  etaRegion      = ETA_FULL;   // barrel, endcap, or all etas
+const SampleType sample         = SAMPLE_DY;
 
 // Preselection cuts: must match or be looser than 
 // cuts in OptimizatioConstants.hh
 const float ptMin = 20;
 const float etaMax = 2.5;
 const float dzMax = 1.0;
+// Note: passConversionVeto is also applied
 const float boundaryEBEE = 1.479;
 
 //====================================================
@@ -43,42 +48,38 @@ const bool smallEventCount = false;
 const int maxEventsSmall = 1000000;
 
 // Files input
-const TString fileNameDY = "~/DYJetsToLL_madgraph_80X_v4.root";
-const TString fileNameTT = "~/TTJets_amcatnlo_80X_v4.root";
-const TString fileNameGJ = "~/GJet_pythia8_80X_Pt40.root";
+const TString fileNameDY = "~/DYJetsToLL_cutID_tuning_92X_v1.root";
+const TString fileNameTT = "~/TTJets_cutID_92X_v1.root";
+const TString fileNameGJ = "~/GJet_DoubleEM_cutID_tuning_92X_v1.root";
 // Tree name input 
 const TString treeName = "ntupler/ElectronTree";
 // File and histogram with kinematic weights
-const TString fileNameWeights = "kinematicWeights_20160611.root";
+const TString fileNameWeights = "kinematicWeights_20171028.root";
 const TString histNameWeights = "hKinematicWeights";
 
 // Files output
-const TString flatNtupleFileNameBaseDY = "DYJetsToLL_jun21_flat_ntuple";
-const TString flatNtupleFileNameBaseTT = "TTJets_jun21_flat_ntuple";
-const TString flatNtupleFileNameBaseGJ = "GJet_jun20_Pt40_flat_ntuple";
-
-
-// //  Files IN 
-// const TString fileNameS 
-// = "/afs/cern.ch/user/i/ikrav/workspace/ntuples/Spring16/DYJetsToLL_madgraph_80X_v3.root";
-// const TString fileNameBG 
-// = "/afs/cern.ch/user/i/ikrav/workspace/ntuples/Spring16/TTJets_amcatnlo_80X_v3.root";
-// // Tree Name (file IN):
+const TString flatNtupleFileNameBaseDY = "DYJetsToLL_oct28_flat_ntuple";
+const TString flatNtupleFileNameBaseTT = "TTJets_oct28_flat_ntuple";
+const TString flatNtupleFileNameBaseGJ = "GJet_DoubleEM_oct28_flat_ntuple";
 
 // //  Files OUT
 
-// Effective areas for electrons derived by Ilya for Summer16
-// https://indico.cern.ch/event/482673/contributions/2187022/attachments/1282446/1905912/talk_electron_ID_spring16.pdf
+// Effective areas for electrons derived by Ilya for Fall17
+//  https://indico.cern.ch/event/662749/contributions/2763091/attachments/1545124/2424854/talk_electron_ID_fall17.pdf
 namespace EffectiveAreas {
   const int nEtaBins = 7;
   const float etaBinLimits[nEtaBins+1] = {
     0.0, 1.0, 1.479, 2.0, 
     2.2, 2.3, 2.4, 2.5
   };
-  const float effectiveAreaValues[nEtaBins] = { 
-    0.1703,	 0.1715,	 0.1213,	 
-    0.1230,	 0.1635,	 0.1937,	 
-    0.2393	
+  const float effectiveAreaValues[nEtaBins] = {
+    0.1566,
+    0.1626,
+    0.1073,
+    0.0854,
+    0.1051,
+    0.1204,
+    0.1524
   };
 }
 

@@ -13,6 +13,7 @@
 #if not defined(__CINT__) || defined(__MAKECINT__)
 // needs to be included when makecint runs (ACLIC)
 #include "TMVA/Config.h"
+#include "TMVA/DataLoader.h"
 #include "TMVA/Factory.h"
 #include "TMVA/Tools.h"
 #include "TMVA/MethodCuts.h"
@@ -22,7 +23,7 @@
 // Input
 TTree * getTreeFromFile(TString fname, TString tname, TFile **fileHandle);
 // Configuration for TMVA
-void    configureFactoryVariables(TMVA::Factory *factory);
+void    configureVariables(TMVA::DataLoader *factory);
 TString getTrainAndTestOptions();
 void    configureCuts(TCut &signalCuts, TCut &backgroundCuts);
 TString getMethodOptions(TString cutMaxFileName,

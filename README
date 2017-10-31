@@ -173,3 +173,321 @@ To create a ROOT file with a stored cut set: edit cut values in
 exampleFillCuts.C, and then run:
   root -b -q exampleFillCuts.C+
 and the files with cuts will appear in the cut_repository/.
+
+//-----------------------------------------------------------
+      Electron ID tuning steps for fall 2017
+//-----------------------------------------------------------
+
+1. Ntuples are made for the DY, TT, GJ datasets (the last one is 
+just for comparison plots). The effective area does not have to be
+up to date for the ntuple maker. The ntuples are made with (c++, python, crab):
+
+https://github.com/ikrav/EgammaWork/blob/ntupler_and_VID_benchmarks_9XX/ElectronNtupler/plugins/SimpleElectronNtupler.cc
+https://github.com/ikrav/EgammaWork/blob/ntupler_and_VID_benchmarks_9XX/ElectronNtupler/test/runElectrons.py
+https://github.com/ikrav/EgammaWork/blob/ntupler_and_VID_benchmarks_9XX/ElectronNtupler/test/crab_config_electrons_DY.py
+
+2. Effective areas are prepared with the ElectronWork/EffectiveAreas
+package, see README there
+
+https://github.com/ikrav/ElectronWork/tree/effective_area_fall17/EffectiveArea
+
+3. Since 2016, we are reweighting signal (DY) to background (TTbar)
+in 2D, pt and eta. Weights need to be prepared, To do this,
+edit the beginning of the script (file names) and run it like this once:
+
+.L computeKinematicWeights.C+
+computeKinematicWeights()
+
+rename the kinematicWeights.root into something if desired (e.g. add date).
+
+4. Convert the full ntuples with event structure into much reduced flat (one entry
+is an electron, not an event with vectors) ntuples for TMVA. The smaller are the final 
+ntuples,  the faster is the tuning. What was done so far is to create one flat
+ntuple for each of the following: signal barrel, signal endcap, background barrel,
+background endcap. The script needs to be edited in the beginning, the input
+files adjusted and the choices (signal/fake, EB/EE) made. The output file naming
+is mostly automatic, but the base name with date needs adjusting.
+    This file requires the correct name of the root file with kinematic weights 
+(discussed above) set in the beginning of the code. This file also requires
+numerical values for the final effective areas, in the beginning of the code (discussed above).
+Note that this script ignores the "relIsoWithEA" computed in the original ntuple, and
+replaces it what is computed on the spot from the PF isolations of three types, 
+the rho and the effective areas hardcoded in this file. NOTE: the kinematic weights
+are set to meaningful values only for the sample DY and matching choice TRUE. For any
+other combination of flags set in the beginning of the convert... script, kinematic
+weights are 1 for all events. Therefore, for tuning one has to run this convert script
+once with choices DY, TRUE, and any choice of eta (barrel, endcap, or any eta), and
+feed the resulting ntuple to TMVA as described below.
+    Thus, this step has to be run after all of the above steps. To run this
+step, after all adjustements, execute as many times as needed (typically four times,
+changing the code each time):
+
+.L convert_EventStrNtuple_To_FlatNtuple.C+
+convert_EventStrNtuple_To_FlatNtuple()
+
+5. Edit the file that contain the varialbles that will go into tuning (if needed):
+
+  Variables.hh
+
+For this tuning, we have 6 variables that go into TMVA tuning, and the rest
+are spectators.
+
+Further, edit the file that contain the majority of settings for TMVA tuning, but
+is also used by other scripts.
+
+  OptimizationConstants.hh
+
+Review here: 
+  - numbers of events to train/test on (300K was sufficient for training
+        in the past, but one should watch out for the ROC becoming clearly 
+	non-smooth, and increase the sample in that case. This may happen
+        due to various weights being used and reducing effective statistics)
+  - file names for the input flat signal/background ntuples created in the
+       step above
+  - set barrel/endcap flag to the desired value that you expect to need in
+       the first tuning a few steps down these instructions
+
+6. Compute limits within which TMVA will look for optimal cuts, aiming
+for 99.9% efficient range for each variable of the ID. The script requires
+only the change of the name string in the beginning. It takes all other
+info from header files with constants, such as Variables.hh and OptimizationConstants.hh.
+Run it as:
+
+  .L findCutLimits.C+
+  findCutLimits()
+
+The output of the script is printed on the screen, and is also saved 
+in ROOT files with names like:
+
+  cut_repository/cuts_barrel_eff_0999_20171028_200000.root
+  cut_repository/cuts_endcap_eff_0999_20171028_200000.root
+
+These files will be used directly in the steps below.
+
+7. Run optimization of four working points.
+
+ Before doing that, check that OptimizationConstants.hh have the 
+desired settings. In the first attempt, one may want to do a quick
+(sort of) test with few events, like 20K training size would take maybe
+30min+. Then restore the settings to the full training size, such as 300K.
+  Also, check the settings in the VariableLimits.hh. The standard
+first order behavior of the optimization is to have for each variable
+the range that is from zero to 99.9% efficient for the working point Veto,
+then from then on the range is from zero to the cut value of the previous
+working point (for Loose, Medium, Tight). The VariableLimits allows
+one to put further restrictions, and TMVA gets an OR of the previous working
+point (or 99.9% efficient value) and the user defined restrictions. In 2016
+this was used, for example, to make sure that some working points are tighter
+than HLT.
+
+ In the fourPointOptimization.C, check:
+ - the names of the 99.9% efficienc cuts from the step above
+ - the date string out of which the outputs are built, set in the
+      beginning of the program (like "nameTime")
+ - check that the loop goes over four passes (sometimes the script is
+      modified to run only on some passes, and the setting is forgotten).
+ - check that "user defined cut limits" do what is needed. In 2016,
+      these extra limits were used to make some working points tighter
+      than HLT. See above comments for VariableLimits.hh
+
+  root -b -q fourPointOptimization.C >& log-EBorEE_etc.txt &
+  tail -f test.log
+
+one can prepend the root command with "nohup" and come and check
+it next day, since it may take awhile. On lxplus this might not work,
+and the job may be gone without completing.
+   One should always save logs from at least final optimizations to 
+be able to review them later in case of any issues.
+
+Run this script twice, once for the barrel and once for the endcap. Change
+this flag in OptimizationConstants.hh
+
+Each optimization will take awhile: each has four passes, so one will see
+the progress bar four times. The four passes are necessary to make
+each next working point tighter in all cuts than the previous working point.
+
+If there is a crash, or working points do not look good, one can
+attempt to re-do the optimization with misc adjustments, such as:
+  - extra restrictions on the range of some of the ID variables in VariableLimits.hh
+  - change in the number of training events in OptimizationConstants.hh
+One can re-do the otimization of the failed and subsequent passes
+only by changing the starting pass in the loop over passes in the fourPointOptimization.C.
+
+   * Optimization results *
+At the end of the run of the optiization script the tuned working
+points are printed on the screen. However, this is just for general
+information. The saved outcome discussed below is what is really useful.
+
+The results of the optimization are saved in a few different ways.
+The standard output of TMVA goes into a separate directory for each 
+pass, such as:
+
+trainingData/training_results_barrel_pass1_20171028_200000
+trainingData/training_results_barrel_pass2_20171028_200000
+trainingData/training_results_barrel_pass3_20171028_200000
+trainingData/training_results_barrel_pass4_20171028_200000
+
+the ROOT file there contains the ROCs and the training and testing
+trees used in the tuning.
+
+The cuts of the working points are saved in the cuts_repository/ directory.
+Here is an example of a single run of fourPointOptimization.C:
+
+cut_repository/cuts_barrel_pass1_20171028_200000_WP_Veto.root
+cut_repository/cuts_barrel_pass1_20171028_200000_WP_Loose.root
+cut_repository/cuts_barrel_pass1_20171028_200000_WP_Medium.root
+cut_repository/cuts_barrel_pass1_20171028_200000_WP_Tight.root
+cut_repository/cuts_barrel_pass2_20171028_200000_WP_Veto.root
+cut_repository/cuts_barrel_pass2_20171028_200000_WP_Loose.root
+cut_repository/cuts_barrel_pass2_20171028_200000_WP_Medium.root
+cut_repository/cuts_barrel_pass2_20171028_200000_WP_Tight.root
+cut_repository/cuts_barrel_pass3_20171028_200000_WP_Veto.root
+cut_repository/cuts_barrel_pass3_20171028_200000_WP_Loose.root
+cut_repository/cuts_barrel_pass3_20171028_200000_WP_Medium.root
+cut_repository/cuts_barrel_pass3_20171028_200000_WP_Tight.root
+cut_repository/cuts_barrel_pass4_20171028_200000_WP_Veto.root
+cut_repository/cuts_barrel_pass4_20171028_200000_WP_Loose.root
+cut_repository/cuts_barrel_pass4_20171028_200000_WP_Medium.root
+cut_repository/cuts_barrel_pass4_20171028_200000_WP_Tight.root
+cut_repository/cuts_barrel_20171028_200000_WP_Veto.root
+cut_repository/cuts_barrel_20171028_200000_WP_Loose.root
+cut_repository/cuts_barrel_20171028_200000_WP_Medium.root
+cut_repository/cuts_barrel_20171028_200000_WP_Tight.root
+
+Above list has four working points created after each pass.
+The final working points are the ones that contain the same date 
+stamp by no word "passX" in the name. The Veto is taken from pass1,
+the Loose is from pass2, Medium from pass3, Tight from pass4.
+
+The cuts are stored in the form of a storable VarCut object defined
+in this package. To view a cut, one can start a ROOT session
+while being in the main directory of the package (so that the rootlogon.C
+loads all libraries) and execute, e.g.L
+
+  TFile f("cut_repository/cuts_barrel_20171028_200000_WP_Tight.root")
+  .ls
+  cuts->Print()
+
+8. Review the optimization results. Note that all the scripts here
+produce plots that can go straight into the presentations.
+
+a) Draw pt and eta spectra of the signal and background electrons,
+with and without reweighting.
+   Before running this script one may want to create flat ntuples
+that contain both barrel and endcap, following the full->flat step
+above with appropriate changes to the flags in the converting script.
+Then, change the input ntuple names for the drawing script below and
+run it as:
+
+   .L drawKinematics.C+
+   drawKinematics()
+
+b) Draw ROC and display the working points in the ROC space. In the
+script that does this one needs to specify locations of the TMVA output
+for all four passes, as well as the files with the final cut objects.
+Typically one just needs to edit in the file the date string, the rest
+of the names are standard. 
+   Note that the ROC is built piece-wise out of four ROCs, one from
+each pass. This way, each working point gets its own native ROC segment.
+For example, the working point Medium with 80% target efficiency is taken 
+from the pass2, and the ROC displayed contains the segment of the ROC from
+pass2 between 75 and 90% of the signal efficiency.
+   The markers are drawn based on the TestTree from the TMVA file, the
+same tree which (to our best guess) used to build the ROCs, so the WP markers
+should really be sitting on the final composite ROC. 
+   Note that right now there is one extra cut applied in the script
+that is not applied in TMVA preselection and not tuned by the TMVA:
+the cut on the expected missing inner hits. This cut can be disabled. The 
+cut as it is there at the moment of this writing is fairly loose.
+  The script is run separately for the barrel and separately for the endcap,
+there is a boolean flag in the beginning of the script that controls that.
+  The script computes the efficiencies for the signal with exactly the same
+weights that TMVA used to tune the cuts.
+  To run the script to draw the ROC and the working points one needs to
+run from ROOT prompt in the main package directory:
+
+  .L drawROCandWPv4.C+
+  drawROCandWPv4()
+
+The output, a presentation-grade figure, is saved into a file with the 
+name like
+
+   figures/plot_ROCandWP_barrel_27july.png
+
+(change the date string in the script to the desired one).
+
+c) Draw distributions of all ID variables. This script draws distributions
+of all ID variables and overlays cuts for all working points. 
+In this script one has to set up the names of all relevant flat ntuples
+and the barrel/endcap flag. The drawn variables include both the variables
+tuned by TMVA and other ID variables where the cut is chosen manually
+(thus these manual cuts need to be reviewed during tuning). At this 
+moment the "mannual" cuts include: d0, dz, and the expected missing inner hits.
+   The script draws fake electron background from three sources for each
+variable: from the TTJets sample (which is what was used in the TMVA tunning,
+and contains both jets faking electrons and secondary electrons from heavy flavor),
+from the DYJetsToLL sample (which is mostly light jets faking electrons) and
+from the GJet_something sample (which is jets or energetic photons faking
+electrons).
+   Run this script as:
+
+  .L drawVariablesAndCuts_3bg.C+
+  drawVariablesAndCuts_3bg()
+
+The output of the script, plots for a presentation, goes to files like:
+
+   figures/plot_barrel_3BGs_full5x5_sigmaIetaIeta.png
+   figures/plot_barrel_3BGs_dEtaSeed.png
+   figures/plot_barrel_3BGs_dPhiIn.png
+   figures/plot_barrel_3BGs_hOverE.png
+   figures/plot_barrel_3BGs_relIsoWithEA.png
+   figures/plot_barrel_3BGs_ooEmooP.png
+   figures/plot_barrel_3BGs_d0.png
+   figures/plot_barrel_3BGs_dz.png
+   figures/plot_barrel_3BGs_expectedMissingInnerHits.png
+
+Note that some distributions might be better displayed in the log-Y mode.
+For that, one can change the script or just change it interactively on
+the desired canvas and save the figure manually.
+
+c) Draw the ID efficiencies as a function of pt, eta, and the number
+of vertices.
+   One needs to check that the flat ntuple names of the input are right
+in the script. The barrel/endcap flag in the beginning of the script 
+needs to be set. The names of the files with cut objects need to be adjusted
+as necessary. Note that even though one selects only the barrel or endcap
+for one run of the script, all cut object files, both barrel and endcap,
+have to exist. Kinematic reweighting is applied in the script.
+   The script have to be run separately to produce eff(pt), eff(eta),
+and eff(Nvtx). To define which of these is to be produced one needs
+to change the "mode" constant in the beginning of the script. 
+   The script is run as follows:
+
+   .L drawEfficiency.C+
+   drawEfficiency()
+
+The output of the scripts is plots with names like:
+
+  figures/plot_eff_barrel_pt.png
+  figures/plot_eff_etaSC.png
+  figures/plot_eff_barrel_nPV.pn
+
+A couple of caveats regarding the cuts. The missing hits cuts are added
+by hand, one needs to review and adjust them as needed. The impact parameter
+cuts d0 and dz are not there at all. These cuts are presently selected 
+manually and not part of TMVA tuning. Additionally, the cuts on IP have
+sample-dependent efficiency. There is a fairly large fraction of Drell-Yan
+events in which the primary vertex is not well measured. For seemingly
+reasonable cuts that have 99% efficiency on true prompt electrons from
+a TTbar sample, one may observe 93%-level efficiency in the Drell-Yan
+sample. 
+   Note that the background efficiency is drawn on the same canvas
+as the signal efficiency. There is an option in the beginning
+of the script to scale up the background efficiency by, say, x5
+for a better visibility.
+
+The present version of the package does not make plots of
+the efficiency as a function of pt for high energy electrons.
+It is desirable to add the high pt plots, and perhaps use for those
+dedicated samples (no kinematic reweighting either), such
+as DoubleElectron_FlatPt-1To300 and DoubleElectron_FlatPt-300To6500.

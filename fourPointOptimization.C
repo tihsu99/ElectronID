@@ -9,16 +9,16 @@ void fourPointOptimization(){
 
   // Define source for the initial cut range
   TString startingCutMaxFileName 
-    = "cuts_barrel_eff_0999_20160616_200000.root";
+    = "cuts_barrel_eff_0999_20171028_200000.root";
   if( !Opt::useBarrel )
     startingCutMaxFileName 
-      = "cuts_endcap_eff_0999_20160616_200000.root";
+      = "cuts_endcap_eff_0999_20171028_200000.root";
 
   TString namePrefix = "cuts_barrel_";
   if( !Opt::useBarrel )
     namePrefix = "cuts_endcap_";
   TString namePass[Opt::nWP] = {"pass1_","pass2_","pass3_","pass4_"};
-  TString nameTime = "20160718_200000";
+  TString nameTime = "20171030_200000";
 
   for( int ipass = 0; ipass < Opt::nWP; ipass++){
 
@@ -85,6 +85,7 @@ void fourPointOptimization(){
   printf("Final definition of working points\n");
   printf("====================================================\n");
   printf("Copy files with working points info into the final locations\n");
+  // The printf/etc lines below are to debug an rare odd problem
   printf("Current path:\n");
   gSystem->Exec("pwd"); 
   printf("Content of this dir:\n");

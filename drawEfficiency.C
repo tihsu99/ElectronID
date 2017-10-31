@@ -20,27 +20,27 @@
 const bool useSmallEventCount = false;
 
 // Draw barrel or endcap
-const bool drawBarrel = false;
+const bool drawBarrel = true;
 const bool scaleBackground = false;
 
 enum Mode {EFF_PT=0, EFF_ETA, EFF_NVTX};
 TString varName[3] = {"pt", "etaSC", "nPV"};
 
-Mode mode = EFF_NVTX; // If mode is EFF_ETA, set drawBarrel to true!
+Mode mode = EFF_PT; // If mode is EFF_ETA, set drawBarrel to true!
 
 
 // File name with working point cuts
 const TString cutFileNamesBarrel[4] = { 
-  "./cut_repository/cuts_barrel_20160718_200000_WP_Veto.root",
-  "./cut_repository/cuts_barrel_20160718_200000_WP_Loose.root",
-  "./cut_repository/cuts_barrel_20160718_200000_WP_Medium.root",
-  "./cut_repository/cuts_barrel_20160718_200000_WP_Tight.root"
+  "./cut_repository/cuts_barrel_20171030_200000_WP_Veto.root",
+  "./cut_repository/cuts_barrel_20171030_200000_WP_Loose.root",
+  "./cut_repository/cuts_barrel_20171030_200000_WP_Medium.root",
+  "./cut_repository/cuts_barrel_20171030_200000_WP_Tight.root"
 };
 const TString cutFileNamesEndcap[4] = {
-  "./cut_repository/cuts_endcap_20160718_200000_WP_Veto.root",
-  "./cut_repository/cuts_endcap_20160718_200000_WP_Loose.root",
-  "./cut_repository/cuts_endcap_20160718_200000_WP_Medium.root",
-  "./cut_repository/cuts_endcap_20160718_200000_WP_Tight.root"
+  "./cut_repository/cuts_endcap_20171030_200000_WP_Veto.root",
+  "./cut_repository/cuts_endcap_20171030_200000_WP_Loose.root",
+  "./cut_repository/cuts_endcap_20171030_200000_WP_Medium.root",
+  "./cut_repository/cuts_endcap_20171030_200000_WP_Tight.root"
 };
 const TString *cutFileNames = drawBarrel ? cutFileNamesBarrel : cutFileNamesEndcap;
 
@@ -54,9 +54,8 @@ const int *missingHitsCut = drawBarrel ? missingHitsCutBarrel : missingHitsCutEn
 // Signal and background files
 // TString signalFileName = drawBarrel ? Opt::fnameSignalBarrel : Opt::fnameSignalEndcap;
 // TString backgroundFileName = drawBarrel ? Opt::fnameBackgroundBarrel : Opt::fnameBackgroundEndcap;
-//TString signalFileName     = "DYJetsToLL_jun20_flat_ntuple_trueAndFake_alleta_full.root";
-TString signalFileName     = "DYJetsToLL_jun20_flat_ntuple_true_alleta_full.root";
-TString backgroundFileName = "TTJets_jun20_flat_ntuple_trueAndFake_alleta_full.root";
+TString signalFileName     = "DYJetsToLL_oct28_flat_ntuple_true_alleta_full.root";
+TString backgroundFileName = "TTJets_oct28_flat_ntuple_trueAndFake_alleta_full.root";
 
 
 // Histogram settings
@@ -66,10 +65,10 @@ double ptBinLimits[nPtBinsMax+1];
 const int nEtaBinsMax = 1000; // a large number
 double etaBinLimits[nEtaBinsMax+1];
 
-const int nNvtxBins = 26;
+const int nNvtxBins = 28;
 double nvtxBinLimits[nNvtxBins+1] = 
   {0, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-   21, 22, 23, 24, 25, 27, 30, 35, 40};
+   21, 22, 23, 24, 25, 27, 30, 35, 40, 45, 50};
 
 int sigColors[Opt::nWP] = {2, 4, 6, 8};
 int  bgColors[Opt::nWP] = {9, 46, 30, 42};

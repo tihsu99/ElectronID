@@ -16,7 +16,7 @@
 // computation set it to false
 const bool useSmallEventCount = false;
 // Draw barrel or endcap
-const bool drawBarrel = false;
+const bool drawBarrel = true;
 
 const bool doOverlayCuts = true;
 
@@ -25,17 +25,17 @@ const bool doOverlayCuts = true;
 // content of this array is ignored).
 const TString cutFileNamesBarrel[4] = { 
   // only WP Veto was optimized with the exercise purpose
-  "./cut_repository/cuts_barrel_20160718_200000_WP_Veto.root",
-  "./cut_repository/cuts_barrel_20160718_200000_WP_Loose.root",
-  "./cut_repository/cuts_barrel_20160718_200000_WP_Medium.root",
-  "./cut_repository/cuts_barrel_20160718_200000_WP_Tight.root"
+  "./cut_repository/cuts_barrel_20171030_200000_WP_Veto.root",
+  "./cut_repository/cuts_barrel_20171030_200000_WP_Loose.root",
+  "./cut_repository/cuts_barrel_20171030_200000_WP_Medium.root",
+  "./cut_repository/cuts_barrel_20171030_200000_WP_Tight.root"
 };
 const TString cutFileNamesEndcap[4] = {
   // for aestetics purpose, switch to real endcap files, once they are made
-  "./cut_repository/cuts_endcap_20160718_200000_WP_Veto.root",
-  "./cut_repository/cuts_endcap_20160718_200000_WP_Loose.root",
-  "./cut_repository/cuts_endcap_20160718_200000_WP_Medium.root",
-  "./cut_repository/cuts_endcap_20160718_200000_WP_Tight.root"
+  "./cut_repository/cuts_endcap_20171030_200000_WP_Veto.root",
+  "./cut_repository/cuts_endcap_20171030_200000_WP_Loose.root",
+  "./cut_repository/cuts_endcap_20171030_200000_WP_Medium.root",
+  "./cut_repository/cuts_endcap_20171030_200000_WP_Tight.root"
 };
 
 // Cuts on expected missing hits are separate from VarCut cuts, tuned by hand.
@@ -93,21 +93,25 @@ void drawVariablesAndCuts_3bg(){
   //
   // Open files
   //
-  TString fname1 = "DYJetsToLL_jun14_flat_ntuple_trueAndFake_barrel_full.root";
+  // The if statement allows for the possibility of having separate flat ntuples
+  // for barrel and endcap
+  TString fname1 = "DYJetsToLL_oct28_flat_ntuple_trueAndFake_alleta_full.root";
   if( !drawBarrel )
-    fname1 = "DYJetsToLL_jun14_flat_ntuple_trueAndFake_endcap_full.root";
+    fname1 = "DYJetsToLL_oct28_flat_ntuple_trueAndFake_alleta_full.root";
   TFile *input1 = new TFile( fname1 );
   //  input1->cd("wp3");
   TTree *signalTree     = (TTree*) input1->Get("electronTree");
-  
-  TString fname2 = "TTJets_may29_flat_ntuple_full_barrel.root";
+
+  // The if statement allows for the possibility of having separate flat ntuples
+  // for barrel and endcap
+  TString fname2 = "TTJets_oct28_flat_ntuple_trueAndFake_alleta_full.root";
   if( !drawBarrel )
-    fname2 = "TTJets_may29_flat_ntuple_full_endcap.root";
+    fname2 = "TTJets_oct28_flat_ntuple_trueAndFake_alleta_full.root";
   TFile *input2 = new TFile( fname2 );
   //  input2->cd("wp3");
   TTree *backgroundTree     = (TTree*) input2->Get("electronTree");
   
-  TString fname3 = "GJet_jun19_Pt40_flat_ntuple_trueAndFake_alleta_full.root";
+  TString fname3 = "GJet_DoubleEM_oct28_flat_ntuple_trueAndFake_alleta_full.root";
   TFile *input3 = new TFile( fname3 );
   //  input3->cd("wp3");
   TTree *backgroundTreeAdditional     = 0;
@@ -270,15 +274,15 @@ TCanvas *drawOneVariable(TTree *signalTree, TTree *backgroundTree1, TTree *backg
   hsig->Draw("hist");
   if( hbg1 ){
 
-    hbg1->Draw("same");
+    hbg1->Draw("hist,same");
   }
   if( hbg2 ){
 
-    hbg2->Draw("same");
+    hbg2->Draw("hist,same");
   }
   if( hbg3 ){
 
-    hbg3->Draw("same");
+    hbg3->Draw("hist,same");
   }
   TLegend *leg = new TLegend(0.55, 0.65, 0.95, 0.80); // 0.6 0.9
   leg->SetFillStyle(0);

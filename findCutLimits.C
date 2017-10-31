@@ -13,7 +13,7 @@
 #include "VarCut.hh"
 
 // Define unique part of the file name for saving the cuts
-TString dateTag = "20160616_200000";
+TString dateTag = "20171028_200000";
 
 // For debug purposes, set the flag below to true, for regular
 // computation set it to false
