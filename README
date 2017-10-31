@@ -491,3 +491,24 @@ the efficiency as a function of pt for high energy electrons.
 It is desirable to add the high pt plots, and perhaps use for those
 dedicated samples (no kinematic reweighting either), such
 as DoubleElectron_FlatPt-1To300 and DoubleElectron_FlatPt-300To6500.
+
+9. Tune several cuts by manually. These include the expected missing
+inner hits cuts and the impact parameter cuts. All of this is usually 
+chosen to be fairly loose. Impact parameter cuts can then be changed
+by individual analyses if needed.
+   In the 2017, perhaps we should not change the d0 and dz cuts
+from the 2016 values unless there is a reason to do it.
+   As far as the expected missing inner hits, we should review the
+cuts and see if the change is necessary with respect to the 2016 values
+because we are now running with a new pixel detector with more layers.
+
+   A discussion and evolution of the impact parameter cuts choice
+in 2016 can be found in these presentations:
+https://indico.cern.ch/event/545076/contributions/2212238/attachments/1295178/1930742/talk_electron_ID_spring16.pdf
+https://indico.cern.ch/event/482675/contributions/2221671/attachments/1300610/1941558/talk_electron_ID_spring16_update.pdf
+https://indico.cern.ch/event/482677/contributions/2259342/attachments/1316731/1972911/talk_electron_ID_spring16_update.pdf
+ 
+10. The H/E cut tuned as a flat cut in this proceedure may need to be
+reviewed, and scaling with rho and pt introduced along the lines discussed
+in 
+https://indico.cern.ch/event/662749/contributions/2763092/attachments/1545209/2425054/talk_electron_ID_2017.pdf
