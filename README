@@ -195,8 +195,7 @@ https://github.com/ikrav/ElectronWork/tree/effective_area_fall17/EffectiveArea
 in 2D, pt and eta. Weights need to be prepared, To do this,
 edit the beginning of the script (file names) and run it like this once:
 
-.L computeKinematicWeights.C+
-computeKinematicWeights()
+  ./compileAndRun.sh computeKinematicWeights
 
 rename the kinematicWeights.root into something if desired (e.g. add date).
 
@@ -222,8 +221,7 @@ feed the resulting ntuple to TMVA as described below.
 step, after all adjustements, execute as many times as needed (typically four times,
 changing the code each time):
 
-.L convert_EventStrNtuple_To_FlatNtuple.C+
-convert_EventStrNtuple_To_FlatNtuple()
+  ./compileAndRun.sh convert_EventStrNtuple_To_FlatNtuple
 
 5. Edit the file that contain the varialbles that will go into tuning (if needed):
 
@@ -379,8 +377,7 @@ above with appropriate changes to the flags in the converting script.
 Then, change the input ntuple names for the drawing script below and
 run it as:
 
-   .L drawKinematics.C+
-   drawKinematics()
+  ./compileAndRun.sh drawKinematics
 
 b) Draw ROC and display the working points in the ROC space. In the
 script that does this one needs to specify locations of the TMVA output
