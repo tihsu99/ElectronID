@@ -251,8 +251,7 @@ only the change of the name string in the beginning. It takes all other
 info from header files with constants, such as Variables.hh and OptimizationConstants.hh.
 Run it as:
 
-  .L findCutLimits.C+
-  findCutLimits()
+  root -q -b findCutLimits.C+
 
 The output of the script is printed on the screen, and is also saved 
 in ROOT files with names like:
