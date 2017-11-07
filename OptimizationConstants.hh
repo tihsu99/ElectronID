@@ -8,14 +8,17 @@
 namespace Opt {
 
   // Global parameters
-  const bool useBarrel = true;
+  const bool useBarrel = false;
   // Events to test and train. 
   // To use ALL available events, split 50/50, set
   // all of the nTrain and nTest to 0
-  const int nTrain_Signal     = 20000;
-  const int nTrain_Background = 20000;
+  const int nTrain_Signal     =300000;
+  const int nTrain_Background =300000;
   const int nTest_Signal      =1000000;
   const int nTest_Background  =1000000;
+
+  const TString tagDir = "2017-11-07";
+
   // Cut repository directory
   const TString cutRepositoryDir = "./cut_repository";
   
@@ -40,12 +43,12 @@ namespace Opt {
   //
   TFile *fileSignal = 0;
   TFile *fileBackground = 0;
-  const TString fnameSignalBarrel = "./DYJetsToLL_oct28_flat_ntuple_true_barrel_full.root";
-  const TString fnameSignalEndcap = "./DYJetsToLL_oct28_flat_ntuple_true_endcap_full.root";
+  const TString fnameSignalBarrel = tagDir + "/DYJetsToLL_flat_ntuple_true_barrel_full.root";
+  const TString fnameSignalEndcap = tagDir + "/DYJetsToLL_flat_ntuple_true_endcap_full.root";
   const TString fnameSignal = useBarrel ? fnameSignalBarrel : fnameSignalEndcap;
   const TString signalTreeName = "electronTree";
-  const TString fnameBackgroundBarrel = "./TTJets_oct28_flat_ntuple_fake_barrel_full.root";
-  const TString fnameBackgroundEndcap = "./TTJets_oct28_flat_ntuple_fake_endcap_full.root";
+  const TString fnameBackgroundBarrel = tagDir + "/TTJets_flat_ntuple_fake_barrel_full.root";
+  const TString fnameBackgroundEndcap = tagDir + "/TTJets_flat_ntuple_fake_endcap_full.root";
   const TString fnameBackground = useBarrel ? fnameBackgroundBarrel : fnameBackgroundEndcap;
   const TString backgroundTreeName = "electronTree";
   
