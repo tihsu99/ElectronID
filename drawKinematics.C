@@ -13,6 +13,8 @@
 #include "TColor.h"
 #include "TGaxis.h"
 #include "OptimizationConstants.hh"
+#include <cassert>
+#include <TROOT.h>
 
 // For debug purposes, set the flag below to true, for regular
 // computation set it to false
@@ -20,8 +22,9 @@ const bool useSmallEventCount = false;
 
 // Note: the DY ntuple has to be prepared for true electrons only to
 // have meaningful kinematic weights.
-TString signalFileName     = "DYJetsToLL_oct28_flat_ntuple_true_alleta_full.root";
-TString backgroundFileName = "TTJets_oct28_flat_ntuple_trueAndFake_alleta_full.root";
+TString tagDir = "2017-11-07";
+TString signalFileName     = tagDir + "/DYJetsToLL_flat_ntuple_true_alleta_full.root";
+TString backgroundFileName = tagDir + "/TTJets_flat_ntuple_trueAndFake_alleta_full.root";
 
 // Forward declarations
 TTree *getTreeFromFile(TString fname, TString tname);
@@ -145,4 +148,10 @@ TTree *getTreeFromFile(TString fname, TString tname){
   TTree *tree     = (TTree*) file->Get(tname);
   
   return tree;
+}
+
+// Compiled
+int main(int argc, char *argv[]){
+  gROOT->SetBatch();
+  drawKinematics();
 }
