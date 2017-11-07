@@ -287,8 +287,8 @@ than HLT.
       these extra limits were used to make some working points tighter
       than HLT. See above comments for VariableLimits.hh
 
-  root -b -q fourPointOptimization.C >& log-EBorEE_etc.txt &
-  tail -f test.log
+  root -b -q 'fourPointOptimization.C(true)'  &> barrel.log &
+  root -b -q 'fourPointOptimization.C(false)' &> endcap.log &
 
 one can prepend the root command with "nohup" and come and check
 it next day, since it may take awhile. On lxplus this might not work,

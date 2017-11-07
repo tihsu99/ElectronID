@@ -7,15 +7,17 @@
 
 namespace Opt {
 
-  // Global parameters
-  const bool useBarrel = false;
   // Events to test and train. 
   // To use ALL available events, split 50/50, set
   // all of the nTrain and nTest to 0
-  const int nTrain_Signal     =300000;
-  const int nTrain_Background =300000;
-  const int nTest_Signal      =1000000;
-  const int nTest_Background  =1000000;
+  const int nTrain_SignalBarrel     =300000;
+  const int nTrain_BackgroundBarrel =300000;
+  const int nTest_SignalBarrel      =1000000;
+  const int nTest_BackgroundBarrel  =1000000;
+  const int nTrain_SignalEndcap     =300000;
+  const int nTrain_BackgroundEndcap =100000;
+  const int nTest_SignalEndcap      =1000000;
+  const int nTest_BackgroundEndcap  =1000000;
 
   const TString tagDir = "2017-11-07";
 
@@ -32,7 +34,6 @@ namespace Opt {
   const float effBarrel[nWP]       = {0.95      , 0.90       , 0.80      , 0.70     };
   // Make it possible to have a lower target efficieny for endcap:
   const float effEndcap[nWP]       = {0.95      , 0.90       , 0.80      , 0.70     };
-  const float *eff = useBarrel ? effBarrel : effEndcap;
   const TString wpNames[nWP] = {"WP_Veto", "WP_Loose", "WP_Medium", "WP_Tight"};
   enum WorkingPointIndex       {WP_VETO  , WP_LOOSE  , WP_MEDIUM  , WP_TIGHT  };
   
@@ -45,11 +46,9 @@ namespace Opt {
   TFile *fileBackground = 0;
   const TString fnameSignalBarrel = tagDir + "/DYJetsToLL_flat_ntuple_true_barrel_full.root";
   const TString fnameSignalEndcap = tagDir + "/DYJetsToLL_flat_ntuple_true_endcap_full.root";
-  const TString fnameSignal = useBarrel ? fnameSignalBarrel : fnameSignalEndcap;
   const TString signalTreeName = "electronTree";
   const TString fnameBackgroundBarrel = tagDir + "/TTJets_flat_ntuple_fake_barrel_full.root";
   const TString fnameBackgroundEndcap = tagDir + "/TTJets_flat_ntuple_fake_endcap_full.root";
-  const TString fnameBackground = useBarrel ? fnameBackgroundBarrel : fnameBackgroundEndcap;
   const TString backgroundTreeName = "electronTree";
   
   //

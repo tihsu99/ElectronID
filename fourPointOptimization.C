@@ -5,20 +5,16 @@
 #include "VariableLimits.hh"
 #include "optimize.hh"
 
-void fourPointOptimization(){
+void fourPointOptimization(bool useBarrel){
 
   // Define source for the initial cut range
-  TString startingCutMaxFileName 
-    = "cuts_barrel_eff_0999_20171028_200000.root";
-  if( !Opt::useBarrel )
-    startingCutMaxFileName 
-      = "cuts_endcap_eff_0999_20171028_200000.root";
+  TString dateTag = "2017-11-07";
+  TString startingCutMaxFileName        = "cuts_barrel_eff_0999_" + dateTag + ".root";
+  if(!useBarrel) startingCutMaxFileName = "cuts_endcap_eff_0999_" + dateTag + ".root";
 
-  TString namePrefix = "cuts_barrel_";
-  if( !Opt::useBarrel )
-    namePrefix = "cuts_endcap_";
+  TString namePrefix = useBarrel ? "cuts_barrel_" : "cuts_endcap_";
   TString namePass[Opt::nWP] = {"pass1_","pass2_","pass3_","pass4_"};
-  TString nameTime = "20171030_200000";
+  TString nameTime = dateTag;
 
   for( int ipass = 0; ipass < Opt::nWP; ipass++){
 
@@ -27,10 +23,7 @@ void fourPointOptimization(){
     // Note: for each subsequence pass, the previous working point
     // is used. For the first pass, the 99.9% efficient cut range is used.
     TString cutMaxFileName = startingCutMaxFileName;
-    if( ipass > 0 ){
-      cutMaxFileName = namePrefix + namePass[ipass-1] + nameTime + TString("_")
-	+ Opt::wpNames[ipass-1] + TString(".root");
-    }
+    if(ipass > 0) cutMaxFileName = namePrefix + namePass[ipass-1] + nameTime + TString("_") + Opt::wpNames[ipass-1] + TString(".root");
     
     // The string below is used to construct the file names
     // to save the cut objects
@@ -41,25 +34,17 @@ void fourPointOptimization(){
     // This string will be used to construct the dir for the output
     // of TMVA: the dir for weights and the filename for diagnostics
     TString trainingDataOutputBase = "training_results_";
-    if( Opt::useBarrel ){
-      trainingDataOutputBase += "barrel_";
-    }else{
-      trainingDataOutputBase += "endcap_";
-    }
+    if(useBarrel) trainingDataOutputBase += "barrel_";
+    else          trainingDataOutputBase += "endcap_";
+
     trainingDataOutputBase += namePass[ipass];
     trainingDataOutputBase += nameTime;
 
     // Use the following user-defined limits
     // (if in doubt, use the no-restrictions one defined in VariableLimits.hh)
     VarLims::VariableLimits **userDefinedCutLimits = VarLims::limitsNoRestrictions;
-    if( ipass > 0 ){
-      userDefinedCutLimits = VarLims::limitsWPAnyV1;
-    }
-
-    if( ipass == 3 ){
-      userDefinedCutLimits = VarLims::limitsHLTSafeEndcap;	
-      if (Opt::useBarrel)      userDefinedCutLimits = VarLims::limitsHLTSafeBarrel;	
-    }
+    if( ipass > 0 )  userDefinedCutLimits = VarLims::limitsWPAnyV1;
+    if( ipass == 3 ) userDefinedCutLimits = useBarrel ? VarLims::limitsHLTSafeBarrel : VarLims::limitsHLTSafeEndcap;	
 
     printf("\n-----------------------------------------------------------------\n");
     printf("\n");
@@ -71,9 +56,7 @@ void fourPointOptimization(){
     printf(" %s\n", cutOutputBase.Data());
     printf("------------------------------------------------------------------\n\n");
     
-    optimize(cutMaxFileName, cutOutputBase, trainingDataOutputBase,
-    	     userDefinedCutLimits);    
-
+    optimize(cutMaxFileName, cutOutputBase, trainingDataOutputBase, userDefinedCutLimits, useBarrel);    
   }
  
   // Finally, create the files containing the working point
@@ -94,17 +77,10 @@ void fourPointOptimization(){
   gSystem->Exec("ls -rtl cut_repository/"); 
   for(int i=0; i<Opt::nWP; i++){
 
-    TString wpPassFileName = Opt::cutRepositoryDir + TString("/")
-      + namePrefix + namePass[i] + nameTime + TString("_")
-      + Opt::wpNames[i] + TString(".root");
+    TString wpPassFileName  = Opt::cutRepositoryDir + TString("/") + namePrefix + namePass[i] + nameTime + TString("_") + Opt::wpNames[i] + TString(".root");
+    TString wpFinalFileName = Opt::cutRepositoryDir + TString("/") + namePrefix + nameTime + TString("_") + Opt::wpNames[i] + TString(".root");
 
-    TString wpFinalFileName =  Opt::cutRepositoryDir + TString("/")
-      + namePrefix + nameTime + TString("_")
-      + Opt::wpNames[i] + TString(".root");
-
-    TString copyCommand = TString::Format("cp %s %s", 
-					  wpPassFileName.Data(), 
-					  wpFinalFileName.Data());
+    TString copyCommand = TString::Format("cp %s %s", wpPassFileName.Data(), wpFinalFileName.Data());
 
     int result = gSystem->Exec(copyCommand); 
     int tries =0;
@@ -118,10 +94,8 @@ void fourPointOptimization(){
     printf(" file name:   %s\n", wpFinalFileName.Data());
     TFile *fwp = new TFile(wpFinalFileName);
     VarCut *thisWP = (VarCut*)fwp->Get("cuts");
-    if( thisWP != 0 )
-      thisWP->print();
-    else
-      printf("???? not found????\n");
+    if(thisWP != 0) thisWP->print();
+    else            printf("???? not found????\n");
     fwp->Close();
     
   }

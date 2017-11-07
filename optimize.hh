@@ -24,21 +24,17 @@
 TTree * getTreeFromFile(TString fname, TString tname, TFile **fileHandle);
 // Configuration for TMVA
 void    configureVariables(TMVA::DataLoader *factory);
-TString getTrainAndTestOptions();
-void    configureCuts(TCut &signalCuts, TCut &backgroundCuts);
-TString getMethodOptions(TString cutMaxFileName,
-			 VarLims::VariableLimits **userDefinedCutLimits);
+TString getTrainAndTestOptions(bool useBarrel);
+void    configureCuts(TCut &signalCuts, TCut &backgroundCuts, bool useBarrel);
+TString getMethodOptions(TString cutMaxFileName, VarLims::VariableLimits **userDefinedCutLimits);
+
 // Output
-void writeWorkingPoints(const TMVA::Factory *factory, 
-			TString cutsOutFileNameBase);
+void writeWorkingPoints(const TMVA::Factory *factory, TString cutsOutFileNameBase, bool useBarrel);
 
 // Main method
-void optimize(TString cutMaxFileName 
-	      = "cuts_barrel_eff_0999_20140727_165000.root",
-	      TString cutsOutFileNameBase 
-	      = "cuts_barrel_xxxx_99999999_999999",
-	      TString trainingDataOutputBase 
-	      = "training_xxxx_results_99999999_999999",
-	      VarLims::VariableLimits **userDefinedCutLimits = VarLims::limitsNoRestrictions);
+void optimize(TString cutMaxFileName = "cuts_barrel_eff_0999_20140727_165000.root",
+	      TString cutsOutFileNameBase = "cuts_barrel_xxxx_99999999_999999",
+	      TString trainingDataOutputBase = "training_xxxx_results_99999999_999999",
+	      VarLims::VariableLimits **userDefinedCutLimits = VarLims::limitsNoRestrictions, bool useBarrel = true);
 
 #endif
