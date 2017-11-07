@@ -19,6 +19,11 @@
 #include "TBenchmark.h"
 #include <signal.h>
 #include "TMath.h"
+#include <cassert>
+#include <TROOT.h>
+#include <vector>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "OptimizationConstants.hh"
 
@@ -26,13 +31,9 @@ enum MatchType  {MATCH_TRUE, MATCH_FAKE, MATCH_ANY};
 enum SampleType {SAMPLE_UNDEF, SAMPLE_DY, SAMPLE_TT, SAMPLE_GJ};
 enum EtaRegion  {ETA_EB, ETA_EE, ETA_FULL};
 
-// For electron ID tuning, use MATCH_TRUE with SAMPLE_DY
-// and MATCH_FAKE with SAMPLE_TT.
-// NOTE: kinematic weights are meaningful only for the combination DY/TRUE.
-// for all other choices of flags kinematic weights are 1.0
-const MatchType  matchType      = MATCH_TRUE; // MC truth matching to signal or bg electrons
-const EtaRegion  etaRegion      = ETA_FULL;   // barrel, endcap, or all etas
-const SampleType sample         = SAMPLE_DY;
+const TString getFileName(TString type){
+  return "/user/tomc/eleIdTuning/tuples/" + type + "_cutID_tuning_92X_v1.root";
+}
 
 // Preselection cuts: must match or be looser than 
 // cuts in OptimizatioConstants.hh
@@ -43,26 +44,18 @@ const float dzMax = 1.0;
 const float boundaryEBEE = 1.479;
 
 //====================================================
-const bool talkativeRegime = false;
+const bool talkativeRegime = true;
 const bool smallEventCount = false;   
 const int maxEventsSmall = 1000000;
 
-// Files input
-const TString fileNameDY = "~/DYJetsToLL_cutID_tuning_92X_v1.root";
-const TString fileNameTT = "~/TTJets_cutID_92X_v1.root";
-const TString fileNameGJ = "~/GJet_DoubleEM_cutID_tuning_92X_v1.root";
+// output dir of tuples
+const TString outDir = "2017-11-07";
+
 // Tree name input 
 const TString treeName = "ntupler/ElectronTree";
 // File and histogram with kinematic weights
-const TString fileNameWeights = "kinematicWeights_20171028.root";
+const TString fileNameWeights = "kinematicWeights-2017-11-03.root";
 const TString histNameWeights = "hKinematicWeights";
-
-// Files output
-const TString flatNtupleFileNameBaseDY = "DYJetsToLL_oct28_flat_ntuple";
-const TString flatNtupleFileNameBaseTT = "TTJets_oct28_flat_ntuple";
-const TString flatNtupleFileNameBaseGJ = "GJet_DoubleEM_oct28_flat_ntuple";
-
-// //  Files OUT
 
 // Effective areas for electrons derived by Ilya for Fall17
 //  https://indico.cern.ch/event/662749/contributions/2763091/attachments/1545124/2424854/talk_electron_ID_fall17.pdf
@@ -85,30 +78,22 @@ namespace EffectiveAreas {
 
 
 void bazinga (std::string mes){
-  if (talkativeRegime)
-    std::cout<<"\n"<<mes<<endl;
+  if(talkativeRegime) std::cout<<"\n"<<mes<<std::endl;
 }
 
 // Forward declarations
-float findKinematicWeight(TH2D *hist, float pt, float etaSC);
-bool passPreselection(int isTrue, float pt, float eta, 
-		      int passConversionVeto, float dz);
+float   findKinematicWeight(TH2D *hist, float pt, float etaSC);
+bool    passPreselection(int isTrue, float pt, float eta, int passConversionVeto, float dz, MatchType matchType, EtaRegion etaRegion);
 TString eventCountString();
-void drawProgressBar(float progress);
+void    drawProgressBar(float progress);
 
 //
 // Main program
 //
-
-void convert_EventStrNtuple_To_FlatNtuple(){
+void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType, EtaRegion etaRegion){
 
   bazinga("Start main function");
-  gBenchmark->Start("Timing");
 
-  //  Generate  a dictionary, so that CINT will have all the information 
-  // it needs about type or variable at anytime.
-  gROOT->ProcessLine("#include <vector>"); 
-  
   // General settings in case one adds drawing of histograms etc
   gStyle->SetOptFit();
   gStyle->SetOptStat(0);
@@ -121,42 +106,32 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   // Input/output file names
   TString inputFileName = "";
   TString flatNtupleFileNameBase = "Undefined";
-  if( sample == SAMPLE_DY ){
-    inputFileName = fileNameDY;
-    flatNtupleFileNameBase = flatNtupleFileNameBaseDY;
-  }else if( sample == SAMPLE_TT ){
-    inputFileName = fileNameTT;
-    flatNtupleFileNameBase = flatNtupleFileNameBaseTT;
-  }else if( sample == SAMPLE_GJ ){
-    inputFileName = fileNameGJ;
-    flatNtupleFileNameBase = flatNtupleFileNameBaseGJ;
-  }else{
+  if(sample == SAMPLE_DY)        inputFileName = "DYJetsToLL";
+  else if( sample == SAMPLE_TT ) inputFileName = "TTJets";
+  else if( sample == SAMPLE_GJ ) inputFileName = "GJet_DoubleEM";
+  else {
     printf("Unknown sample requested\n");
     assert(0);
   }
 
+  flatNtupleFileNameBase = inputFileName + "_flat_ntuple";
+  inputFileName          = getFileName(inputFileName);
+
   TString flatNtupleFileNameTruth = "";
-  if( matchType == MATCH_TRUE ){
-    flatNtupleFileNameTruth = "_true";
-  }else if( matchType == MATCH_FAKE ){
-    flatNtupleFileNameTruth = "_fake";
-  }else if( matchType == MATCH_ANY ){
-    flatNtupleFileNameTruth = "_trueAndFake";
-  }
+  if(matchType == MATCH_TRUE)      flatNtupleFileNameTruth = "_true";
+  else if(matchType == MATCH_FAKE) flatNtupleFileNameTruth = "_fake";
+  else if(matchType == MATCH_ANY)  flatNtupleFileNameTruth = "_trueAndFake";
 
   TString flatNtupleFileNameEtas = "";
-  if( etaRegion == ETA_EB ){
-    flatNtupleFileNameEtas = "_barrel";
-  }else if( etaRegion == ETA_EE ){
-    flatNtupleFileNameEtas = "_endcap";
-  }else if( etaRegion == ETA_FULL ){
-    flatNtupleFileNameEtas = "_alleta";
-  }
+  if(etaRegion == ETA_EB)        flatNtupleFileNameEtas = "_barrel";
+  else if(etaRegion == ETA_EE)   flatNtupleFileNameEtas = "_endcap";
+  else if(etaRegion == ETA_FULL) flatNtupleFileNameEtas = "_alleta";
 
   TString flatNtupleFileNameEvents = eventCountString();
   TString flatNtupleFileNameEnding = ".root";
 
-  TString flatNtupleFileName = flatNtupleFileNameBase + flatNtupleFileNameTruth 
+  system("mkdir -p " + outDir);
+  TString flatNtupleFileName = outDir + "/" + flatNtupleFileNameBase + flatNtupleFileNameTruth 
     + flatNtupleFileNameEtas + flatNtupleFileNameEvents + flatNtupleFileNameEnding;
 
   // Open input file and find the tree
@@ -235,29 +210,26 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   TBranch *b_electronPassConversionVeto = 0;
 
   // Connect variables and branches to the tree with the data
-  treeIn->SetBranchAddress("nEle", &eleNEle, &b_eleNEle);
-  treeIn->SetBranchAddress("nPV", &nPV, &b_nPV);
-  treeIn->SetBranchAddress("genWeight", &genWeight, &b_genWeight);
-  treeIn->SetBranchAddress("rho", &eleRho, &b_eleRho);
-  treeIn->SetBranchAddress("pt", &elePt, &b_elePt);
-  treeIn->SetBranchAddress("etaSC", &eleEtaSC, &b_eleEtaSC);
-  treeIn->SetBranchAddress("phiSC", &elePhiSC, &b_elePhiSC);
-  treeIn->SetBranchAddress("isoChargedHadrons", &isoChargedHadrons, &b_isoChargedHadrons);
-  treeIn->SetBranchAddress("isoNeutralHadrons", &isoNeutralHadrons, &b_isoNeutralHadrons);
-  treeIn->SetBranchAddress("isoPhotons",        &eleIsoPhotons,        &b_eleIsoPhotons);
-  treeIn->SetBranchAddress("isTrue",    &eleIsTrueElectron,    &b_eleIsTrueElectron);
-  treeIn->SetBranchAddress("d0",                &eleD0,             &b_eleD0);
-  treeIn->SetBranchAddress("dz",                &eleDZ,             &b_eleDZ);
-  treeIn->SetBranchAddress("dEtaSeed",            &eleDEtaSeed,         &b_eleDEtaSeed);
-  treeIn->SetBranchAddress("dPhiIn",            &eleDPhiIn,         &b_eleDPhiIn);
-  treeIn->SetBranchAddress("hOverE",            &eleHoverE,         &b_eleHoverE);
-  treeIn->SetBranchAddress("full5x5_sigmaIetaIeta", &eleFull5x5SigmaIEtaIEta,
-			  &b_eleFull5x5SigmaIEtaIEta);
-  treeIn->SetBranchAddress("ooEmooP",           &eleOOEMOOP,        &b_eleOOEMOOP);
-  treeIn->SetBranchAddress("expectedMissingInnerHits", &eleExpectedMissingInnerHits, 
-			  &b_eleExpectedMissingInnerHits);
-  treeIn->SetBranchAddress("passConversionVeto",       &electronPassConversionVeto,
-			  &b_electronPassConversionVeto);
+  treeIn->SetBranchAddress("nEle",                     &eleNEle,                     &b_eleNEle);
+  treeIn->SetBranchAddress("nPV",                      &nPV,                         &b_nPV);
+  treeIn->SetBranchAddress("genWeight",                &genWeight,                   &b_genWeight);
+  treeIn->SetBranchAddress("rho",                      &eleRho,                      &b_eleRho);
+  treeIn->SetBranchAddress("pt",                       &elePt,                       &b_elePt);
+  treeIn->SetBranchAddress("etaSC",                    &eleEtaSC,                    &b_eleEtaSC);
+  treeIn->SetBranchAddress("phiSC",                    &elePhiSC,                    &b_elePhiSC);
+  treeIn->SetBranchAddress("isoChargedHadrons",        &isoChargedHadrons,           &b_isoChargedHadrons);
+  treeIn->SetBranchAddress("isoNeutralHadrons",        &isoNeutralHadrons,           &b_isoNeutralHadrons);
+  treeIn->SetBranchAddress("isoPhotons",               &eleIsoPhotons,               &b_eleIsoPhotons);
+  treeIn->SetBranchAddress("isTrue",                   &eleIsTrueElectron,           &b_eleIsTrueElectron);
+  treeIn->SetBranchAddress("d0",                       &eleD0,                       &b_eleD0);
+  treeIn->SetBranchAddress("dz",                       &eleDZ,                       &b_eleDZ);
+  treeIn->SetBranchAddress("dEtaSeed",                 &eleDEtaSeed,                 &b_eleDEtaSeed);
+  treeIn->SetBranchAddress("dPhiIn",                   &eleDPhiIn,                   &b_eleDPhiIn);
+  treeIn->SetBranchAddress("hOverE",                   &eleHoverE,                   &b_eleHoverE);
+  treeIn->SetBranchAddress("full5x5_sigmaIetaIeta",    &eleFull5x5SigmaIEtaIEta,     &b_eleFull5x5SigmaIEtaIEta);
+  treeIn->SetBranchAddress("ooEmooP",                  &eleOOEMOOP,                  &b_eleOOEMOOP);
+  treeIn->SetBranchAddress("expectedMissingInnerHits", &eleExpectedMissingInnerHits, &b_eleExpectedMissingInnerHits);
+  treeIn->SetBranchAddress("passConversionVeto",       &electronPassConversionVeto,  &b_electronPassConversionVeto);
 
   
   //
@@ -271,7 +243,7 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   TH2D *hKinematicWeights = (TH2D*)fweights->Get("hKinematicWeights");
   if( !hKinematicWeights ){
     printf("The histogram %s is not found in file %s\n", 
-	   histNameWeights.Data(), fileNameWeights.Data());
+           histNameWeights.Data(), fileNameWeights.Data());
     assert(0);
   }
   
@@ -307,24 +279,24 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   Int_t   passConversionVeto_= 0;
   Int_t   isTrueEle_= 0;
     
-  treeOut->Branch("nPV"        ,  &nPV_     , "nPV/I");
+  treeOut->Branch("nPV",                      &nPV_,                      "nPV/I");
 
-  treeOut->Branch("genWeight"  ,  &gweight_ , "gweight/F");  
-  treeOut->Branch("kinWeight"  ,  &kweight_ , "kweight/F");  
+  treeOut->Branch("genWeight",                &gweight_,                  "gweight/F");
+  treeOut->Branch("kinWeight",                &kweight_,                  "kweight/F");
 
-  treeOut->Branch("pt"    ,  &pt_    , "pt/F");			    
-  treeOut->Branch("etaSC" ,  &etaSC_ , "etaSC/F");
-  treeOut->Branch("dEtaSeed",  &dEtaSeed_, "dEtaSeed/F");
-  treeOut->Branch("dPhiIn",  &dPhiIn_, "dPhiIn/F");
-  treeOut->Branch("hOverE",  &hOverE_, "hOverE/F");
-  treeOut->Branch("full5x5_sigmaIetaIeta", &full5x5_sigmaIetaIeta_, "full5x5_sigmaIetaIeta/F");
-  treeOut->Branch("relIsoWithEA"           , &relIsoWithEA_, "relIsoWithEA/F");
-  treeOut->Branch("ooEmooP", &ooEmooP_, "ooEmooP/F");
-  treeOut->Branch("d0"     , &d0_,      "d0/F");
-  treeOut->Branch("dz"     , &dz_,      "dz/F");
+  treeOut->Branch("pt" ,                      &pt_,                       "pt/F");
+  treeOut->Branch("etaSC",                    &etaSC_,                    "etaSC/F");
+  treeOut->Branch("dEtaSeed",                 &dEtaSeed_,                 "dEtaSeed/F");
+  treeOut->Branch("dPhiIn",                   &dPhiIn_,                   "dPhiIn/F");
+  treeOut->Branch("hOverE",                   &hOverE_,                   "hOverE/F");
+  treeOut->Branch("full5x5_sigmaIetaIeta",    &full5x5_sigmaIetaIeta_,    "full5x5_sigmaIetaIeta/F");
+  treeOut->Branch("relIsoWithEA",             &relIsoWithEA_,             "relIsoWithEA/F");
+  treeOut->Branch("ooEmooP",                  &ooEmooP_,                  "ooEmooP/F");
+  treeOut->Branch("d0",                       &d0_,                       "d0/F");
+  treeOut->Branch("dz",                       &dz_,                       "dz/F");
   treeOut->Branch("expectedMissingInnerHits", &expectedMissingInnerHits_, "expectedMissingInnerHits/I");
-  treeOut->Branch("passConversionVeto", &passConversionVeto_, "passConversionVeto/I");
-  treeOut->Branch("isTrueEle"    , &isTrueEle_,     "isTrueEle/I");
+  treeOut->Branch("passConversionVeto",       &passConversionVeto_,       "passConversionVeto/I");
+  treeOut->Branch("isTrueEle",                &isTrueEle_,                "isTrueEle/I");
   
   //
   // Loop over events
@@ -379,10 +351,8 @@ void convert_EventStrNtuple_To_FlatNtuple(){
       pt_ = elePt->at(iele);
       etaSC_ = eleEtaSC->at(iele);
       // Reweight only signal electron of the DY sample
-      if( sample == SAMPLE_DY && matchType == MATCH_TRUE )
-	kweight_ = findKinematicWeight(hKinematicWeights, pt_, etaSC_);
-      else
-	kweight_ = 1;
+      if(sample == SAMPLE_DY && matchType == MATCH_TRUE) kweight_ = findKinematicWeight(hKinematicWeights, pt_, etaSC_);
+      else                                               kweight_ = 1;
 
       dEtaSeed_ = eleDEtaSeed->at(iele);
       dPhiIn_ = eleDPhiIn->at(iele);
@@ -406,18 +376,13 @@ void convert_EventStrNtuple_To_FlatNtuple(){
       // Find eta bin first. If eta>2.5, the last eta bin is used.
       int etaBin = 0; 
       while ( etaBin < EffectiveAreas::nEtaBins-1 
-	      && abs(etaSC_) > EffectiveAreas::etaBinLimits[etaBin+1] )
-	{ ++etaBin; };
+              && abs(etaSC_) > EffectiveAreas::etaBinLimits[etaBin+1] )
+        { ++etaBin; };
       double area = EffectiveAreas::effectiveAreaValues[etaBin];
-      relIsoWithEA_ = (  isoChargedHadrons_
-			 + max(0.0, isoNeutralHadrons_ + isoPhotons_ 
-			       - eleRho * area ) )/pt_;
-      if( ! passPreselection( isTrueEle_, pt_, etaSC_, passConversionVeto_, dz_) )
-	  continue;
+      relIsoWithEA_ = (isoChargedHadrons_ + std::max(0.0, isoNeutralHadrons_+isoPhotons_-eleRho*area))/pt_;
+      if(!passPreselection(isTrueEle_, pt_, etaSC_, passConversionVeto_, dz_, matchType, etaRegion)) continue;
       treeOut->Fill();// IK will kill me next time, if this line is not at the right place!
-      
     } // end loop over the electrons
-  
   } // end loop over SIGNAL events
   
   bazinga("I'm here to write signal tree");    
@@ -430,7 +395,7 @@ void convert_EventStrNtuple_To_FlatNtuple(){
   inputFile = nullptr;
   
   bazinga("I'm finished with calculation, here is the info from dBenchmark:");  
-  printf("\n");  gBenchmark->Show("Timing");  // get timing info
+//  printf("\n");  gBenchmark->Show("Timing");  // get timing info
 } // end of main fcn
 
 float findKinematicWeight(TH2D *hist, float pt, float etaSC){
@@ -446,14 +411,10 @@ float findKinematicWeight(TH2D *hist, float pt, float etaSC){
   if( ipt < 1 || ipt > npt || ieta < 1 || ieta > neta ){      
     // If pt and eta are outside of the limits of the weight histogram,
     // set the weight to the edge value
-    if( ipt < 1 ) 
-      ipt = 1;
-    if( ipt > npt )
-      ipt = npt;
-    if( ieta < 1 ) 
-      ieta = 1;
-    if( ieta > neta ) 
-      ieta = neta;
+    if(ipt < 1)     ipt = 1;
+    if(ipt > npt)   ipt = npt;
+    if(ieta < 1)    ieta = 1;
+    if(ieta > neta) ieta = neta;
     weight = hist->GetBinContent(ipt, ieta);
   } else {
     // Normal case, pt and eta are within limits of the weight histogram
@@ -463,8 +424,7 @@ float findKinematicWeight(TH2D *hist, float pt, float etaSC){
   return weight;
 }
 
-bool passPreselection(int isTrue, float pt, float eta, 
-		      int passConversionVeto, float dz){
+bool passPreselection(int isTrue, float pt, float eta, int passConversionVeto, float dz, MatchType matchType, EtaRegion etaRegion){
 
   bool pass = true;
 
@@ -546,3 +506,23 @@ void drawProgressBar(float progress){
 
   return;
 }
+
+
+// For electron ID tuning, use MATCH_TRUE with SAMPLE_DY
+// and MATCH_FAKE with SAMPLE_TT.
+// NOTE: kinematic weights are meaningful only for the combination DY/TRUE.
+// for all other choices of flags kinematic weights are 1.0
+int main(int argc, char *argv[]){
+  gROOT->SetBatch();
+
+  // Simply run all combinations, then we are sure all combinations are available for plotting
+  for(SampleType s : {SAMPLE_DY, SAMPLE_TT, SAMPLE_GJ}){
+    for(MatchType m : {MATCH_TRUE, MATCH_FAKE, MATCH_ANY}){
+      for(EtaRegion r : {ETA_EB, ETA_EE, ETA_FULL}){
+        convert_EventStrNtuple_To_FlatNtuple(s, m, r);
+      }
+    }
+  }
+}
+
+
