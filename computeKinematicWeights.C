@@ -3,6 +3,10 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH2D.h"
+#include <cassert>
+#include <TROOT.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 const TCut trueEleCut = "isTrue == 1";
 const TCut fakeEleCut = "isTrue == 0 || isTrue == 3";
@@ -23,12 +27,13 @@ const int nPtBins = 35; // Variable pt bins are actually used
 const bool smallEventCount = false;
 const int smallMaxEvents = 100000;
 
-//  Files IN 
-const TString fileNameS = "~/DYJetsToLL_cutID_tuning_92X_v1.root";
-const TString fileNameB = "~/TTJets_cutID_92X_v1.root";
+const TString getFileName(TString type){
+  return "/user/tomc/eleIdTuning/tuples/" + type + "_cutID_tuning_92X_v1.root";
+}
 // Tree Name (file IN):
 const TString treeName = "ntupler/ElectronTree";
 // File with weights OUT:
+const TString tagDir = "2017-11-07";
 const TString fileNameWeights = "kinematicWeights.root";
 
 // Forward declarations
@@ -42,8 +47,8 @@ void computeKinematicWeights(){
   //
   // Load the signal and background trees
   //
-  TTree *treeS = getTree(fileNameS, treeName);
-  TTree *treeB = getTree(fileNameB, treeName);
+  TTree *treeS = getTree(getFileName("DYJetsToLL"), treeName);
+  TTree *treeB = getTree(getFileName("TTJets"),     treeName);
 
   // 
   // Book weight histograms
@@ -108,7 +113,8 @@ void computeKinematicWeights(){
   hKinematicWeights->Draw("colz");
 
   // Write out the result
-  TFile *fout = new TFile(fileNameWeights, "recreate");
+  system("mkdir -p " + tagDir);
+  TFile *fout = new TFile(tagDir + "/" + fileNameWeights, "recreate");
   fout->cd();
   hPtEtaSignal->Write();
   hPtEtaBackground->Write();
@@ -133,3 +139,8 @@ TTree *getTree(TString fname, TString tname){
   return tree;
 }
 
+// Compiled
+int main(int argc, char *argv[]){
+  gROOT->SetBatch();
+  computeKinematicWeights();
+}
