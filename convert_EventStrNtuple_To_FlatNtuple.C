@@ -22,8 +22,6 @@
 #include <cassert>
 #include <TROOT.h>
 #include <vector>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "OptimizationConstants.hh"
 
@@ -49,12 +47,12 @@ const bool smallEventCount = false;
 const int maxEventsSmall = 1000000;
 
 // output dir of tuples
-const TString outDir = "2017-11-07";
+const TString tagDir = "2017-11-07";
 
 // Tree name input 
 const TString treeName = "ntupler/ElectronTree";
 // File and histogram with kinematic weights
-const TString fileNameWeights = "kinematicWeights-2017-11-03.root";
+const TString fileNameWeights = "kinematicWeights.root";
 const TString histNameWeights = "hKinematicWeights";
 
 // Effective areas for electrons derived by Ilya for Fall17
@@ -130,8 +128,7 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
   TString flatNtupleFileNameEvents = eventCountString();
   TString flatNtupleFileNameEnding = ".root";
 
-  system("mkdir -p " + outDir);
-  TString flatNtupleFileName = outDir + "/" + flatNtupleFileNameBase + flatNtupleFileNameTruth 
+  TString flatNtupleFileName = tagDir + "/" + flatNtupleFileNameBase + flatNtupleFileNameTruth 
     + flatNtupleFileNameEtas + flatNtupleFileNameEvents + flatNtupleFileNameEnding;
 
   // Open input file and find the tree
@@ -235,15 +232,14 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
   //
   // Get the histogram with kinematic weights
   //  
-  TFile *fweights = new TFile(fileNameWeights);
+  TFile *fweights = new TFile(tagDir + "/" + fileNameWeights);
   if( !fweights ){
-    printf("File with kinematic weights %s is not found\n", fileNameWeights.Data());
+    printf("File with kinematic weights %s is not found\n", tagDir + "/" + fileNameWeights.Data());
     assert(0);
   }
   TH2D *hKinematicWeights = (TH2D*)fweights->Get("hKinematicWeights");
   if( !hKinematicWeights ){
-    printf("The histogram %s is not found in file %s\n", 
-           histNameWeights.Data(), fileNameWeights.Data());
+    printf("The histogram %s is not found in file %s\n", histNameWeights.Data(), tagDir + "/" + fileNameWeights.Data());
     assert(0);
   }
   
@@ -515,14 +511,17 @@ void drawProgressBar(float progress){
 int main(int argc, char *argv[]){
   gROOT->SetBatch();
 
-  // Simply run all combinations, then we are sure all combinations are available for plotting
-  for(SampleType s : {SAMPLE_DY, SAMPLE_TT, SAMPLE_GJ}){
-    for(MatchType m : {MATCH_TRUE, MATCH_FAKE, MATCH_ANY}){
-      for(EtaRegion r : {ETA_EB, ETA_EE, ETA_FULL}){
-        convert_EventStrNtuple_To_FlatNtuple(s, m, r);
-      }
-    }
-  }
+  // For tuning
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_TRUE, ETA_EB);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_TRUE, ETA_EE);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_TT, MATCH_FAKE, ETA_EB);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_TT, MATCH_FAKE, ETA_EE);
+
+  // For plotting
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_TRUE, ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_ANY,  ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_TT, MATCH_ANY,  ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_GJ, MATCH_ANY,  ETA_FULL);
 }
 
 
