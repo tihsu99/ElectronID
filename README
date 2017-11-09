@@ -457,8 +457,8 @@ and eff(Nvtx). To define which of these is to be produced one needs
 to change the "mode" constant in the beginning of the script. 
    The script is run as follows:
 
-   .L drawEfficiency.C+
-   drawEfficiency()
+   root -b -q 'drawEfficiency.C(true)'
+   root -b -q 'drawEfficiency.C(false)'
 
 The output of the scripts is plots with names like:
 

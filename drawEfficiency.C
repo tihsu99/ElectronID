@@ -28,34 +28,33 @@ TString varName[3] = {"pt", "etaSC", "nPV"};
 
 Mode mode = EFF_PT; // If mode is EFF_ETA, set drawBarrel to true!
 
+TString dateTag = "2017-11-07";
 
 // File name with working point cuts
 const TString cutFileNamesBarrel[4] = { 
-  "./cut_repository/cuts_barrel_20171030_200000_WP_Veto.root",
-  "./cut_repository/cuts_barrel_20171030_200000_WP_Loose.root",
-  "./cut_repository/cuts_barrel_20171030_200000_WP_Medium.root",
-  "./cut_repository/cuts_barrel_20171030_200000_WP_Tight.root"
+  "./cut_repository/cuts_barrel_" + dateTag + "_WP_Veto.root",
+  "./cut_repository/cuts_barrel_" + dateTag + "_WP_Loose.root",
+  "./cut_repository/cuts_barrel_" + dateTag + "_WP_Medium.root",
+  "./cut_repository/cuts_barrel_" + dateTag + "_WP_Tight.root"
 };
 const TString cutFileNamesEndcap[4] = {
-  "./cut_repository/cuts_endcap_20171030_200000_WP_Veto.root",
-  "./cut_repository/cuts_endcap_20171030_200000_WP_Loose.root",
-  "./cut_repository/cuts_endcap_20171030_200000_WP_Medium.root",
-  "./cut_repository/cuts_endcap_20171030_200000_WP_Tight.root"
+  "./cut_repository/cuts_endcap_" + dateTag + "_WP_Veto.root",
+  "./cut_repository/cuts_endcap_" + dateTag + "_WP_Loose.root",
+  "./cut_repository/cuts_endcap_" + dateTag + "_WP_Medium.root",
+  "./cut_repository/cuts_endcap_" + dateTag + "_WP_Tight.root"
 };
-const TString *cutFileNames = drawBarrel ? cutFileNamesBarrel : cutFileNamesEndcap;
 
 
 // Cuts on expected missing hits are separate from VarCut cuts, tuned by hand.
 // These are summer 2016 values:
 const int missingHitsCutBarrel[Opt::nWP] = { 2, 1, 1, 1};
 const int missingHitsCutEndcap[Opt::nWP] = { 3, 1, 1, 1};
-const int *missingHitsCut = drawBarrel ? missingHitsCutBarrel : missingHitsCutEndcap;
 
 // Signal and background files
 // TString signalFileName = drawBarrel ? Opt::fnameSignalBarrel : Opt::fnameSignalEndcap;
 // TString backgroundFileName = drawBarrel ? Opt::fnameBackgroundBarrel : Opt::fnameBackgroundEndcap;
-TString signalFileName     = "DYJetsToLL_oct28_flat_ntuple_true_alleta_full.root";
-TString backgroundFileName = "TTJets_oct28_flat_ntuple_trueAndFake_alleta_full.root";
+TString signalFileName     = "DYJetsToLL_flat_ntuple_true_alleta_full.root";
+TString backgroundFileName = "TTJets_flat_ntuple_trueAndFake_alleta_full.root";
 
 
 // Histogram settings
@@ -95,7 +94,10 @@ void    setHistogram(TH1F *hist, int wp, bool isSignal);
 
 
 // Main function
-void drawEfficiency(){
+void drawEfficiency(bool drawBarrel){
+
+  const TString *cutFileNames = drawBarrel ? cutFileNamesBarrel : cutFileNamesEndcap;
+  const int *missingHitsCut = drawBarrel ? missingHitsCutBarrel : missingHitsCutEndcap;
 
   TTree *signalTree     = getTreeFromFile( signalFileName, Opt::signalTreeName);
   TTree *backgroundTree = getTreeFromFile( backgroundFileName, Opt::backgroundTreeName);
@@ -446,4 +448,3 @@ void    setHistogram(TH1F *hist, int wp, bool isSignal){
   hist->SetMarkerColor(color);
 
 }
-
