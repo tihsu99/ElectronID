@@ -402,15 +402,13 @@ weights that TMVA used to tune the cuts.
   To run the script to draw the ROC and the working points one needs to
 run from ROOT prompt in the main package directory:
 
-  .L drawROCandWPv4.C+
-  drawROCandWPv4()
+  root -b -q 'drawROCandWPv4.C(true)'
+  root -b -q 'drawROCandWPv4.C(false)'
 
 The output, a presentation-grade figure, is saved into a file with the 
 name like
 
-   figures/plot_ROCandWP_barrel_27july.png
-
-(change the date string in the script to the desired one).
+   figures/plot_ROCandWP_barrel.png
 
 c) Draw distributions of all ID variables. This script draws distributions
 of all ID variables and overlays cuts for all working points. 
