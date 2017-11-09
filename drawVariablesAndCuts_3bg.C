@@ -67,7 +67,7 @@ TCanvas * drawOneVariable(TTree *signalTree,
         TCut signalCuts, TCut backgroundCuts,
         TString var, int nbins, double xlow, double xhigh,
         TString sigLegend, TString bg1Legend, TString bg2Legend,TString bg3Legend,
-        TString comment);
+        TString comment, bool logY);
 
 void overlayCuts(TCanvas *canvas, TString variable, bool drawBarrel);
 
@@ -87,6 +87,7 @@ struct VarPlotSettings {
 // Main function
 //
 void drawVariablesAndCuts_3bg(bool drawBarrel){
+ for(bool logY : {false, true}){
   //
   // Open files
   //
@@ -163,17 +164,16 @@ void drawVariablesAndCuts_3bg(bool drawBarrel){
     c1 = drawOneVariable(signalTree, signalTree, backgroundTree,backgroundTreeAdditional,
        		 signalCuts, backgroundCuts,
        		 variable, nbins, xmin, xmax,
-       		 "signal DYJetsToLL", "fakes from DYJetsToLL", "fakes from TTJets","fakes from GJets" ,comment);
+       		 "signal DYJetsToLL", "fakes from DYJetsToLL", "fakes from TTJets","fakes from GJets" ,comment, logY);
     if(doOverlayCuts) overlayCuts(c1, variable, drawBarrel);
 
     TString outname = (TString) "figures/plot_" + (drawBarrel ? "barrel" : "endcap") + "_3BGs_";
     outname += variable;
+    if(logY) outname += "_log";
     outname += ".png";
     c1->Print(outname);
   }
-
-
-  
+ }
 }
 
 TCanvas *drawOneVariable(TTree *signalTree, TTree *backgroundTree1, TTree *backgroundTree2,TTree *backgroundTree3,
@@ -181,13 +181,14 @@ TCanvas *drawOneVariable(TTree *signalTree, TTree *backgroundTree1, TTree *backg
        		 TString var,
        		 int nbins, double xlow, double xhigh,
        		 TString sigLegend, TString bg1Legend, TString bg2Legend,TString bg3Legend,
-       		 TString comment)
+       		 TString comment, bool logY)
 {
 
   TString cname = "c_";
   cname += var;
   TCanvas *c1 = new TCanvas(cname,cname,10,10,600,600);
   c1->cd();
+  if(logY) c1->SetLogy();
 
   TH1F *hsig = new TH1F(TString("hsig_")+var,"",nbins, xlow, xhigh);
   TH1F *hbg1 = new TH1F(TString("hbg1_")+var,"",nbins, xlow, xhigh);
