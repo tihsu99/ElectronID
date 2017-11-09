@@ -17,6 +17,7 @@
 const bool useSmallEventCount = false;
 // Draw barrel or endcap
 const bool drawBarrel = true;
+const TString dateTag = "2017-11-07";
 
 const bool doOverlayCuts = true;
 
@@ -25,32 +26,29 @@ const bool doOverlayCuts = true;
 // content of this array is ignored).
 const TString cutFileNamesBarrel[4] = { 
   // only WP Veto was optimized with the exercise purpose
-  "./cut_repository/cuts_barrel_20171030_200000_WP_Veto.root",
-  "./cut_repository/cuts_barrel_20171030_200000_WP_Loose.root",
-  "./cut_repository/cuts_barrel_20171030_200000_WP_Medium.root",
-  "./cut_repository/cuts_barrel_20171030_200000_WP_Tight.root"
+  "./cut_repository/cuts_barrel_" + dateTag + "_WP_Veto.root",
+  "./cut_repository/cuts_barrel_" + dateTag + "_WP_Loose.root",
+  "./cut_repository/cuts_barrel_" + dateTag + "_WP_Medium.root",
+  "./cut_repository/cuts_barrel_" + dateTag + "_WP_Tight.root"
 };
 const TString cutFileNamesEndcap[4] = {
   // for aestetics purpose, switch to real endcap files, once they are made
-  "./cut_repository/cuts_endcap_20171030_200000_WP_Veto.root",
-  "./cut_repository/cuts_endcap_20171030_200000_WP_Loose.root",
-  "./cut_repository/cuts_endcap_20171030_200000_WP_Medium.root",
-  "./cut_repository/cuts_endcap_20171030_200000_WP_Tight.root"
+  "./cut_repository/cuts_endcap_" + dateTag + "_WP_Veto.root",
+  "./cut_repository/cuts_endcap_" + dateTag + "_WP_Loose.root",
+  "./cut_repository/cuts_endcap_" + dateTag + "_WP_Medium.root",
+  "./cut_repository/cuts_endcap_" + dateTag + "_WP_Tight.root"
 };
 
 // Cuts on expected missing hits are separate from VarCut cuts, tuned by hand.
 // These are summer 2016 values:
 const int missingHitsBarrel[Opt::nWP] = { 2, 1, 1, 1};
 const int missingHitsEndcap[Opt::nWP] = { 3, 1, 1, 1};
-const int *missingHitsCut = drawBarrel ? missingHitsBarrel : missingHitsEndcap;
 //
 const float d0Barrel[Opt::nWP] = {0.05, 0.05, 0.05, 0.05};
 const float d0Endcap[Opt::nWP] = {0.10, 0.10, 0.10, 0.10};
-const float *d0Cut = drawBarrel ? d0Barrel : d0Endcap;
 //
 const float dzBarrel[Opt::nWP] = {0.10, 0.10, 0.10, 0.10};
 const float dzEndcap[Opt::nWP] = {0.20, 0.20, 0.20, 0.20};
-const float *dzCut = drawBarrel ? dzBarrel : dzEndcap;
 
 static Int_t c_Canvas         = TColor::GetColor( "#f0f0f0" );
 static Int_t c_FrameFill      = TColor::GetColor( "#fffffd" );
@@ -65,14 +63,13 @@ static Int_t c_NovelBlue      = TColor::GetColor( "#2244a5" );
 
 // Forward declaraitons
 TCanvas * drawOneVariable(TTree *signalTree, 
-			  TTree *backgroundTree1, TTree *backgroundTree2,TTree *backgroundTreeAdditional,
-			  TCut signalCuts, TCut backgroundCuts,
-			  TString var,
-			  int nbins, double xlow, double xhigh,
-			  TString sigLegend, TString bg1Legend, TString bg2Legend,TString bg3Legend,
-			  TString comment);
+        TTree *backgroundTree1, TTree *backgroundTree2,TTree *backgroundTreeAdditional,
+        TCut signalCuts, TCut backgroundCuts,
+        TString var, int nbins, double xlow, double xhigh,
+        TString sigLegend, TString bg1Legend, TString bg2Legend,TString bg3Legend,
+        TString comment);
 
-void overlayCuts(TCanvas *canvas, TString variable);
+void overlayCuts(TCanvas *canvas, TString variable, bool drawBarrel);
 
 void setHistogramAttributes(TH1F *hsig, TH1F *hbg1, TH1F *hbg2, TH1F *hbg3);
 
@@ -89,32 +86,24 @@ struct VarPlotSettings {
 //
 // Main function
 //
-void drawVariablesAndCuts_3bg(){
+void drawVariablesAndCuts_3bg(bool drawBarrel){
   //
   // Open files
   //
-  // The if statement allows for the possibility of having separate flat ntuples
-  // for barrel and endcap
-  TString fname1 = "DYJetsToLL_oct28_flat_ntuple_trueAndFake_alleta_full.root";
-  if( !drawBarrel )
-    fname1 = "DYJetsToLL_oct28_flat_ntuple_trueAndFake_alleta_full.root";
-  TFile *input1 = new TFile( fname1 );
+  TString fname1 = "DYJetsToLL_flat_ntuple_trueAndFake_alleta_full.root";
+  TFile  *input1 = new TFile( fname1 );
   //  input1->cd("wp3");
-  TTree *signalTree     = (TTree*) input1->Get("electronTree");
+  TTree *signalTree = (TTree*) input1->Get("electronTree");
 
-  // The if statement allows for the possibility of having separate flat ntuples
-  // for barrel and endcap
-  TString fname2 = "TTJets_oct28_flat_ntuple_trueAndFake_alleta_full.root";
-  if( !drawBarrel )
-    fname2 = "TTJets_oct28_flat_ntuple_trueAndFake_alleta_full.root";
-  TFile *input2 = new TFile( fname2 );
+  TString fname2 = "TTJets_flat_ntuple_trueAndFake_alleta_full.root";
+  TFile  *input2 = new TFile( fname2 );
   //  input2->cd("wp3");
-  TTree *backgroundTree     = (TTree*) input2->Get("electronTree");
+  TTree *backgroundTree = (TTree*) input2->Get("electronTree");
   
-  TString fname3 = "GJet_DoubleEM_oct28_flat_ntuple_trueAndFake_alleta_full.root";
+  TString fname3 = "GJet_DoubleEM_flat_ntuple_trueAndFake_alleta_full.root";
   TFile *input3 = new TFile( fname3 );
   //  input3->cd("wp3");
-  TTree *backgroundTreeAdditional     = 0;
+  TTree *backgroundTreeAdditional = 0;
   if( input3 )
     backgroundTreeAdditional = (TTree*) input3->Get("electronTree");
  
@@ -172,15 +161,12 @@ void drawVariablesAndCuts_3bg(){
     xmin = vPlotSettings.at(i)->xmin;
     xmax = vPlotSettings.at(i)->xmax;
     c1 = drawOneVariable(signalTree, signalTree, backgroundTree,backgroundTreeAdditional,
-			 signalCuts, backgroundCuts,
-			 variable, nbins, xmin, xmax,
-			 "signal DYJetsToLL", "fakes from DYJetsToLL", "fakes from TTJets","fakes from GJets" ,comment);
-    if( doOverlayCuts )
-      overlayCuts(c1, variable);
+       		 signalCuts, backgroundCuts,
+       		 variable, nbins, xmin, xmax,
+       		 "signal DYJetsToLL", "fakes from DYJetsToLL", "fakes from TTJets","fakes from GJets" ,comment);
+    if(doOverlayCuts) overlayCuts(c1, variable, drawBarrel);
 
-    TString outname = "figures/plot_barrel_3BGs_";
-    if( !drawBarrel )
-      outname = "figures/plot_endcap_3BGs_";
+    TString outname = (TString) "figures/plot_" + (drawBarrel ? "barrel" : "endcap") + "_3BGs_";
     outname += variable;
     outname += ".png";
     c1->Print(outname);
@@ -191,11 +177,11 @@ void drawVariablesAndCuts_3bg(){
 }
 
 TCanvas *drawOneVariable(TTree *signalTree, TTree *backgroundTree1, TTree *backgroundTree2,TTree *backgroundTree3,
-			 TCut signalCuts, TCut backgroundCuts,
-			 TString var,
-			 int nbins, double xlow, double xhigh,
-			 TString sigLegend, TString bg1Legend, TString bg2Legend,TString bg3Legend,
-			 TString comment)
+       		 TCut signalCuts, TCut backgroundCuts,
+       		 TString var,
+       		 int nbins, double xlow, double xhigh,
+       		 TString sigLegend, TString bg1Legend, TString bg2Legend,TString bg3Legend,
+       		 TString comment)
 {
 
   TString cname = "c_";
@@ -272,18 +258,10 @@ TCanvas *drawOneVariable(TTree *signalTree, TTree *backgroundTree1, TTree *backg
   c1->Clear();
 
   hsig->Draw("hist");
-  if( hbg1 ){
+  if(hbg1) hbg1->Draw("hist,same");
+  if(hbg2) hbg2->Draw("hist,same");
+  if(hbg3) hbg3->Draw("hist,same");
 
-    hbg1->Draw("hist,same");
-  }
-  if( hbg2 ){
-
-    hbg2->Draw("hist,same");
-  }
-  if( hbg3 ){
-
-    hbg3->Draw("hist,same");
-  }
   TLegend *leg = new TLegend(0.55, 0.65, 0.95, 0.80); // 0.6 0.9
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
@@ -350,13 +328,9 @@ void setHistogramAttributes(TH1F *hsig, TH1F *hbg1, TH1F *hbg2, TH1F * hbg3){
     hbg3->SetFillStyle( 3018 );
     hbg3->SetFillColor( kMagenta+2 );
   }
-
-
-
-  
 }
 
-void overlayCuts(TCanvas *canvas, TString variable){
+void overlayCuts(TCanvas *canvas, TString variable, bool drawBarrel){
 
   canvas->cd();
   double ymax = canvas->GetPad(0)->GetUymax();
@@ -375,6 +349,9 @@ void overlayCuts(TCanvas *canvas, TString variable){
   //
   float cutVal[Opt::nWP];
   bool symmetric = false;
+  const int *missingHitsCut = drawBarrel ? missingHitsBarrel : missingHitsEndcap;
+  const float *d0Cut = drawBarrel ? d0Barrel : d0Endcap;
+  const float *dzCut = drawBarrel ? dzBarrel : dzEndcap;
   if( variable == "expectedMissingInnerHits"){
     // Special treatment for missing hits
     printf("\nNOTE: the missing hits cuts are not taken from optimization, but are added by hand!\n\n");
@@ -400,24 +377,18 @@ void overlayCuts(TCanvas *canvas, TString variable){
     // Process a regular cut, look up cut values for all working points
     // Only four working points are listed in the array of file names 
     // in the beginning of this file.
-    if( Opt::nWP != 4 )
-      assert(0);
+    if( Opt::nWP != 4 ) assert(0);
     // Pull up the cuts
     for(int iwp=0; iwp<Opt::nWP; iwp++){
       TString cutFileName = "";
-      if( drawBarrel )
-	cutFileName = cutFileNamesBarrel[iwp];
-      else
-	cutFileName = cutFileNamesEndcap[iwp];
+      if( drawBarrel ) cutFileName = cutFileNamesBarrel[iwp];
+      else             cutFileName = cutFileNamesEndcap[iwp];
       TFile *fcut = new TFile(cutFileName);
-      if( !fcut )
-	assert(0);
+      if( !fcut) assert(0);
       VarCut *thisCut = (VarCut*)fcut->Get("cuts");
-      if( !thisCut )
-	assert(0);
+      if( !thisCut ) assert(0);
       cutVal[iwp] = thisCut->getCutValue(variable);
-      if (variable == "expectedMissingInnerHits") 
-	cutVal[iwp] = int(cutVal[iwp]);
+      if (variable == "expectedMissingInnerHits") cutVal[iwp] = int(cutVal[iwp]);
       // This flag below is overwritten every iteration, but that's ok
       // since all cuts of the same set should be the same wrt this.
       symmetric = thisCut->isSymmetric(variable);
@@ -451,11 +422,11 @@ void overlayCuts(TCanvas *canvas, TString variable){
       arYmin = ymax*0.35 + ymax*i*0.05;
       arYmax = 0;
       if( -cutVal[i] < xmin ){
-	// Make the error horizontal instead
-	float xwindow = xmax-xmin;
-	arXmin = xmin + (0.08+0.04*i)*xwindow;
-	arXmax = xmin;
-	arYmin = arYmax = ymax*(0.50 + i*0.05);
+        // Make the error horizontal instead
+        float xwindow = xmax-xmin;
+        arXmin = xmin + (0.08+0.04*i)*xwindow;
+        arXmax = xmin;
+        arYmin = arYmax = ymax*(0.50 + i*0.05);
       }
       arrowLower[i] = new TArrow(arXmin, arYmin, arXmax, arYmax, 0.05, "|->");
       arrowLower[i]->SetLineWidth(2);
@@ -466,7 +437,3 @@ void overlayCuts(TCanvas *canvas, TString variable){
 
   canvas->Update();
 }
-
-
-
-

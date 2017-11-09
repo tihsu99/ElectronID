@@ -425,8 +425,8 @@ from the GJet_something sample (which is jets or energetic photons faking
 electrons).
    Run this script as:
 
-  .L drawVariablesAndCuts_3bg.C+
-  drawVariablesAndCuts_3bg()
+  root -b -q 'drawVariablesAndCuts_3bg.C(true)'
+  root -b -q 'drawVariablesAndCuts_3bg.C(false)'
 
 The output of the script, plots for a presentation, goes to files like:
 
@@ -444,7 +444,7 @@ Note that some distributions might be better displayed in the log-Y mode.
 For that, one can change the script or just change it interactively on
 the desired canvas and save the figure manually.
 
-c) Draw the ID efficiencies as a function of pt, eta, and the number
+d) Draw the ID efficiencies as a function of pt, eta, and the number
 of vertices.
    One needs to check that the flat ntuple names of the input are right
 in the script. The barrel/endcap flag in the beginning of the script 
