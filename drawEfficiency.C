@@ -87,11 +87,21 @@ const TString *bgLegString = scaleBackground ? bgLegStringScaled : bgLegStringUn
 
 // Forward declarations
 TTree * getTreeFromFile(TString fname, TString tname);
-void    calculateEffAndErrors(TH1F *numHist, TH1F *denomHist, TH1F *&ehist);
+TH1F*   calculateEffAndErrors(TH1F *numHist, TH1F *denHist, TString eName, double* binLimits);
 double *getPtBinLimits(int &nBins, bool longPtRange);
 double *getEtaBinLimits(int &nBins);
 double *getNvtxBinLimits(int &nBins);
 void    setHistogram(TH1F *hist, int wp, bool isSignal);
+
+// Get histogram for selectionsCuts and varName into histName
+TH1F* drawFromTree(TTree* tree, TCut selectionCuts, TString varName, TString histName, int nBins, double* binLimits, int maxEvents){
+  TH1F* hist = new TH1F(histName , histName, nBins, binLimits);
+  hist->Sumw2();
+  TString cutString = TString::Format("genWeight*kinWeight*(%s)", selectionCuts.GetTitle());
+  TString command    = TString::Format("%s>>%s", varName.Data(), histName.Data());
+  tree->Draw(command, cutString, "goff", maxEvents);
+  return hist;
+}
 
 
 // Main function
@@ -190,17 +200,16 @@ void drawEfficiency(bool drawBarrel){
     wpCuts[i] = *(wpCutsObject[i]->getCut());
     fileCut[i]->Close();
     // 
-   fileCutBarrel[i] = new TFile( cutFileNamesBarrel[i] );
-   wpCutsObject[i] = (VarCut*)fileCutBarrel[i]->Get("cuts");
-   wpCutsBarrel[i] = *(wpCutsObject[i]->getCut());
-   fileCutBarrel[i]->Close();
-   //
-   fileCutEndcap[i] = new TFile( cutFileNamesEndcap[i] );
-   wpCutsObject[i] = (VarCut*)fileCutEndcap[i]->Get("cuts");
-   wpCutsEndcap[i] = *(wpCutsObject[i]->getCut());
-   fileCutEndcap[i]->Close();
-   
- }
+    fileCutBarrel[i] = new TFile( cutFileNamesBarrel[i] );
+    wpCutsObject[i] = (VarCut*)fileCutBarrel[i]->Get("cuts");
+    wpCutsBarrel[i] = *(wpCutsObject[i]->getCut());
+    fileCutBarrel[i]->Close();
+    //
+    fileCutEndcap[i] = new TFile( cutFileNamesEndcap[i] );
+    wpCutsObject[i] = (VarCut*)fileCutEndcap[i]->Get("cuts");
+    wpCutsEndcap[i] = *(wpCutsObject[i]->getCut());
+    fileCutEndcap[i]->Close();
+  }
 
   for(int i=0; i<Opt::nWP; i++){
   //for(int i=0; i<2; i++){
@@ -210,23 +219,25 @@ void drawEfficiency(bool drawBarrel){
     TString sigNumHistName = TString::Format("sigNum_wp%d", i);
     TString sigDenHistName = TString::Format("sigDen_wp%d", i);
     TString sigEffHistName = TString::Format("sigEff_wp%d", i);
+    /*
     sigNum[i] = new TH1F(sigNumHistName , sigNumHistName, nBins, binLimits);
     sigDen[i] = new TH1F(sigDenHistName , sigDenHistName, nBins, binLimits);
     sigEff[i] = new TH1F(sigEffHistName , sigEffHistName, nBins, binLimits);
     sigNum[i]->Sumw2();
     sigDen[i]->Sumw2();
     sigEff[i]->Sumw2();
-
+*/
     TString bgNumHistName = TString::Format("bgNum_wp%d", i);
     TString bgDenHistName = TString::Format("bgDen_wp%d", i);
     TString bgEffHistName = TString::Format("bgEff_wp%d", i);
+    /*
     bgNum[i] = new TH1F(bgNumHistName, bgNumHistName, nBins, binLimits);
     bgDen[i] = new TH1F(bgDenHistName, bgDenHistName, nBins, binLimits);
     bgEff[i] = new TH1F(bgEffHistName, bgEffHistName, nBins, binLimits);
     bgNum[i]->Sumw2();
     bgDen[i]->Sumw2();
     bgEff[i]->Sumw2();
-
+*/
     // Set up cuts
     TCut selectionCuts;
     TCut missingHits;
@@ -235,49 +246,33 @@ void drawEfficiency(bool drawBarrel){
       selectionCuts += wpCuts[i];
       missingHits = TString::Format("expectedMissingInnerHits<=%d", missingHitsCut[i]).Data();
       selectionCuts = selectionCuts && missingHits;
-    }else{
+    } else {
       TCut selectionCutsBarrel;
       selectionCutsBarrel += wpCutsBarrel[i];
       TCut missingHitsBarrel = TString::Format("expectedMissingInnerHits<=%d", missingHitsCutBarrel[i]).Data();
-      selectionCutsBarrel = selectionCutsBarrel && missingHitsBarrel;
-      selectionCutsBarrel = selectionCutsBarrel && Opt::etaCutBarrel;
-      //
+      selectionCutsBarrel = selectionCutsBarrel && missingHitsBarrel && Opt::etaCutBarrel;
+
       TCut selectionCutsEndcap = wpCutsEndcap[i];
       TCut missingHitsEndcap = TString::Format("expectedMissingInnerHits<=%d", missingHitsCutEndcap[i]).Data();;
-      selectionCutsEndcap = selectionCutsEndcap && missingHitsEndcap;
-      selectionCutsEndcap = selectionCutsEndcap && Opt::etaCutEndcap;
+      selectionCutsEndcap = selectionCutsEndcap && missingHitsEndcap && Opt::etaCutEndcap;
       //
       selectionCuts = (selectionCutsBarrel) || (selectionCutsEndcap);
     }    
 
     TString command;
     // Signal numerator and denominator
-    TString sigCutsStringNum = TString::Format("genWeight*kinWeight*(%s)", (selectionCuts && signalCuts).GetTitle());
-    TString sigCutsStringDen = TString::Format("genWeight*kinWeight*(%s)", (signalCuts).GetTitle());
-    command = TString::Format("%s>>%s", varName[mode].Data(), sigNumHistName.Data());
-    signalTree->Draw(command, sigCutsStringNum, "goff", maxEventsS);
-
-    command = TString::Format("%s>>%s",  varName[mode].Data(), sigDenHistName.Data());
-    signalTree->Draw(command, sigCutsStringDen, "goff", maxEventsS);
-    // printf("Command %s\n", command.Data());
-    // printf("Cuts: %s\n", sigCutsStringDen.Data());
-
-    // Background numerator and denominator
-    TString bgCutsStringNum = TString::Format("genWeight*kinWeight*(%s)", (selectionCuts && backgroundCuts).GetTitle());
-    TString bgCutsStringDen = TString::Format("genWeight*kinWeight*(%s)", (backgroundCuts).GetTitle());
-    command = TString::Format("%s>>%s",  varName[mode].Data(), bgNumHistName.Data());
-    backgroundTree->Draw(command, bgCutsStringNum, "goff", maxEventsB);
-
-    command = TString::Format("%s>>%s",  varName[mode].Data(), bgDenHistName.Data());
-    backgroundTree->Draw(command, bgCutsStringDen, "goff", maxEventsB);
+    sigNum[i] = drawFromTree(signalTree,     (selectionCuts && signalCuts),     varName[mode], TString::Format("sigNum_wp%d", i), nBins, binLimits, maxEventsS);
+    sigDen[i] = drawFromTree(signalTree,     (signalCuts),                      varName[mode], TString::Format("sigDen_wp%d", i), nBins, binLimits, maxEventsS);
+    bgNum[i]  = drawFromTree(backgroundTree, (selectionCuts && backgroundCuts), varName[mode], TString::Format("bgNum_wp%d", i),  nBins, binLimits, maxEventsB);
+    bgDen[i]  = drawFromTree(backgroundTree, (backgroundCuts),                  varName[mode], TString::Format("bgDen_wp%d", i),  nBins, binLimits, maxEventsB);
 
     // Compute efficiencies
-    calculateEffAndErrors(sigNum[i], sigDen[i], sigEff[i]);
     if( scaleBackground ){
       printf("\n\nSCALE BACKGROUND EFF BY x5\n\n");
       bgNum[i]->Scale(5);
     }
-    calculateEffAndErrors(bgNum[i], bgDen[i], bgEff[i]);
+    sigEff[i] = calculateEffAndErrors(sigNum[i], sigDen[i], TString::Format("sigEff_wp%d", i), binLimits);
+    bgEff[i]  = calculateEffAndErrors(bgNum[i],  bgDen[i],  TString::Format("bgEff_wp%d", i),  binLimits);
 
     setHistogram(sigEff[i], i, true);
     setHistogram( bgEff[i], i, false);
@@ -336,10 +331,13 @@ TTree *getTreeFromFile(TString fname, TString tname){
   return tree;
 }
 
-void calculateEffAndErrors(TH1F *numHist, TH1F *denHist, TH1F *&ehist){
+TH1F* calculateEffAndErrors(TH1F *numHist, TH1F *denHist, TString eName, double* binLimits){
+  int nBins = numHist->GetNbinsX();
+
+  TH1F* ehist = new TH1F(eName, eName, nBins, binLimits);
+  ehist->Sumw2();
 
   //ehist->Divide(denomHist);
-  int nBins = ehist->GetNbinsX();
   for(int i=1;i<=nBins;++i){
     //
     double eff = 0.0;
@@ -354,20 +352,15 @@ void calculateEffAndErrors(TH1F *numHist, TH1F *denHist, TH1F *&ehist){
 
     if( den != 0 ){
       eff = num/den;
-
       if( num != 0 )    effErr2 = (num*num*den*den)/(tot*tot*tot*tot) * ( numErr*numErr/(num*num) + denErr*denErr/(den*den) );
       if( effErr2 < 0 ) effErr2 = 0;
-
       effErr = sqrt(effErr2);
     }
 
     ehist->SetBinContent(i, eff);
     ehist->SetBinError(i, effErr);
-
-    // printf("num=%f, denom=%f, eff=%f\n", numHist->GetBinContent(i), denomHist->GetBinContent(i), effSignal);
-
   }
-  
+  return ehist;
 }
 
 void addBins(int &nBins, double step, int times){
@@ -398,9 +391,7 @@ double *getEtaBinLimits(int &nBins){
   double xmax = 2.5;
   double delta = (xmax - xmin)/nBins;
   
-  for(int i=0; i<=nBins; i++){
-    etaBinLimits[i] = xmin + i*delta;
-  }
+  for(int i=0; i<=nBins; i++) etaBinLimits[i] = xmin + i*delta;
   return etaBinLimits;
 }
 
@@ -409,14 +400,10 @@ double *getNvtxBinLimits(int &nBins){
   return nvtxBinLimits;
 }
 
-void    setHistogram(TH1F *hist, int wp, bool isSignal){
-
+void setHistogram(TH1F *hist, int wp, bool isSignal){
   int color = 0;
-  if( isSignal ){
-    color = sigColors[wp];
-  }else{
-    color = bgColors[wp];
-  }
+  if( isSignal ) color = sigColors[wp];
+  else           color = bgColors[wp];
 
   hist->SetLineColor(color);
   hist->SetLineWidth(2);
