@@ -26,7 +26,7 @@
 #include "OptimizationConstants.hh"
 
 enum MatchType  {MATCH_TRUE, MATCH_FAKE, MATCH_ANY};
-enum SampleType {SAMPLE_UNDEF, SAMPLE_DY, SAMPLE_TT, SAMPLE_GJ};
+enum SampleType {SAMPLE_UNDEF, SAMPLE_DY, SAMPLE_TT, SAMPLE_GJ, SAMPLE_DoubleEle1to300, SAMPLE_DoubleEle300to6500};
 enum EtaRegion  {ETA_EB, ETA_EE, ETA_FULL};
 
 const TString getFileName(TString type){
@@ -45,7 +45,6 @@ const float boundaryEBEE = 1.479;
 const bool talkativeRegime = true;
 const bool smallEventCount = false;   
 const int maxEventsSmall = 1000000;
-
 // output dir of tuples
 const TString tagDir = "2017-11-07";
 
@@ -85,10 +84,22 @@ bool    passPreselection(int isTrue, float pt, float eta, int passConversionVeto
 TString eventCountString();
 void    drawProgressBar(float progress);
 
+float getEntries(TString inputFileName){
+  TFile *file   = new TFile(inputFileName);
+  TTree *tree   = (TTree*)file->Get(treeName);
+  float entries = tree->GetEntries();
+  delete tree;
+  delete file;
+  return entries;
+}
+
 //
 // Main program
 //
 void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType, EtaRegion etaRegion){
+  int N_1to300    = getEntries(getFileName("DoubleEleFlat1to300"));
+  int N_300to6500 = getEntries(getFileName("DoubleEleFlat300to6500"));
+
 
   bazinga("Start main function");
 
@@ -104,9 +115,11 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
   // Input/output file names
   TString inputFileName = "";
   TString flatNtupleFileNameBase = "Undefined";
-  if(sample == SAMPLE_DY)        inputFileName = "DYJetsToLL";
-  else if( sample == SAMPLE_TT ) inputFileName = "TTJets";
-  else if( sample == SAMPLE_GJ ) inputFileName = "GJet_DoubleEM";
+  if(sample == SAMPLE_DY)                        inputFileName = "DYJetsToLL";
+  else if( sample == SAMPLE_TT )                 inputFileName = "TTJets";
+  else if( sample == SAMPLE_GJ )                 inputFileName = "GJet_DoubleEM";
+  else if( sample == SAMPLE_DoubleEle1to300 )    inputFileName = "DoubleEleFlat1to300";
+  else if( sample == SAMPLE_DoubleEle300to6500 ) inputFileName = "DoubleEleFlat300to6500";
   else {
     printf("Unknown sample requested\n");
     assert(0);
@@ -114,6 +127,17 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
 
   flatNtupleFileNameBase = inputFileName + "_flat_ntuple";
   inputFileName          = getFileName(inputFileName);
+
+  TFile *inputFile = new TFile(inputFileName);
+  if(!inputFile ){
+    printf("Failed to open input file %s\n", inputFileName.Data());
+    assert(0);
+  }
+  TTree *treeIn = (TTree*)inputFile->Get(treeName);
+  if( !treeIn ){
+    printf("Failed to find tree %s in the file %s\n", treeName.Data(), inputFileName.Data());
+    assert(0);
+  }
 
   TString flatNtupleFileNameTruth = "";
   if(matchType == MATCH_TRUE)      flatNtupleFileNameTruth = "_true";
@@ -131,17 +155,6 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
   TString flatNtupleFileName = tagDir + "/" + flatNtupleFileNameBase + flatNtupleFileNameTruth 
     + flatNtupleFileNameEtas + flatNtupleFileNameEvents + flatNtupleFileNameEnding;
 
-  // Open input file and find the tree
-  TFile *inputFile = new TFile(inputFileName);
-  if( !inputFile ){
-    printf("Failed to open input file %s\n", inputFileName.Data());
-    assert(0);
-  }
-  TTree *treeIn = (TTree*)inputFile->Get(treeName);
-  if( !treeIn ){
-    printf("Failed to find tree %s in the file %s\n", treeName.Data(), inputFileName.Data());
-    assert(0);
-  }
 
   // Open output file
   TFile *fileOut = new TFile(flatNtupleFileName, "recreate");
@@ -348,6 +361,7 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
       etaSC_ = eleEtaSC->at(iele);
       // Reweight only signal electron of the DY sample
       if(sample == SAMPLE_DY && matchType == MATCH_TRUE) kweight_ = findKinematicWeight(hKinematicWeights, pt_, etaSC_);
+      else if(sample == SAMPLE_DoubleEle300to6500)       kweight_ = (6500 - 300)/(300 - 1)*N_1to300/N_300to6500;
       else                                               kweight_ = 1;
 
       dEtaSeed_ = eleDEtaSeed->at(iele);
@@ -393,6 +407,8 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
   bazinga("I'm finished with calculation, here is the info from dBenchmark:");  
 //  printf("\n");  gBenchmark->Show("Timing");  // get timing info
 } // end of main fcn
+
+
 
 float findKinematicWeight(TH2D *hist, float pt, float etaSC){
   
@@ -510,7 +526,7 @@ void drawProgressBar(float progress){
 // for all other choices of flags kinematic weights are 1.0
 int main(int argc, char *argv[]){
   gROOT->SetBatch();
-
+/*
   // For tuning
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_TRUE, ETA_EB);
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_TRUE, ETA_EE);
@@ -521,7 +537,9 @@ int main(int argc, char *argv[]){
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_TRUE, ETA_FULL);
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_ANY,  ETA_FULL);
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_TT, MATCH_ANY,  ETA_FULL);
-  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_GJ, MATCH_ANY,  ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_GJ, MATCH_ANY,  ETA_FULL);*/
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle1to300,    MATCH_ANY,  ETA_FULL);
+  //convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle300to6500, MATCH_ANY,  ETA_FULL);
 }
 
 

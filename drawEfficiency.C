@@ -21,12 +21,13 @@ const bool useSmallEventCount = false;
 
 // Draw barrel or endcap
 const bool drawBarrel = true;
+const bool longPtRange = true;
 const bool scaleBackground = false;
 
-enum Mode {EFF_PT=0, EFF_ETA, EFF_NVTX};
-TString varName[3] = {"pt", "etaSC", "nPV"};
+enum Mode {EFF_PT=0, EFF_PT_2TEV, EFF_ETA, EFF_NVTX};
+TString varName[4] = {"pt", "pt", "etaSC", "nPV"};
 
-Mode mode = EFF_PT; // If mode is EFF_ETA, set drawBarrel to true!
+Mode mode = EFF_PT_2TEV; // If mode is EFF_ETA, set drawBarrel to true!
 
 TString dateTag = "2017-11-07";
 
@@ -87,7 +88,7 @@ const TString *bgLegString = scaleBackground ? bgLegStringScaled : bgLegStringUn
 // Forward declarations
 TTree * getTreeFromFile(TString fname, TString tname);
 void    calculateEffAndErrors(TH1F *numHist, TH1F *denomHist, TH1F *&ehist);
-double *getPtBinLimits(int &nBins);
+double *getPtBinLimits(int &nBins, bool longPtRange);
 double *getEtaBinLimits(int &nBins);
 double *getNvtxBinLimits(int &nBins);
 void    setHistogram(TH1F *hist, int wp, bool isSignal);
@@ -99,8 +100,9 @@ void drawEfficiency(bool drawBarrel){
   const TString *cutFileNames = drawBarrel ? cutFileNamesBarrel : cutFileNamesEndcap;
   const int *missingHitsCut = drawBarrel ? missingHitsCutBarrel : missingHitsCutEndcap;
 
-  TTree *signalTree     = getTreeFromFile( signalFileName, Opt::signalTreeName);
-  TTree *backgroundTree = getTreeFromFile( backgroundFileName, Opt::backgroundTreeName);
+  if(mode == EFF_PT_2TEV) signalFileName = "DoubleEleFlat_flat_ntuple_trueAndFake_alleta_full.root";
+  TTree *signalTree     = getTreeFromFile( dateTag + "/" + signalFileName, Opt::signalTreeName);
+  TTree *backgroundTree = getTreeFromFile( dateTag + "/" + backgroundFileName, Opt::backgroundTreeName);
 
   int maxEventsS = signalTree->GetEntries();
   int maxEventsB = signalTree->GetEntries();
@@ -127,8 +129,8 @@ void drawEfficiency(bool drawBarrel){
   int nBins;
   double *binLimits = nullptr;
   TString axisLabel = "";
-  if( mode == EFF_PT){
-    binLimits = getPtBinLimits(nBins);
+  if( mode == EFF_PT or mode == EFF_PT_2TEV){
+    binLimits = getPtBinLimits(nBins, mode==EFF_PT_2TEV);
     axisLabel = "p_{T} [GeV]";
   }else if( mode == EFF_ETA ){
     binLimits = getEtaBinLimits(nBins);
@@ -171,7 +173,7 @@ void drawEfficiency(bool drawBarrel){
   }
   preselectionCuts += Opt::otherPreselectionCuts;
 
-  TCut signalCuts     = preselectionCuts && Opt::trueEleCut;
+  TCut signalCuts     = (mode == EFF_PT_2TEV ? preselectionCuts : preselectionCuts && Opt::trueEleCut);
   TCut backgroundCuts = preselectionCuts && Opt::fakeEleCut;
 
   // Load cut files
@@ -282,19 +284,16 @@ void drawEfficiency(bool drawBarrel){
     
     // Draw on canvas
     sigEff[i]->Draw("same,pe");
-    bgEff[i] ->Draw("same,pe");
+    if(mode != EFF_PT_2TEV) bgEff[i] ->Draw("same,pe");
     c1->Update();
 
   } // end loop over working points
   
   TLegend *leg = nullptr;
-  if( mode == EFF_PT ){
-    leg = new TLegend(0.2, 0.3, 0.6, 0.7);
-  }else if( mode == EFF_ETA ){
-    leg = new TLegend(0.38, 0.2, 0.75, 0.6);
-  }else if( mode == EFF_NVTX ){
-    leg = new TLegend(0.2, 0.2, 0.6, 0.6);
-  }else{
+  if( mode == EFF_PT or mode == EFF_PT_2TEV ) leg = new TLegend(0.2, 0.3, 0.6, 0.7);
+  else if( mode == EFF_ETA )                  leg = new TLegend(0.38, 0.2, 0.75, 0.6);
+  else if( mode == EFF_NVTX )                 leg = new TLegend(0.2, 0.2, 0.6, 0.6);
+  else{
     printf("ERROR: unknown mode requested\n");
     assert(0);
   }
@@ -305,10 +304,12 @@ void drawEfficiency(bool drawBarrel){
   for(int i=0; i<Opt::nWP; i++){
     leg->AddEntry(sigEff[i], sigLegString[i], "pl");
   }
-  leg->AddEntry((TObject*)0, "", "");
-  leg->AddEntry((TObject*)0, "Background:", "");
-  for(int i=0; i<Opt::nWP; i++){
-    leg->AddEntry(bgEff[i], bgLegString[i], "pl");
+  if(mode != EFF_PT_2TEV){
+    leg->AddEntry((TObject*)0, "", "");
+    leg->AddEntry((TObject*)0, "Background:", "");
+    for(int i=0; i<Opt::nWP; i++){
+      leg->AddEntry(bgEff[i], bgLegString[i], "pl");
+    }
   }
   leg->Draw("same");
 
@@ -318,24 +319,20 @@ void drawEfficiency(bool drawBarrel){
 
   TString filename = "figures/plot_eff_";
   if( mode != EFF_ETA ){
-    if( drawBarrel )
-      filename += "barrel_";
-    else
-      filename += "endcap_";
+    if( drawBarrel ) filename += "barrel_";
+    else             filename += "endcap_";
   }
 
   filename += varName[mode];
+  if ( mode == EFF_PT_2TEV) filename += "_2TeV";
   filename += ".png";
   c1->Print(filename);
-
 }
 
 // Get a given tree from a given file name.
 TTree *getTreeFromFile(TString fname, TString tname){
-
   TFile *file = new TFile( fname );
-  TTree *tree     = (TTree*) file->Get(tname);
-  
+  TTree *tree = (TTree*) file->Get(tname);
   return tree;
 }
 
@@ -358,11 +355,8 @@ void calculateEffAndErrors(TH1F *numHist, TH1F *denHist, TH1F *&ehist){
     if( den != 0 ){
       eff = num/den;
 
-      if( num != 0 )
-	effErr2 = (num*num*den*den)/(tot*tot*tot*tot) * ( numErr*numErr/(num*num) + denErr*denErr/(den*den) );
-	
-      if( effErr2 < 0 )
-	effErr2 = 0;
+      if( num != 0 )    effErr2 = (num*num*den*den)/(tot*tot*tot*tot) * ( numErr*numErr/(num*num) + denErr*denErr/(den*den) );
+      if( effErr2 < 0 ) effErr2 = 0;
 
       effErr = sqrt(effErr2);
     }
@@ -376,42 +370,29 @@ void calculateEffAndErrors(TH1F *numHist, TH1F *denHist, TH1F *&ehist){
   
 }
 
-double *getPtBinLimits(int &nBins){
+void addBins(int &nBins, double step, int times){
+  for(int i=0; i < times; ++i){
+    ptBinLimits[nBins+1] = ptBinLimits[nBins] + step;
+    ++nBins;
+  }
+}
 
-
+double *getPtBinLimits(int &nBins, bool longPtRange){
   nBins = 0;
-  double ptTmp = 20;
-  ptBinLimits[0] = ptTmp;
-  for(int i=1; i<=20; i++){
-    ptTmp += 1;
-    ptBinLimits[i] = ptTmp;
-    nBins++;
+  ptBinLimits[0] = 20;
+  addBins(nBins, 1,  20);
+  addBins(nBins, 2,  30);
+  addBins(nBins, 5,  10);
+  addBins(nBins, 10,  5);
+  if(longPtRange){
+    addBins(nBins, 20,  20);
+    addBins(nBins, 40,  10);
+    addBins(nBins, 100, 10);
   }
-
-  for(int i=21; i<=50; i++){
-    ptTmp += 2;
-    ptBinLimits[i] = ptTmp;
-    nBins++;
-  }
-
-  for(int i=51; i<=60; i++){
-    ptTmp += 5;
-    ptBinLimits[i] = ptTmp;
-    nBins++;
-  }
-
-  for(int i=61; i<=65; i++){
-    ptTmp += 10;
-    ptBinLimits[i] = ptTmp;
-    nBins++;
-  }
-
   return ptBinLimits;
-
 }
 
 double *getEtaBinLimits(int &nBins){
-
   nBins = 50;
   double xmin = -2.5;
   double xmax = 2.5;
@@ -420,15 +401,12 @@ double *getEtaBinLimits(int &nBins){
   for(int i=0; i<=nBins; i++){
     etaBinLimits[i] = xmin + i*delta;
   }
-
   return etaBinLimits;
 }
 
 double *getNvtxBinLimits(int &nBins){
-
   nBins = nNvtxBins;
   return nvtxBinLimits;
-
 }
 
 void    setHistogram(TH1F *hist, int wp, bool isSignal){
