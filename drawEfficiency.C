@@ -24,11 +24,6 @@ const bool drawBarrel = true;
 const bool longPtRange = true;
 const bool scaleBackground = false;
 
-enum Mode {EFF_PT=0, EFF_PT_2TEV, EFF_ETA, EFF_NVTX};
-TString varName[4] = {"pt", "pt", "etaSC", "nPV"};
-
-Mode mode = EFF_PT_2TEV; // If mode is EFF_ETA, set drawBarrel to true!
-
 TString dateTag = "2017-11-07";
 
 // File name with working point cuts
@@ -103,72 +98,52 @@ TH1F* drawFromTree(TTree* tree, TCut selectionCuts, TString varName, TString his
   return hist;
 }
 
+TCut getCuts(TString fileName, int missingHitsCut, TString selectVar = ""){
+  printf("\nNOTE: the missing hits cuts are not taken from optimization, but are added by hand!\n\n");
+  TFile* file        = new TFile(fileName);
+  VarCut* cutsObject = (VarCut*) file->Get("cuts");
+  TCut wpCuts        = *(cutsObject->getCut(selectVar));
+  if(selectVar == "" or selectVar == "expectedMissingInnerHits") wpCuts = wpCuts && TString::Format("expectedMissingInnerHits<=%d", missingHitsCut).Data();
+  file->Close();
+  delete cutsObject;
+  delete file;
+  return wpCuts;
+}
+
 
 // Main function
-void drawEfficiency(bool drawBarrel){
-
-  const TString *cutFileNames = drawBarrel ? cutFileNamesBarrel : cutFileNamesEndcap;
-  const int *missingHitsCut = drawBarrel ? missingHitsCutBarrel : missingHitsCutEndcap;
-
-  if(mode == EFF_PT_2TEV) signalFileName = "DoubleEleFlat_flat_ntuple_trueAndFake_alleta_full.root";
-  TTree *signalTree     = getTreeFromFile( dateTag + "/" + signalFileName, Opt::signalTreeName);
-  TTree *backgroundTree = getTreeFromFile( dateTag + "/" + backgroundFileName, Opt::backgroundTreeName);
-
-  int maxEventsS = signalTree->GetEntries();
-  int maxEventsB = signalTree->GetEntries();
-  if( useSmallEventCount ){
-    maxEventsS = 100000;
-    maxEventsB = 100000;
+void drawEfficiency(bool drawBarrel, TString mode){
+  bool foundMode = false;
+  for(TString m : {"pt", "pt_2TeV", "eta", "nvtx"}){
+    if(mode == m) foundMode = true;
   }
-
-  //
-  // Draw efficiency
-  //
-  TCanvas *c1 = new TCanvas("c1","c1",10,10,600,600);
-  gStyle->SetOptStat(0);
-  c1->cd();
-
-  TH1F *sigNum[Opt::nWP];
-  TH1F *sigDen[Opt::nWP];
-  TH1F *sigEff[Opt::nWP];
-
-  TH1F *bgNum[Opt::nWP];
-  TH1F *bgDen[Opt::nWP];
-  TH1F *bgEff[Opt::nWP];
-
-  int nBins;
-  double *binLimits = nullptr;
-  TString axisLabel = "";
-  if( mode == EFF_PT or mode == EFF_PT_2TEV){
-    binLimits = getPtBinLimits(nBins, mode==EFF_PT_2TEV);
-    axisLabel = "p_{T} [GeV]";
-  }else if( mode == EFF_ETA ){
-    binLimits = getEtaBinLimits(nBins);
-    axisLabel = "#eta_{SC}";
-  }else if(mode == EFF_NVTX){
-    binLimits = getNvtxBinLimits(nBins);
-    axisLabel = "Nvtx";
-  }else{
+  if(!foundMode){
     printf("ERROR: unknown mode\n");
     assert(0);
   }
 
-  // for(int i=0; i<=nBins; i++)
-  //   printf("%2d    %5.0f\n", i, binLimits[i]);
-  TH2D *dummy = new TH2D("dummy","", 100, binLimits[0], binLimits[nBins],
-			 100, 0, 1);
+  if(mode == "pt_2TeV") signalFileName = "DoubleEleFlat_flat_ntuple_trueAndFake_alleta_full.root";
+  TTree *signalTree     = getTreeFromFile( dateTag + "/" + signalFileName,     Opt::signalTreeName);
+  TTree *backgroundTree = getTreeFromFile( dateTag + "/" + backgroundFileName, Opt::backgroundTreeName);
 
+  int maxEventsS = useSmallEventCount ? 100000 : signalTree->GetEntries();
+  int maxEventsB = useSmallEventCount ? 100000 : signalTree->GetEntries();
 
-  dummy->GetXaxis()->SetTitle(axisLabel);
-  dummy->GetXaxis()->SetTitleOffset(1.2);
-  dummy->GetYaxis()->SetTitle("efficiency");
-  dummy->GetYaxis()->SetTitleOffset(1.2);
-  dummy->Draw();
+  int nBins;
+  double *binLimits = nullptr;
+  if(mode.Contains("pt"))        binLimits = getPtBinLimits(nBins, mode=="pt_2TeV");
+  else if(mode.Contains("eta"))  binLimits = getEtaBinLimits(nBins);
+  else if(mode.Contains("nvtx")) binLimits = getNvtxBinLimits(nBins);
+
+  TString axisLabel = "";
+  if(mode.Contains("pt"))        axisLabel = "p_{T} [GeV]";
+  else if(mode.Contains("eta"))  axisLabel = "#eta_{SC}";
+  else if(mode.Contains("nvtx")) axisLabel = "Nvtx";
 
   // Define denominator cuts
   TString comment = "barrel electrons";
   TCut preselectionCuts = Opt::ptCut;
-  if( mode == EFF_ETA ){
+  if(mode.Contains("eta")){
     comment = "";
     TCut anyEtaCut = "abs(etaSC)<2.5";
     preselectionCuts += anyEtaCut;
@@ -183,145 +158,102 @@ void drawEfficiency(bool drawBarrel){
   }
   preselectionCuts += Opt::otherPreselectionCuts;
 
-  TCut signalCuts     = (mode == EFF_PT_2TEV ? preselectionCuts : preselectionCuts && Opt::trueEleCut);
+  TCut signalCuts     = (mode.Contains("2TeV") ? preselectionCuts : preselectionCuts && Opt::trueEleCut);
   TCut backgroundCuts = preselectionCuts && Opt::fakeEleCut;
 
-  // Load cut files
-  TFile *fileCut[Opt::nWP];
-  TFile *fileCutBarrel[Opt::nWP];
-  TFile *fileCutEndcap[Opt::nWP];
-  VarCut *wpCutsObject[Opt::nWP];
-  TCut wpCuts[Opt::nWP];
-  TCut wpCutsBarrel[Opt::nWP];
-  TCut wpCutsEndcap[Opt::nWP];
-  for(int i=0; i<Opt::nWP; i++){
-    fileCut[i] = new TFile( cutFileNames[i] );
-    wpCutsObject[i] = (VarCut*)fileCut[i]->Get("cuts");
-    wpCuts[i] = *(wpCutsObject[i]->getCut());
-    fileCut[i]->Close();
-    // 
-    fileCutBarrel[i] = new TFile( cutFileNamesBarrel[i] );
-    wpCutsObject[i] = (VarCut*)fileCutBarrel[i]->Get("cuts");
-    wpCutsBarrel[i] = *(wpCutsObject[i]->getCut());
-    fileCutBarrel[i]->Close();
-    //
-    fileCutEndcap[i] = new TFile( cutFileNamesEndcap[i] );
-    wpCutsObject[i] = (VarCut*)fileCutEndcap[i]->Get("cuts");
-    wpCutsEndcap[i] = *(wpCutsObject[i]->getCut());
-    fileCutEndcap[i]->Close();
-  }
+  // Loop over wp and individual variables
+  for(TString selectVar : {"", "expectedMissingInnerHits", "full5x5_sigmaIetaIeta", "dEtaSeed", "dPhiIn", "hOverE", "relIsoWithEA", "ooEmooP"}){
+    TCanvas *c1 = new TCanvas("c1","c1",10,10,600,600);
+    gStyle->SetOptStat(0);
+    c1->cd();
 
-  for(int i=0; i<Opt::nWP; i++){
-  //for(int i=0; i<2; i++){
-    printf("Process working point %d\n", i);
+    TH2D *dummy = new TH2D("dummy","", 100, binLimits[0], binLimits[nBins], 100, 0, 1);
+    dummy->GetXaxis()->SetTitle(axisLabel);
+    dummy->GetXaxis()->SetTitleOffset(1.2);
+    dummy->GetYaxis()->SetTitle("efficiency");
+    dummy->GetYaxis()->SetTitleOffset(1.2);
+    dummy->Draw();
 
-    // Book all histograms
-    TString sigNumHistName = TString::Format("sigNum_wp%d", i);
-    TString sigDenHistName = TString::Format("sigDen_wp%d", i);
-    TString sigEffHistName = TString::Format("sigEff_wp%d", i);
-    /*
-    sigNum[i] = new TH1F(sigNumHistName , sigNumHistName, nBins, binLimits);
-    sigDen[i] = new TH1F(sigDenHistName , sigDenHistName, nBins, binLimits);
-    sigEff[i] = new TH1F(sigEffHistName , sigEffHistName, nBins, binLimits);
-    sigNum[i]->Sumw2();
-    sigDen[i]->Sumw2();
-    sigEff[i]->Sumw2();
-*/
-    TString bgNumHistName = TString::Format("bgNum_wp%d", i);
-    TString bgDenHistName = TString::Format("bgDen_wp%d", i);
-    TString bgEffHistName = TString::Format("bgEff_wp%d", i);
-    /*
-    bgNum[i] = new TH1F(bgNumHistName, bgNumHistName, nBins, binLimits);
-    bgDen[i] = new TH1F(bgDenHistName, bgDenHistName, nBins, binLimits);
-    bgEff[i] = new TH1F(bgEffHistName, bgEffHistName, nBins, binLimits);
-    bgNum[i]->Sumw2();
-    bgDen[i]->Sumw2();
-    bgEff[i]->Sumw2();
-*/
-    // Set up cuts
-    TCut selectionCuts;
-    TCut missingHits;
-    printf("\nNOTE: the missing hits cuts are not taken from optimization, but are added by hand!\n\n");
-    if( mode != EFF_ETA ){
-      selectionCuts += wpCuts[i];
-      missingHits = TString::Format("expectedMissingInnerHits<=%d", missingHitsCut[i]).Data();
-      selectionCuts = selectionCuts && missingHits;
-    } else {
-      TCut selectionCutsBarrel;
-      selectionCutsBarrel += wpCutsBarrel[i];
-      TCut missingHitsBarrel = TString::Format("expectedMissingInnerHits<=%d", missingHitsCutBarrel[i]).Data();
-      selectionCutsBarrel = selectionCutsBarrel && missingHitsBarrel && Opt::etaCutBarrel;
-
-      TCut selectionCutsEndcap = wpCutsEndcap[i];
-      TCut missingHitsEndcap = TString::Format("expectedMissingInnerHits<=%d", missingHitsCutEndcap[i]).Data();;
-      selectionCutsEndcap = selectionCutsEndcap && missingHitsEndcap && Opt::etaCutEndcap;
-      //
-      selectionCuts = (selectionCutsBarrel) || (selectionCutsEndcap);
-    }    
-
-    TString command;
-    // Signal numerator and denominator
-    sigNum[i] = drawFromTree(signalTree,     (selectionCuts && signalCuts),     varName[mode], TString::Format("sigNum_wp%d", i), nBins, binLimits, maxEventsS);
-    sigDen[i] = drawFromTree(signalTree,     (signalCuts),                      varName[mode], TString::Format("sigDen_wp%d", i), nBins, binLimits, maxEventsS);
-    bgNum[i]  = drawFromTree(backgroundTree, (selectionCuts && backgroundCuts), varName[mode], TString::Format("bgNum_wp%d", i),  nBins, binLimits, maxEventsB);
-    bgDen[i]  = drawFromTree(backgroundTree, (backgroundCuts),                  varName[mode], TString::Format("bgDen_wp%d", i),  nBins, binLimits, maxEventsB);
-
-    // Compute efficiencies
-    if( scaleBackground ){
-      printf("\n\nSCALE BACKGROUND EFF BY x5\n\n");
-      bgNum[i]->Scale(5);
-    }
-    sigEff[i] = calculateEffAndErrors(sigNum[i], sigDen[i], TString::Format("sigEff_wp%d", i), binLimits);
-    bgEff[i]  = calculateEffAndErrors(bgNum[i],  bgDen[i],  TString::Format("bgEff_wp%d", i),  binLimits);
-
-    setHistogram(sigEff[i], i, true);
-    setHistogram( bgEff[i], i, false);
-    
-    // Draw on canvas
-    sigEff[i]->Draw("same,pe");
-    if(mode != EFF_PT_2TEV) bgEff[i] ->Draw("same,pe");
-    c1->Update();
-
-  } // end loop over working points
-  
-  TLegend *leg = nullptr;
-  if( mode == EFF_PT or mode == EFF_PT_2TEV ) leg = new TLegend(0.2, 0.3, 0.6, 0.7);
-  else if( mode == EFF_ETA )                  leg = new TLegend(0.38, 0.2, 0.75, 0.6);
-  else if( mode == EFF_NVTX )                 leg = new TLegend(0.2, 0.2, 0.6, 0.6);
-  else{
-    printf("ERROR: unknown mode requested\n");
-    assert(0);
-  }
-
-  leg->SetFillStyle(0);
-  leg->SetBorderSize(0);
-  leg->AddEntry((TObject*)0, "Signal:", "");
-  for(int i=0; i<Opt::nWP; i++){
-    leg->AddEntry(sigEff[i], sigLegString[i], "pl");
-  }
-  if(mode != EFF_PT_2TEV){
-    leg->AddEntry((TObject*)0, "", "");
-    leg->AddEntry((TObject*)0, "Background:", "");
+    TH1F *sigEff[Opt::nWP];
+    TH1F *bgEff[Opt::nWP];
     for(int i=0; i<Opt::nWP; i++){
-      leg->AddEntry(bgEff[i], bgLegString[i], "pl");
+      printf("Process working point %d\n", i);
+      TCut wpCutsBarrel = getCuts(cutFileNamesBarrel[i], missingHitsCutBarrel[i], selectVar);
+      TCut wpCutsEndcap = getCuts(cutFileNamesEndcap[i], missingHitsCutEndcap[i], selectVar);
+
+      // Set up cuts
+      TCut selectionCutsBarrel = wpCutsBarrel && Opt::etaCutBarrel;
+      TCut selectionCutsEndcap = wpCutsEndcap && Opt::etaCutEndcap;
+      TCut selectionCuts = (selectionCutsBarrel) || (selectionCutsEndcap);
+
+      // Signal numerator and denominator
+      TString varName = "pt";
+      if(mode.Contains("eta"))  varName = "etaSC";
+      if(mode.Contains("nvtx")) varName = "nPV";
+      TH1F* sigNum = drawFromTree(signalTree,     (signalCuts && selectionCuts),     varName, TString::Format("sigNum_wp%d", i), nBins, binLimits, maxEventsS);
+      TH1F* sigDen = drawFromTree(signalTree,     (signalCuts),                      varName, TString::Format("sigDen_wp%d", i), nBins, binLimits, maxEventsS);
+      TH1F* bgNum  = drawFromTree(backgroundTree, (backgroundCuts && selectionCuts), varName, TString::Format("bgNum_wp%d", i),  nBins, binLimits, maxEventsB);
+      TH1F* bgDen  = drawFromTree(backgroundTree, (backgroundCuts),                  varName, TString::Format("bgDen_wp%d", i),  nBins, binLimits, maxEventsB);
+
+      // Compute efficiencies
+      if( scaleBackground ){
+        printf("\n\nSCALE BACKGROUND EFF BY x5\n\n");
+        bgNum->Scale(5);
+      }
+      sigEff[i] = calculateEffAndErrors(sigNum, sigDen, TString::Format("sigEff_wp%d", i), binLimits);
+      bgEff[i]  = calculateEffAndErrors(bgNum,  bgDen,  TString::Format("bgEff_wp%d", i),  binLimits);
+
+      setHistogram(sigEff[i], i, true);
+      setHistogram( bgEff[i], i, false);
+      
+      // Draw on canvas
+      sigEff[i]->Draw("same,pe");
+      if(!mode.Contains("2TeV")) bgEff[i]->Draw("same,pe");
+      c1->Update();
+
+    } // end loop over working points
+    
+    TLegend *leg = nullptr;
+    if(mode.Contains("pt"))        leg = new TLegend(0.2, 0.3, 0.6, 0.7);
+    else if(mode.Contains("eta"))  leg = new TLegend(0.38, 0.2, 0.75, 0.6);
+    else if(mode.Contains("nvtx")) leg = new TLegend(0.2, 0.2, 0.6, 0.6);
+
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
+    leg->AddEntry((TObject*)0, "Signal:", "");
+    for(int i=0; i<Opt::nWP; i++){
+      leg->AddEntry(sigEff[i], sigLegString[i], "pl");
     }
+    if(!mode.Contains("2TeV")){
+      leg->AddEntry((TObject*)0, "", "");
+      leg->AddEntry((TObject*)0, "Background:", "");
+      for(int i=0; i<Opt::nWP; i++){
+        leg->AddEntry(bgEff[i], bgLegString[i], "pl");
+      }
+    }
+    leg->Draw("same");
+
+    TLatex *lat = new TLatex(0.5, 0.95, comment); // 0.85
+    lat->SetNDC(kTRUE);
+    lat->Draw("same");
+
+    TString dirName = "figures/efficiencies/";
+    system("mkdir -p " + dirName);
+    system("cp figures/index.php " + dirName);
+    if(selectVar != "") dirName += selectVar + "/";
+    system("mkdir -p " + dirName);
+    system("cp figures/index.php " + dirName);
+
+    TString fileName = dirName + "eff_";
+    if(!mode.Contains("eta")){
+      if( drawBarrel ) fileName += "barrel_";
+      else             fileName += "endcap_";
+    }
+
+    fileName += mode;
+    fileName += ".png";
+    c1->Print(fileName);
   }
-  leg->Draw("same");
-
-  TLatex *lat = new TLatex(0.5, 0.95, comment); // 0.85
-  lat->SetNDC(kTRUE);
-  lat->Draw("same");
-
-  TString filename = "figures/plot_eff_";
-  if( mode != EFF_ETA ){
-    if( drawBarrel ) filename += "barrel_";
-    else             filename += "endcap_";
-  }
-
-  filename += varName[mode];
-  if ( mode == EFF_PT_2TEV) filename += "_2TeV";
-  filename += ".png";
-  c1->Print(filename);
 }
 
 // Get a given tree from a given file name.
@@ -411,5 +343,4 @@ void setHistogram(TH1F *hist, int wp, bool isSignal){
   hist->SetMarkerStyle(20);
   hist->SetMarkerSize(0.8);
   hist->SetMarkerColor(color);
-
 }
