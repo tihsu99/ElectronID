@@ -22,7 +22,7 @@ VarCut::VarCut()
 };
 
 // Construct TCut object for all cuts joined with &&
-TCut *VarCut::getCut(){
+TCut *VarCut::getCut(TString selectVar = ""){
 
   TCut *cut = 0;
 
@@ -36,6 +36,7 @@ TCut *VarCut::getCut(){
 
   cut = new TCut("");
   for(int i=0; i<Vars::nVariables; i++){
+    if(selectVar != "" and Vars::variables[i]->name != selectVar) continue;
     // The += adds all cuts with &&:
     TString formatString = " %s < %f ";
     if( Vars::variables[i]->name == "expectedMissingInnerHits")

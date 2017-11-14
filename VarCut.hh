@@ -25,7 +25,7 @@ public:
   float getCutValue(TString var);
 
   // Get the full TCut object with cuts on all variables
-  TCut* getCut();
+  TCut* getCut(TString selectVar);
 
   // Get index of the variable in the internal array from its name,
   // using the regular name and the name known to TMVA (may include abs())
