@@ -40,7 +40,7 @@ namespace VarLims{
     new VariableLimits("full5x5_sigmaIetaIeta"   ,1e30),
     new VariableLimits("dEtaSeed"                ,0.03), // Barrel/Endcap 99.9+%
     new VariableLimits("dPhiIn"                  ,0.25), // Barrel/Endcap 99.9+%
-    new VariableLimits("hOverE"                  ,0.35), // Barrel/Endcap 99.9%
+    new VariableLimits("hOverE"                  ,0.05), // the constant C_0 should not be made much larger than 0.05 to reject poorly measured true electrons with HCAL energy of 5% or higher
     new VariableLimits("relIsoWithEA"            ,1.00), // Barrel/Endcap 99.9%
     new VariableLimits("ooEmooP"                 ,0.25)  // Barrel/Endcap 99.9%
     // new VariableLimits("d0"                      ,0.40), // Endcap 99.9%  // Removed from optimization
@@ -53,7 +53,7 @@ namespace VarLims{
   // endcap
 
   VariableLimits * limitsHLTSafeBarrel[nVarLimits] = {
-    new VariableLimits("full5x5_sigmaIetaIeta"   ,1e39), // Disabled
+    new VariableLimits("full5x5_sigmaIetaIeta"   ,1e30), // Disabled
     new VariableLimits("dEtaSeed"                ,1e30), // Disabled
     new VariableLimits("dPhiIn"                  ,1e30), // Disabled
     new VariableLimits("hOverE"                  ,1e30), // Disabled
