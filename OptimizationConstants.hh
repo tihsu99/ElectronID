@@ -19,7 +19,7 @@ namespace Opt {
   const int nTest_SignalEndcap      =1000000;
   const int nTest_BackgroundEndcap  =1000000;
 
-  const TString tagDir = "2017-11-07";
+  const TString tagDir = "2017-11-16";
 
   // Cut repository directory
   const TString cutRepositoryDir = "./cut_repository";

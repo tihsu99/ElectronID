@@ -22,7 +22,7 @@ VarCut::VarCut()
 };
 
 // Construct TCut object for all cuts joined with &&
-TCut *VarCut::getCut(TString selectVar = ""){
+TCut *VarCut::getCut(TString selectVar){
 
   TCut *cut = 0;
 
