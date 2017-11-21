@@ -9,24 +9,22 @@ const TString datasetname = "dataset";
 //
 // Main method
 //
-void optimize(TString cutMaxFileName, TString cutsOutFileNameBase,
-	      TString trainingDataOutputBase,
-	      VarLims::VariableLimits **userDefinedCutLimits, bool useBarrel){
+void optimize(TString cutMaxFileName, TString cutsOutFileNameBase, TString trainingDataOutputBase, VarLims::VariableLimits **userDefinedCutLimits, bool useBarrel){
 
-  TString fnameSignal     = useBarrel ? Opt::fnameSignalBarrel : Opt::fnameSignalEndcap;
+  TString fnameSignal     = useBarrel ? Opt::fnameSignalBarrel     : Opt::fnameSignalEndcap;
   TString fnameBackground = useBarrel ? Opt::fnameBackgroundBarrel : Opt::fnameBackgroundEndcap;
 
-  printf("\n Take true electrons from %s   tree %s\n\n", fnameSignal.Data(), Opt::signalTreeName.Data());
-  printf("\n Take background electrons from %s   tree %s\n\n", fnameBackground.Data(), Opt::backgroundTreeName.Data());
+  printf("\n Take true electrons from %s tree %s\n\n",       fnameSignal.Data(),     Opt::signalTreeName.Data());
+  printf("\n Take background electrons from %s tree %s\n\n", fnameBackground.Data(), Opt::backgroundTreeName.Data());
 
-  TTree *signalTree     = getTreeFromFile(fnameSignal, Opt::signalTreeName, &Opt::fileSignal);
+  TTree *signalTree     = getTreeFromFile(fnameSignal,     Opt::signalTreeName,     &Opt::fileSignal);
   TTree *backgroundTree = getTreeFromFile(fnameBackground, Opt::backgroundTreeName, &Opt::fileBackground);
   
   // Configure output details
-  TString trainingOutputDir = TString("trainingData/")
-    + trainingDataOutputBase;
+  TString trainingOutputDir = TString("trainingData/") + trainingDataOutputBase;
   printf("The directory where the xml results of the training is:\n");
   printf("         %s\n", trainingOutputDir.Data());
+
   FileStat_t buf;
   if( gSystem->GetPathInfo(trainingOutputDir.Data(), buf) ){
     printf("     this directory does not exist, creating it.\n");
@@ -34,9 +32,7 @@ void optimize(TString cutMaxFileName, TString cutsOutFileNameBase,
   }
   TMVA::gConfig().GetIONames().fWeightFileDir = trainingOutputDir;
   
-  TString outfileName = trainingOutputDir + TString("/")
-    + TString("TMVA_") + trainingDataOutputBase
-    + TString(".root");
+  TString outfileName = trainingOutputDir + TString("/") + TString("TMVA_") + trainingDataOutputBase + TString(".root");
   TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
   printf("The ROOT file with train/test distributions from TMVA:\n");
   printf("         %s\n", outfileName.Data());
@@ -51,8 +47,7 @@ void optimize(TString cutMaxFileName, TString cutsOutFileNameBase,
   // All TMVA output can be suppressed by removing the "!" (not) in
   // front of the "Silent" argument in the option string
   TString factoryOptions = "!V:!Silent:Color:DrawProgressBar:Transformations=I";
-  TMVA::Factory *factory = new TMVA::Factory( "TMVAClassification",
-					      outputFile, factoryOptions);
+  TMVA::Factory *factory = new TMVA::Factory( "TMVAClassification", outputFile, factoryOptions);
 
   // Data loader handles trees, variables, etc
   TMVA::DataLoader *dataloader=new TMVA::DataLoader(datasetname);
@@ -81,8 +76,7 @@ void optimize(TString cutMaxFileName, TString cutsOutFileNameBase,
   configureCuts(signalCuts, backgroundCuts, useBarrel);
 
   // Tell the dataloader how to use the training and testing events
-  dataloader->PrepareTrainingAndTestTree( signalCuts, backgroundCuts,
-					  trainAndTestOptions );
+  dataloader->PrepareTrainingAndTestTree(signalCuts, backgroundCuts, trainAndTestOptions );
   
   // Book the Cuts method with the factory
   TString methodName = "Cuts";
@@ -105,12 +99,8 @@ void optimize(TString cutMaxFileName, TString cutsOutFileNameBase,
   // better understanding.
   // delete factory;
 
-  if( Opt::fileSignal != 0 ){
-    Opt::fileSignal->Close();
-  }
-  if( Opt::fileBackground != 0 ){
-    Opt::fileBackground->Close();
-  }
+  if(Opt::fileSignal != 0)     Opt::fileSignal->Close();
+  if(Opt::fileBackground != 0) Opt::fileBackground->Close();
 
   delete factory;
   delete dataloader;
@@ -122,10 +112,8 @@ void optimize(TString cutMaxFileName, TString cutsOutFileNameBase,
 // Note: the **file is the way to return a pointer to a file
 // back into the calling method.
 TTree *getTreeFromFile(TString fname, TString tname, TFile **file){
-
   *file = new TFile( fname );
-  TTree *tree     = (TTree*) (*file)->Get(tname);
-  
+  TTree *tree = (TTree*) (*file)->Get(tname);
   return tree;
 }
 
@@ -152,7 +140,6 @@ void configureVariables(TMVA::DataLoader *dataloader){
     printf("    add spectator variable %s of the type %c\n", varName.Data(), varType);
     dataloader->AddSpectator( varName, varType );
   }
-  
 }
 
 void configureCuts(TCut &signalCuts, TCut &backgroundCuts, bool useBarrel){
@@ -192,8 +179,7 @@ TString getTrainAndTestOptions(bool useBarrel){
   return options;
 }
 
-TString getMethodOptions(TString cutMaxFileName, 
-			 VarLims::VariableLimits **userDefinedCutLimits){
+TString getMethodOptions(TString cutMaxFileName, VarLims::VariableLimits **userDefinedCutLimits){
 
   TString methodOptions = Opt::methodCutsBaseOptions;
 
@@ -203,19 +189,15 @@ TString getMethodOptions(TString cutMaxFileName,
   cutsFileName += cutMaxFileName;
 
   TFile *cutsFile = new TFile(cutsFileName);
-  if( !cutsFile )
-    assert(0);
+  if( !cutsFile ) assert(0);
   VarCut *cutMax = (VarCut*)cutsFile->Get("cuts");
-  if( !cutMax )
-    assert(0);
+  if( !cutMax ) assert(0);
 
-  if(!userDefinedCutLimits)
-    assert(0);
+  if(!userDefinedCutLimits) assert(0);
   // Make sure the user defined cut limits array is consistent with the optimization
   // variables set
   bool checkPassed = true;
-  if( Vars::nVariables != VarLims::nVarLimits )
-    checkPassed = false;
+  if( Vars::nVariables != VarLims::nVarLimits ) checkPassed = false;
   for(int i=0; i<Vars::nVariables; i++){
     if( Vars::variables[i]->name != userDefinedCutLimits[i]->name )
       checkPassed = false;
@@ -235,8 +217,7 @@ TString getMethodOptions(TString cutMaxFileName,
   // Add all cut ranges:
   for(int i=0; i<Vars::nVariables; i++){
     float max = cutMax->getCutValue(Vars::variables[i]->name);
-    if( max > userDefinedCutLimits[i]->max )
-      max = userDefinedCutLimits[i]->max;
+    if( max > userDefinedCutLimits[i]->max ) max = userDefinedCutLimits[i]->max;
     methodOptions += TString::Format(":CutRangeMax[%d]=%.6f", i, max);
   }
   
@@ -261,14 +242,11 @@ void writeWorkingPoints(const TMVA::Factory *factory, TString cutsOutFileNameBas
     cutsFileNameWP += Opt::wpNames[iwp];
     cutsFileNameWP += ".root";
     TFile *cutsFile = new TFile(cutsFileNameWP, "recreate");
-    if( !cutsFile )
-      assert(0);
+    if( !cutsFile ) assert(0);
     VarCut *cutMax = new VarCut();
     
-    const TMVA::MethodCuts *method = dynamic_cast<TMVA::MethodCuts*> 
-      (factory->GetMethod(datasetname,"Cuts"));
-    if( method == 0 )
-      assert(0);
+    const TMVA::MethodCuts *method = dynamic_cast<TMVA::MethodCuts*> (factory->GetMethod(datasetname,"Cuts"));
+    if( method == 0 ) assert(0);
 
     std::vector <double> cutLo;
     std::vector <double> cutHi;
@@ -276,12 +254,10 @@ void writeWorkingPoints(const TMVA::Factory *factory, TString cutsOutFileNameBas
     // NOTE: this relies on filling the factory with AddVarilables
     // in exactly the same order (using the same loop) 
     // Start with a sanity check:
-    if( Vars::nVariables != cutHi.size() )
-      assert(0);
+    if( Vars::nVariables != cutHi.size()) assert(0);
     // Now, fill the cut values into the storable object.
     for(uint ivar=0; ivar<cutHi.size(); ivar++){
-      cutMax->setCutValue(Vars::variables[ivar]->name, 
-			  cutHi.at(ivar));
+      cutMax->setCutValue(Vars::variables[ivar]->name, cutHi.at(ivar));
     }
     printf("   working point %s\n", Opt::wpNames[iwp].Data());
     cutMax->print();
@@ -290,4 +266,3 @@ void writeWorkingPoints(const TMVA::Factory *factory, TString cutsOutFileNameBas
   }
 
 }
-

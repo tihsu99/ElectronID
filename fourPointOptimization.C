@@ -8,7 +8,7 @@
 void fourPointOptimization(bool useBarrel){
 
   // Define source for the initial cut range
-  TString dateTag = "2017-11-07";
+  TString dateTag = "2017-11-16";
   TString startingCutMaxFileName        = "cuts_barrel_eff_0999_" + dateTag + ".root";
   if(!useBarrel) startingCutMaxFileName = "cuts_endcap_eff_0999_" + dateTag + ".root";
 
@@ -44,7 +44,7 @@ void fourPointOptimization(bool useBarrel){
     // (if in doubt, use the no-restrictions one defined in VariableLimits.hh)
     VarLims::VariableLimits **userDefinedCutLimits = VarLims::limitsNoRestrictions;
     if( ipass > 0 )  userDefinedCutLimits = VarLims::limitsWPAnyV1;
-    if( ipass == 3 ) userDefinedCutLimits = useBarrel ? VarLims::limitsHLTSafeBarrel : VarLims::limitsHLTSafeEndcap;	
+//  if( ipass == 3 ) userDefinedCutLimits = useBarrel ? VarLims::limitsHLTSafeBarrel : VarLims::limitsHLTSafeEndcap;
 
     printf("\n-----------------------------------------------------------------\n");
     printf("\n");
@@ -75,6 +75,7 @@ void fourPointOptimization(bool useBarrel){
   gSystem->Exec("ls -rtl"); 
   printf("Content of cut_repository subdir\n");
   gSystem->Exec("ls -rtl cut_repository/"); 
+
   for(int i=0; i<Opt::nWP; i++){
 
     TString wpPassFileName  = Opt::cutRepositoryDir + TString("/") + namePrefix + namePass[i] + nameTime + TString("_") + Opt::wpNames[i] + TString(".root");
@@ -97,7 +98,6 @@ void fourPointOptimization(bool useBarrel){
     if(thisWP != 0) thisWP->print();
     else            printf("???? not found????\n");
     fwp->Close();
-    
   }
  
 }
