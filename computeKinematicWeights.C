@@ -8,10 +8,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const TCut trueEleCut = "isTrue == 1";
-const TCut fakeEleCut = "isTrue == 0 || isTrue == 3";
+const TString tagDir = "2017-11-16";
 
-const  TCut preselectionCuts = "passConversionVeto && abs(dz)<1";
+const TCut trueEleCut       = "isTrue == 1";
+const TCut fakeEleCut       = "isTrue == 0 || isTrue == 3";
+const TCut preselectionCuts = "passConversionVeto && abs(dz)<1";
 
 const float etaMin = -2.5;
 const float etaMax = +2.5;
@@ -20,7 +21,7 @@ const int nEtaBins = 50;
 // We are interested to start with pt from 20 GeV, but we actually start
 // from 14 GeV so that there is data for interpolation
 const float ptMin = 14; 
-float dptMin = 2; // ptMin + dptMin should be 20 (REVISED: not necessarily?)
+float dptMin = 2;
 const float ptMax = 200;
 const int nPtBins = 35; // Variable pt bins are actually used
 
@@ -33,11 +34,25 @@ const TString getFileName(TString type){
 // Tree Name (file IN):
 const TString treeName = "ntupler/ElectronTree";
 // File with weights OUT:
-const TString tagDir = "2017-11-07";
 const TString fileNameWeights = "kinematicWeights.root";
 
 // Forward declarations
 TTree *getTree(TString fname, TString tname);
+
+
+TH2D *getPtEtaHist(TString name, TTree* tree, double* ptBinLimits, TCut preselection){
+  TH2D *hPtEta = new TH2D(name,"",nPtBins, ptBinLimits, nEtaBins, etaMin, etaMax);
+  int maxEvents = tree->GetEntries();
+  if(smallEventCount) maxEvents = smallMaxEvents;
+  TString drawCommand = TString::Format("etaSC:pt>>%s", name.Data());
+  printf(TString::Format("Processing %s\n", name.Data()));
+  tree->Draw(drawCommand, preselection, "", maxEvents);
+  tree->Print();
+  printf("%s\n", drawCommand.Data());
+  preselection.Print();
+  hPtEta->Print();
+  return hPtEta;
+}
 
 // Main function
 void computeKinematicWeights(){
@@ -53,7 +68,7 @@ void computeKinematicWeights(){
   // 
   // Book weight histograms
   //
-  TString hPtEtaSignalName = "hPtEtaSignal";
+  TString hPtEtaSignalName     = "hPtEtaSignal";
   TString hPtEtaBackgroundName = "hPtEtaBackground";
   // Set up variable bin limits for pt
   Double_t ptBinLimits[nPtBins+1];
@@ -61,54 +76,28 @@ void computeKinematicWeights(){
   float dpt =dptMin;
   for(int ipt = 1; ipt<=nPtBins; ipt++){
     float ptVal = ptBinLimits[ipt-1];
-    if( ptVal >= ptMin && ptVal<50)
-      dpt = dptMin;
-    else if( ptVal >= 50 && ptVal<100)
-      dpt = 5;
-    else if ( ptVal >=100 && ptVal < 150 )
-      dpt = 10;
-    else
-      dpt = 25;
+    if( ptVal >= ptMin && ptVal<50)        dpt = dptMin;
+    else if( ptVal >= 50 && ptVal<100)     dpt = 5;
+    else if ( ptVal >=100 && ptVal < 150 ) dpt = 10;
+    else                                   dpt = 25;
     
     ptBinLimits[ipt] = ptVal + dpt;
   }    
-  
-  TH2D *hPtEtaSignal = new TH2D(hPtEtaSignalName,"",nPtBins, ptBinLimits, nEtaBins, etaMin, etaMax);
-  TH2D *hPtEtaBackground = new TH2D(hPtEtaBackgroundName,"",nPtBins, ptBinLimits, nEtaBins, etaMin, etaMax);
-
-  // Define cuts
-  const TCut preselectionS = trueEleCut && preselectionCuts;
-  const TCut preselectionB = fakeEleCut && preselectionCuts;
-  
-  // Fill kinematic histograms
-  int maxEventsS = treeS->GetEntries();
-  if( smallEventCount )
-    maxEventsS = smallMaxEvents;
-  TString drawCommandS = TString::Format("etaSC:pt>>%s", hPtEtaSignalName.Data());
-  printf("Process the signal tree\n");
-  treeS->Draw(drawCommandS, preselectionS, "", maxEventsS);
-  treeS->Print();
-  printf("%s\n", drawCommandS.Data());
-  preselectionS.Print();
-  hPtEtaSignal->Print();
-
-  int maxEventsB = treeB->GetEntries();
-  if( smallEventCount )
-    maxEventsB = smallMaxEvents;
-  TString drawCommandB = TString::Format("etaSC:pt>>%s", hPtEtaBackgroundName.Data());
-  printf("Process the background tree\n");
-  treeB->Draw(drawCommandB, preselectionB, "", maxEventsB);
+ 
+  TH2D* hPtEtaSignal     = getPtEtaHist("hPtEtaSignal",     treeS, ptBinLimits, trueEleCut && preselectionCuts); 
+  TH2D* hPtEtaBackground = getPtEtaHist("hPtEtaBackground", treeB, ptBinLimits, fakeEleCut && preselectionCuts); 
 
   //
   // Compute the weights histogram
   //
   // Normalize signal and background distributions to unit area
-  TH2D *hPtEtaSignalNorm = (TH2D*)hPtEtaSignal->Clone("hPtEtaSignalNorm");
+  TH2D *hPtEtaSignalNorm     = (TH2D*) hPtEtaSignal->Clone("hPtEtaSignalNorm");
+  TH2D *hPtEtaBackgroundNorm = (TH2D*) hPtEtaBackground->Clone("hPtEtaBackgroundNorm");
   hPtEtaSignalNorm->Scale(1.0/hPtEtaSignalNorm->GetSumOfWeights());
-  TH2D *hPtEtaBackgroundNorm = (TH2D*)hPtEtaBackground->Clone("hPtEtaBackgroundNorm");
   hPtEtaBackgroundNorm->Scale(1.0/hPtEtaBackgroundNorm->GetSumOfWeights());
+
   // Find the weights
-  TH2D *hKinematicWeights = (TH2D*)hPtEtaBackgroundNorm->Clone("hKinematicWeights");
+  TH2D *hKinematicWeights = (TH2D*) hPtEtaBackgroundNorm->Clone("hKinematicWeights");
   hKinematicWeights->Divide(hPtEtaSignalNorm);
   hKinematicWeights->Draw("colz");
 
@@ -123,7 +112,6 @@ void computeKinematicWeights(){
 }
 
 TTree *getTree(TString fname, TString tname){
-
   TFile *fin = new TFile(fname);
   if( !fin ){
     printf("Failed to open file %s\n", fname.Data());
@@ -135,7 +123,6 @@ TTree *getTree(TString fname, TString tname){
     printf("Failed to find tree %s in file %s\n", tname.Data(), fname.Data());
     assert(0);
   }
-
   return tree;
 }
 
