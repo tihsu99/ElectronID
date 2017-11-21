@@ -29,6 +29,10 @@ enum MatchType  {MATCH_TRUE, MATCH_FAKE, MATCH_ANY};
 enum SampleType {SAMPLE_UNDEF, SAMPLE_DY, SAMPLE_TT, SAMPLE_GJ, SAMPLE_DoubleEle1to300, SAMPLE_DoubleEle300to6500};
 enum EtaRegion  {ETA_EB, ETA_EE, ETA_FULL};
 
+const float C_e   = 2.65;
+const float C_rho = 0.201;
+
+
 const TString getFileName(TString type){
   return "/user/tomc/eleIdTuning/tuples/" + type + "_cutID_tuning_92X_v1.root";
 }
@@ -46,7 +50,7 @@ const bool talkativeRegime = true;
 const bool smallEventCount = false;   
 const int maxEventsSmall = 1000000;
 // output dir of tuples
-const TString tagDir = "2017-11-07";
+const TString tagDir = "2017-11-16";
 
 // Tree name input 
 const TString treeName = "ntupler/ElectronTree";
@@ -173,6 +177,7 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
   // Per-eletron variables
   // Kinematics
   std::vector <float> *elePt = 0;         // electron PT
+  std::vector <float> *eleESC = 0;        // supercluser energy
   std::vector <float> *eleEtaSC = 0;      // supercluser eta
   std::vector <float> *elePhiSC = 0;      // supercluser phi
   // Variables for analysis
@@ -201,6 +206,7 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
   TBranch *b_genWeight = 0;
   TBranch *b_eleRho = 0;
   TBranch *b_elePt = 0;
+  TBranch *b_eleESC = 0;
   TBranch *b_eleEtaSC = 0;
   TBranch *b_elePhiSC = 0;
   TBranch *b_isoChargedHadrons = 0;
@@ -225,6 +231,7 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
   treeIn->SetBranchAddress("genWeight",                &genWeight,                   &b_genWeight);
   treeIn->SetBranchAddress("rho",                      &eleRho,                      &b_eleRho);
   treeIn->SetBranchAddress("pt",                       &elePt,                       &b_elePt);
+  treeIn->SetBranchAddress("eSC",                      &eleESC,                      &b_eleESC);
   treeIn->SetBranchAddress("etaSC",                    &eleEtaSC,                    &b_eleEtaSC);
   treeIn->SetBranchAddress("phiSC",                    &elePhiSC,                    &b_elePhiSC);
   treeIn->SetBranchAddress("isoChargedHadrons",        &isoChargedHadrons,           &b_isoChargedHadrons);
@@ -270,10 +277,13 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
 
   // all electron variables
   Float_t pt_ = 0.0;
+  Float_t rho_ = 0.0;
   Float_t etaSC_= 0.0;
+  Float_t eSC_= 0.0;
   Float_t dEtaSeed_= 0.0;
   Float_t dPhiIn_= 0.0;
   Float_t hOverE_= 0.0;
+  Float_t hOverEscaled_= 0.0;
   Float_t full5x5_sigmaIetaIeta_= 0.0;
   Float_t isoChargedHadrons_= 0.0;
   Float_t isoNeutralHadrons_= 0.0;
@@ -293,11 +303,14 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
   treeOut->Branch("genWeight",                &gweight_,                  "gweight/F");
   treeOut->Branch("kinWeight",                &kweight_,                  "kweight/F");
 
+  treeOut->Branch("rho",                      &rho_,                      "rho/F");
   treeOut->Branch("pt" ,                      &pt_,                       "pt/F");
+  treeOut->Branch("eSC",                      &eSC_,                      "eSC/F");
   treeOut->Branch("etaSC",                    &etaSC_,                    "etaSC/F");
   treeOut->Branch("dEtaSeed",                 &dEtaSeed_,                 "dEtaSeed/F");
   treeOut->Branch("dPhiIn",                   &dPhiIn_,                   "dPhiIn/F");
   treeOut->Branch("hOverE",                   &hOverE_,                   "hOverE/F");
+  treeOut->Branch("hOverEscaled",             &hOverEscaled_,             "hOverEscaled/F");
   treeOut->Branch("full5x5_sigmaIetaIeta",    &full5x5_sigmaIetaIeta_,    "full5x5_sigmaIetaIeta/F");
   treeOut->Branch("relIsoWithEA",             &relIsoWithEA_,             "relIsoWithEA/F");
   treeOut->Branch("ooEmooP",                  &ooEmooP_,                  "ooEmooP/F");
@@ -313,8 +326,7 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
   UInt_t maxEvents = treeIn->GetEntries();
   UInt_t maxEventsOver10000 =   maxEvents/10000.;
 
-  if( smallEventCount )
-    maxEvents = maxEventsSmall;
+  if(smallEventCount) maxEvents = maxEventsSmall;
 
   printf("\nStart processing events, will run on %u events\n", maxEvents );
 
@@ -324,15 +336,13 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
     // Load the value of the number of the electrons in the event    
     b_eleNEle->GetEntry(tentry);
     
-    if( ievent%100000 == 0 || ievent == maxEvents-1){
-      //printf("."); fflush(stdout);
-      drawProgressBar( (1.0*ievent+1)/maxEvents);
-    }
+    if(ievent%100000 == 0 || ievent == maxEvents-1) drawProgressBar( (1.0*ievent+1)/maxEvents);
       
     // Get data for all electrons in this event, only vars of interest
     b_eleRho->GetEntry(tentry);
     b_genWeight->GetEntry(tentry);
     b_elePt->GetEntry(tentry);
+    b_eleESC->GetEntry(tentry);
     b_eleEtaSC->GetEntry(tentry);
     b_elePhiSC->GetEntry(tentry);
     b_isoChargedHadrons->GetEntry(tentry);
@@ -356,38 +366,35 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
     for(int iele = 0; iele < eleNEle; iele++){
      
       gweight_ = genWeight;
-      // nEle_ = eleNEle;
       pt_ = elePt->at(iele);
+      rho_ = eleRho;
+      eSC_ = eleESC->at(iele);
       etaSC_ = eleEtaSC->at(iele);
       // Reweight only signal electron of the DY sample
       if(sample == SAMPLE_DY && matchType == MATCH_TRUE) kweight_ = findKinematicWeight(hKinematicWeights, pt_, etaSC_);
       else if(sample == SAMPLE_DoubleEle300to6500)       kweight_ = (6500 - 300)/(300 - 1)*N_1to300/N_300to6500;
       else                                               kweight_ = 1;
 
-      dEtaSeed_ = eleDEtaSeed->at(iele);
-      dPhiIn_ = eleDPhiIn->at(iele);
-      full5x5_sigmaIetaIeta_ = eleFull5x5SigmaIEtaIEta->at(iele);
-      hOverE_ =  eleHoverE->at(iele);
-      d0_ = eleD0->at(iele);
-      dz_ = eleDZ->at(iele);
-      isoChargedHadrons_ =  isoChargedHadrons->at(iele);
-      isoNeutralHadrons_ = isoNeutralHadrons->at(iele);
-      isoPhotons_ = eleIsoPhotons->at(iele);
+      dEtaSeed_                 = eleDEtaSeed->at(iele);
+      dPhiIn_                   = eleDPhiIn->at(iele);
+      full5x5_sigmaIetaIeta_    = eleFull5x5SigmaIEtaIEta->at(iele);
+      hOverE_                   = eleHoverE->at(iele);
+      hOverEscaled_             = hOverE_ - C_e/eSC_ - C_rho*eleRho/eSC_;
+      d0_                       = eleD0->at(iele);
+      dz_                       = eleDZ->at(iele);
+      isoChargedHadrons_        = isoChargedHadrons->at(iele);
+      isoNeutralHadrons_        = isoNeutralHadrons->at(iele);
+      isoPhotons_               = eleIsoPhotons->at(iele);
       expectedMissingInnerHits_ = eleExpectedMissingInnerHits->at(iele);
-      nPV_ = nPV;
-      // // nPU_ = nPU->at(iele);
-      // // nPUTrue_ = nPUTrue->at(iele);
-      // rho_ = eleRho; //->at(iele);
-      ooEmooP_ = eleOOEMOOP->at(iele);
-      passConversionVeto_ = electronPassConversionVeto->at(iele);
-      isTrueEle_ =  eleIsTrueElectron->at(iele); 
+      nPV_                      = nPV;
+      ooEmooP_                  = eleOOEMOOP->at(iele);
+      passConversionVeto_       = electronPassConversionVeto->at(iele);
+      isTrueEle_                = eleIsTrueElectron->at(iele);
 
       // Compute isolation with effective area correction for PU
       // Find eta bin first. If eta>2.5, the last eta bin is used.
       int etaBin = 0; 
-      while ( etaBin < EffectiveAreas::nEtaBins-1 
-              && abs(etaSC_) > EffectiveAreas::etaBinLimits[etaBin+1] )
-        { ++etaBin; };
+      while(etaBin < EffectiveAreas::nEtaBins-1 && abs(etaSC_) > EffectiveAreas::etaBinLimits[etaBin+1]) ++etaBin;
       double area = EffectiveAreas::effectiveAreaValues[etaBin];
       relIsoWithEA_ = (isoChargedHadrons_ + std::max(0.0, isoNeutralHadrons_+isoPhotons_-eleRho*area))/pt_;
       if(!passPreselection(isTrueEle_, pt_, etaSC_, passConversionVeto_, dz_, matchType, etaRegion)) continue;
@@ -437,65 +444,29 @@ float findKinematicWeight(TH2D *hist, float pt, float etaSC){
 }
 
 bool passPreselection(int isTrue, float pt, float eta, int passConversionVeto, float dz, MatchType matchType, EtaRegion etaRegion){
-
-  bool pass = true;
-
-  if( matchType == MATCH_TRUE ){
-    if( !(isTrue==1) )
-      pass = false;
-  }else if( matchType == MATCH_FAKE ){
-    if( !(isTrue==0 || isTrue==3) )
-      pass = false;
-  }else if( matchType == MATCH_ANY){
-    // No matching needed, do nothing
-  }else{
-    printf("Unknown truth match requested\n");
-    assert(0);
-  }
-    
-  if( pt < ptMin )
-    pass = false;
-
-  if( etaRegion == ETA_EB ){
-    if( !(abs(eta) <= boundaryEBEE ) )
-      pass = false;
-  }else if( etaRegion == ETA_EE ){
-    if( !(abs(eta) >= boundaryEBEE  && abs(eta) <= etaMax ) )
-      pass = false;
-  }else if( etaRegion == ETA_FULL ){
-    if( !( abs(eta) < etaMax ) )
-      pass = false;
-  }else{
-    printf("Unknown eta region requested\n");
-    assert(0);
-  }
-
-  if( !passConversionVeto )
-    pass = false;
-  
-  if( ! (abs(dz) < dzMax ) )
-    pass = false;
-  
-  return pass;
-  
+  if(matchType == MATCH_TRUE and !(isTrue==1))                                      return false;
+  if(matchType == MATCH_FAKE and !(isTrue==0 || isTrue==3))                         return false;
+  if(etaRegion == ETA_EB     and !(abs(eta) <= boundaryEBEE))                       return false;
+  if(etaRegion == ETA_EE     and !(abs(eta) >= boundaryEBEE && abs(eta) <= etaMax)) return false;
+  if(etaRegion == ETA_FULL   and !(abs(eta) < etaMax))                              return false;
+  if(pt < ptMin)                                                                    return false;
+  if(!passConversionVeto)                                                           return false;
+  if(!(abs(dz) < dzMax))                                                            return false;
+  return true;
 }
 
 const int maxPowersBin = 6;
 TString powers[maxPowersBin] = {"","K","M","G","T","P"};
 
 TString eventCountString(){
-
   TString result = "_full";
-
-  if( smallEventCount ){
+  if(smallEventCount){
     int powerOfTen = log10(maxEventsSmall);
     int powersBin = powerOfTen/3;
-    if( powersBin >= maxPowersBin )
-      powersBin = maxPowersBin-1;
+    if(powersBin >= maxPowersBin) powersBin = maxPowersBin-1;
     int neventsShort = maxEventsSmall / TMath::Power(10, 3*powersBin);
     result = TString::Format("_%d%s", neventsShort, powers[powersBin].Data());
   }
-
   return result;
 }
 
@@ -506,15 +477,14 @@ void drawProgressBar(float progress){
   std::cout << "[";
   int pos = barWidth * progress;
   for (int i = 0; i < barWidth; ++i) {
-    if (i < pos) std::cout << "=";
+    if (i < pos)       std::cout << "=";
     else if (i == pos) std::cout << ">";
-    else std::cout << " ";
+    else               std::cout << " ";
   }
   std::cout << "] " << int(progress * 100.0) << " %\r";
   std::cout.flush();
   
-  if( progress >= 1.0 )
-    std::cout << std::endl;
+  if( progress >= 1.0 ) std::cout << std::endl;
 
   return;
 }
@@ -526,7 +496,7 @@ void drawProgressBar(float progress){
 // for all other choices of flags kinematic weights are 1.0
 int main(int argc, char *argv[]){
   gROOT->SetBatch();
-/*
+
   // For tuning
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_TRUE, ETA_EB);
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_TRUE, ETA_EE);
@@ -534,12 +504,10 @@ int main(int argc, char *argv[]){
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_TT, MATCH_FAKE, ETA_EE);
 
   // For plotting
-  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_TRUE, ETA_FULL);
-  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_ANY,  ETA_FULL);
-  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_TT, MATCH_ANY,  ETA_FULL);
-  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_GJ, MATCH_ANY,  ETA_FULL);*/
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY,                 MATCH_TRUE, ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY,                 MATCH_ANY,  ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_TT,                 MATCH_ANY,  ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_GJ,                 MATCH_ANY,  ETA_FULL);
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle1to300,    MATCH_ANY,  ETA_FULL);
-  //convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle300to6500, MATCH_ANY,  ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle300to6500, MATCH_ANY,  ETA_FULL);
 }
-
-
