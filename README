@@ -440,26 +440,20 @@ For that, one can change the script or just change it interactively on
 the desired canvas and save the figure manually.
 
 d) Draw the ID efficiencies as a function of pt, eta, and the number
-of vertices.
-   One needs to check that the flat ntuple names of the input are right
-in the script. The barrel/endcap flag in the beginning of the script 
-needs to be set. The names of the files with cut objects need to be adjusted
-as necessary. Note that even though one selects only the barrel or endcap
+of vertices. In drawEfficiency(mode, tag), mode is pt, pt_2TeV, eta or nvtx;
+tag is the set of workingpoints used in plotting, as defined on top of the file.
+  Note that even though one selects only the barrel or endcap
 for one run of the script, all cut object files, both barrel and endcap,
 have to exist. Kinematic reweighting is applied in the script.
-   The script have to be run separately to produce eff(pt), eff(eta),
-and eff(Nvtx). To define which of these is to be produced one needs
-to change the "mode" constant in the beginning of the script. 
    The script is run as follows:
 
-   root -b -q 'drawEfficiency.C(true)'
-   root -b -q 'drawEfficiency.C(false)'
+   ./drawEfficiency.py
 
 The output of the scripts is plots with names like:
 
-  figures/plot_eff_barrel_pt.png
-  figures/plot_eff_etaSC.png
-  figures/plot_eff_barrel_nPV.pn
+  figures/efficiencies/plot_eff_barrel_pt.png
+  figures/efficiencies/plot_eff_etaSC.png
+  figures/efficiencies/plot_eff_barrel_nPV.pn
 
 A couple of caveats regarding the cuts. The missing hits cuts are added
 by hand, one needs to review and adjust them as needed. The impact parameter
@@ -474,12 +468,6 @@ sample.
 as the signal efficiency. There is an option in the beginning
 of the script to scale up the background efficiency by, say, x5
 for a better visibility.
-
-The present version of the package does not make plots of
-the efficiency as a function of pt for high energy electrons.
-It is desirable to add the high pt plots, and perhaps use for those
-dedicated samples (no kinematic reweighting either), such
-as DoubleElectron_FlatPt-1To300 and DoubleElectron_FlatPt-300To6500.
 
 9. Tune several cuts by manually. These include the expected missing
 inner hits cuts and the impact parameter cuts. All of this is usually 
