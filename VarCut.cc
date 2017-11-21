@@ -3,10 +3,9 @@
 #include <iostream>
 #include <sstream>
 
-const  int sig_figs = 3;
+const int sig_figs = 3;
   
-auto numberNew =   [](int number_of_sig_figs, float number) 
-{
+auto numberNew =   [](int number_of_sig_figs, float number){
   std::stringstream myStream;
   myStream << std::setprecision(number_of_sig_figs) << number;
   return std::stod(myStream.str());
@@ -14,11 +13,9 @@ auto numberNew =   [](int number_of_sig_figs, float number)
 
 const int UNDEFCUT = -999;
 
-VarCut::VarCut()
-{
-  // All cuts are initialized to an unlikely value
-  for(int i=0; i<Vars::nVariables; i++)
-    _cuts[i]= UNDEFCUT;
+// All cuts are initialized to an unlikely value
+VarCut::VarCut(){
+  for(int i=0; i<Vars::nVariables; i++) _cuts[i]= UNDEFCUT;
 };
 
 // Construct TCut object for all cuts joined with &&
@@ -28,7 +25,7 @@ TCut *VarCut::getCut(TString selectVar){
 
   // Die if something appears uninitialized
   for(int i=0; i<Vars::nVariables; i++){
-    if( _cuts[i] == UNDEFCUT ){
+    if(_cuts[i] == UNDEFCUT){
       printf("VarCut:: not all cuts are set! Die!\n");
       assert(0);
     }
@@ -38,112 +35,38 @@ TCut *VarCut::getCut(TString selectVar){
   for(int i=0; i<Vars::nVariables; i++){
     if(selectVar != "" and Vars::variables[i]->name != selectVar) continue;
     // The += adds all cuts with &&:
-    TString formatString = " %s < %f ";
-    if( Vars::variables[i]->name == "expectedMissingInnerHits")
-      formatString = " %s <= %f ";
-
-    (*cut) += TString::Format(formatString.Data(),
-			      Vars::variables[i]->nameTmva.Data(),
-			      _cuts[i]);
+    (*cut) += TString::Format(formatString.Data(), Vars::variables[i]->nameTmva.Data(), _cuts[i]);
   }
   
   return cut;
 }
 
 void VarCut::setCutValue(TString varName, float val){
-
-  int index = getVariableIndex(varName);
-
-  if( index != -1 ){
-    _cuts[index] = numberNew(sig_figs, val);
-  }else{
-    printf("VarCut::setCutValue: requested variable is not known!!!\n");
-  }
-
-  return;
-}
-
-void VarCut::setCutValueTmvaName(TString varNameTmva, float val){
-
-  int index = getVariableIndexTmvaName(varNameTmva);
-
-  if( index != -1 ){
-    _cuts[index] = numberNew(sig_figs, val);
-  }else{
-    printf("VarCut::setCutValue: requested variable is not known!!!\n");
-  }
-
-  return;
+  _cuts[getVariableIndex(varName)] = numberNew(sig_figs, val);
 }
 
 float VarCut::getCutValue(TString variable){
-
-  float cutVal = UNDEFCUT;
-  int index = getVariableIndex(variable);
-
-  if( index != -1 ){
-    cutVal = numberNew(sig_figs,  _cuts[index] );
-  }else{
-    printf("VarCut::getCutValue: requested variable is not known!!!\n");
-  }
-  if (variable == "expectedMissingInnerHits") cutVal = (int) cutVal;
-  return cutVal;
+  return numberNew(sig_figs,  _cuts[getVariableIndex(variable)]);
 }
 
 int VarCut::getVariableIndex(TString variable){
-
-  int index = -1;
   for(int i=0; i<Vars::nVariables; i++){
-    if( variable == Vars::variables[i]->name ){
-      index = i;
-      break;
-    } 
+    if(variable == Vars::variables[i]->name or variable == Vars::variables[i]->nameTmva) return i;
   }
-
-  return index;
+  printf("VarCut::getVariableIndex: requested variable is not known!!!\n");
+  exit(1);
 }
 
-int VarCut::getVariableIndexTmvaName(TString variableTmva){
-
-  int index = -1;
-  for(int i=0; i<Vars::nVariables; i++){
-    if( variableTmva == Vars::variables[i]->nameTmva ){
-      index = i;
-      break;
-    } 
-  }
-
-  return index;
-}
 
 bool VarCut::isSymmetric(TString variable){
-
-  bool result = false;
-  int index = getVariableIndex(variable);
-
-  if( index != -1 ){
-    result = Vars::variables[index]->symmetric;
-  }else{
-    printf("VarCut::isSymmetric: requestd variable is not known!!!\n");
-  }
-
-  return result;
+  return Vars::variables[getVariableIndex(variable)]->symmetric;
 }
 
 // Print all cut values to stdout
 void VarCut::print(){
-
   printf("VarCut::print: Cut values are\n");
   for(int i=0; i<Vars::nVariables; i++){
-    if (i == 8)
-      printf("  %30s <= %g\n", Vars::variables[i]->nameTmva.Data(), numberNew(sig_figs, _cuts[i]) );
-    else 
-      printf("  %30s < %g\n", Vars::variables[i]->nameTmva.Data(), numberNew(sig_figs, _cuts[i]) );
-    
-  
+    printf("  %30s < %g\n", Vars::variables[i]->nameTmva.Data(), numberNew(sig_figs, _cuts[i]));
   }
 
 }
-
-
-  
