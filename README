@@ -68,13 +68,8 @@ fourPointOptimization.C: runs optimization in four passes. The first
      subdirectory with the names configured in the code.
        
 
-exampleFillCuts.C: an example of how to create ROOT files with VarCut objects
+fillCuts.py: an example of how to create ROOT files with VarCut objects
      if cuts are known from somewhere else.
-     Compile and run it without parameters.
-
-fillCutsPreliminary.C and fillCutsEGM2012.C: these scripts create cuts files
-     that contain EGM2012 cuts and the preliminary safe cuts from Giovanni Zevi 
-     Della Porta. Compile and run it without parameters.
 
 findCutLimits.C: this code determines cut values that correspond to
      99.9% efficiency for each variable separately. It uses all definitions
