@@ -1,48 +1,15 @@
 #! /usr/bin/env python
 
 import ROOT,os,numpy,shutil
-os.system('root -b -q VarCut.cc+ &> /dev/null')
-os.system('root -b -q OptimizationConstants.hh+ &> /dev/null')
-ROOT.gROOT.SetBatch(True)
-ROOT.gSystem.Load('VarCut_cc')
-ROOT.gSystem.Load('OptimizationConstants_hh')
+from common import loadClasses, workingPoints, getTreeFromFile
+loadClasses('VarCut.cc', 'OptimizationConstants.hh')
 
 dateTag = "2017-11-16"
-
-#
-# Listing workingpoints to compare
-#
-from collections import namedtuple
-workingPoint = namedtuple('workingpoint', 'name cutsFileBarrel cutsFileEndcap sColor bgColor missingHitsBarrel missingHitsEndcap')
-
-workingPoints = {
-  'default':     [workingPoint('Veto',          'cuts_barrel_2017-11-07_WP_Veto',           'cuts_endcap_2017-11-07_WP_Veto',           2, 9,  2, 3),
-                  workingPoint('Loose',         'cuts_barrel_2017-11-07_WP_Loose',          'cuts_endcap_2017-11-07_WP_Loose',          4, 46, 1, 1),
-                  workingPoint('Medium',        'cuts_barrel_2017-11-07_WP_Medium',         'cuts_endcap_2017-11-07_WP_Medium',         6, 30, 1, 1),
-                  workingPoint('Tight',         'cuts_barrel_2017-11-07_WP_Tight',          'cuts_endcap_2017-11-07_WP_Tight',          8, 42, 1, 1)],
-  'retuneMVA':   [workingPoint('Veto',          'cuts_barrel_2017-11-16_WP_Veto',           'cuts_endcap_2017-11-16_WP_Veto',           2, 9,  2, 3),
-                  workingPoint('Loose',         'cuts_barrel_2017-11-16_WP_Loose',          'cuts_endcap_2017-11-16_WP_Loose',          4, 46, 1, 1),
-                  workingPoint('Medium',        'cuts_barrel_2017-11-16_WP_Medium',         'cuts_endcap_2017-11-16_WP_Medium',         6, 30, 1, 1),
-                  workingPoint('Tight',         'cuts_barrel_2017-11-16_WP_Tight',          'cuts_endcap_2017-11-16_WP_Tight',          8, 42, 1, 1)],
-  'retuneEff':   [workingPoint('Veto',          'cuts_barrel_2017-11-07_retuned_WP_Veto',   'cuts_endcap_2017-11-07_retuned_WP_Veto',   2, 9,  2, 3),
-                  workingPoint('Loose',         'cuts_barrel_2017-11-07_retuned_WP_Loose',  'cuts_endcap_2017-11-07_retuned_WP_Loose',  4, 46, 1, 1),
-                  workingPoint('Medium',        'cuts_barrel_2017-11-07_retuned_WP_Medium', 'cuts_endcap_2017-11-07_retuned_WP_Medium', 6, 30, 1, 1),
-                  workingPoint('Tight',         'cuts_barrel_2017-11-07_retuned_WP_Tight',  'cuts_endcap_2017-11-07_retuned_WP_Tight',  8, 42, 1, 1)],
-  'compare2016': [workingPoint('Tight (2016)',  'cuts_barrel_2016_WP_Tight',                'cuts_endcap_2016_WP_Tight',                6, 30, 1, 1),
-                  workingPoint('Tight',         'cuts_barrel_2017-11-07_WP_Tight',          'cuts_endcap_2017-11-07_WP_Tight',          8, 42, 1, 1),
-                  workingPoint('Loose (2016)',  'cuts_barrel_2016_WP_Loose',                'cuts_endcap_2016_WP_Loose',                2, 9,  1, 1),
-                  workingPoint('Loose',         'cuts_barrel_2017-11-07_WP_Loose',          'cuts_endcap_2017-11-07_WP_Loose',          4, 46, 1, 1)],
-}
 
 
 #
 # Helper functions for trees and binning
 #
-
-def getTreeFromFile(fname, tname):
-  chain = ROOT.TChain(tname)
-  chain.Add(fname)
-  return chain
 
 def getPtBins(longPtRange):
   bins = [20.]
