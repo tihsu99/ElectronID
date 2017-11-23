@@ -260,7 +260,7 @@ void writeWorkingPoints(const TMVA::Factory *factory, TString cutsOutFileNameBas
       cutMax->setCutValue(Vars::variables[ivar]->name, cutHi.at(ivar));
     }
     printf("   working point %s\n", Opt::wpNames[iwp].Data());
-    cutMax->print();
+    cutMax->printCuts();
     cutMax->Write("cuts");
     cutsFile->Close();
   }

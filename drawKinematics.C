@@ -22,7 +22,7 @@ const bool useSmallEventCount = false;
 
 // Note: the DY ntuple has to be prepared for true electrons only to
 // have meaningful kinematic weights.
-TString tagDir = "2017-11-07";
+TString tagDir = "2017-11-16";
 TString signalFileName     = tagDir + "/DYJetsToLL_flat_ntuple_true_alleta_full.root";
 TString backgroundFileName = tagDir + "/TTJets_flat_ntuple_trueAndFake_alleta_full.root";
 

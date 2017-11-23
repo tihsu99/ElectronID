@@ -95,7 +95,7 @@ void fourPointOptimization(bool useBarrel){
     printf(" file name:   %s\n", wpFinalFileName.Data());
     TFile *fwp = new TFile(wpFinalFileName);
     VarCut *thisWP = (VarCut*)fwp->Get("cuts");
-    if(thisWP != 0) thisWP->print();
+    if(thisWP != 0) thisWP->printCuts();
     else            printf("???? not found????\n");
     fwp->Close();
   }

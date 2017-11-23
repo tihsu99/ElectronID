@@ -63,10 +63,9 @@ bool VarCut::isSymmetric(TString variable){
 }
 
 // Print all cut values to stdout
-void VarCut::print(){
+void VarCut::printCuts(){
   printf("VarCut::print: Cut values are\n");
   for(int i=0; i<Vars::nVariables; i++){
     printf("  %30s < %g\n", Vars::variables[i]->nameTmva.Data(), numberNew(sig_figs, _cuts[i]));
   }
-
 }

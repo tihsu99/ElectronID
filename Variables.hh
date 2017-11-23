@@ -17,12 +17,12 @@ namespace Vars {
     Variables(TString nameIn, TString nameTmvaIn, char typeIn, bool symIn):
       name(nameIn), nameTmva(nameTmvaIn), type(typeIn), symmetric(symIn){};
   };
-  
+
   Variables *variables [nVariables] = {
     new Variables("full5x5_sigmaIetaIeta","full5x5_sigmaIetaIeta",'F',false),
     new Variables("dEtaSeed"             ,"abs(dEtaSeed)"        ,'F',true),
     new Variables("dPhiIn"               ,"abs(dPhiIn)"          ,'F',true),
-    new Variables("hOverE"               ,"hOverEscaled"         ,'F',false),
+    new Variables("hOverE"               ,"hOverE"               ,'F',false),
     new Variables("relIsoWithEA"         ,"relIsoWithEA"         ,'F',false),
     new Variables("ooEmooP"              ,"ooEmooP"              ,'F',false)
   };

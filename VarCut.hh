@@ -30,7 +30,7 @@ public:
   bool isSymmetric(TString variable);
 
   // Input/output
-  void print(); // print to stdout
+  void printCuts(); // print to stdout
 
 private:
   // The actual list of variables for which cuts are stored here

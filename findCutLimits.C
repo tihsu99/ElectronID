@@ -96,7 +96,7 @@ void writeCutAtEff(float eff, bool useBarrel, TTree* tree, TCut preselectionCuts
     float cutValue = var.findUpperCut(tree, preselectionCuts, eff);
     cutAtEff->setCutValue(Vars::variables[i]->name, cutValue);
   }
-  cutAtEff->print();
+  cutAtEff->printCuts();
 
   TString fileName = Opt::cutRepositoryDir + TString("/")  + name;
   TFile *file = new TFile(fileName, "recreate");

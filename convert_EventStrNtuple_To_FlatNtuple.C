@@ -29,8 +29,10 @@ enum MatchType  {MATCH_TRUE, MATCH_FAKE, MATCH_ANY};
 enum SampleType {SAMPLE_UNDEF, SAMPLE_DY, SAMPLE_TT, SAMPLE_GJ, SAMPLE_DoubleEle1to300, SAMPLE_DoubleEle300to6500};
 enum EtaRegion  {ETA_EB, ETA_EE, ETA_FULL};
 
-const float C_e   = 2.65;
-const float C_rho = 0.201;
+const float C_e_barrel   = 1.63;
+const float C_rho_barrel = 0.0368;
+const float C_e_endcap   = 2.65;
+const float C_rho_endcap = 0.201;
 
 
 const TString getFileName(TString type){
@@ -375,6 +377,8 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
       else if(sample == SAMPLE_DoubleEle300to6500)       kweight_ = (6500 - 300)/(300 - 1)*N_1to300/N_300to6500;
       else                                               kweight_ = 1;
 
+      float C_e                 = fabs(etaSC_) < 1.4442 ? C_e_barrel   : C_e_endcap;
+      float C_rho               = fabs(etaSC_) < 1.4442 ? C_rho_barrel : C_rho_endcap;
       dEtaSeed_                 = eleDEtaSeed->at(iele);
       dPhiIn_                   = eleDPhiIn->at(iele);
       full5x5_sigmaIetaIeta_    = eleFull5x5SigmaIEtaIEta->at(iele);
