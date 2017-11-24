@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import ROOT,os,numpy,shutil
-from common import loadClasses, workingPoints, getTreeFromFile, drawFromTree, getCuts, makeSubDirs
+from common import loadClasses, workingPoints, getTreeFromFile, drawFromTree, getCuts, makeSubDirs, compareWP
 loadClasses('VarCut.cc', 'OptimizationConstants.hh')
 
 dateTag = "2017-11-16"
