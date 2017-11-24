@@ -1,9 +1,8 @@
 #! /usr/bin/env python
 
-import ROOT,os,numpy
-os.system('root -b -q VarCut.cc+ &> /dev/null')
-ROOT.gSystem.Load('VarCut_cc')
-ROOT.gROOT.SetBatch(True)
+import ROOT
+from common import loadClasses
+loadClasses('VarCut.cc')
 
 #
 # Fill cuts into a VarCut object
