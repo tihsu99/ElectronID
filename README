@@ -97,16 +97,13 @@ drawVariablesAndCuts.C: this script draws distributions of all variables
      is taken from OptimizationConstants.hh, but the names of the ntuples
      are inside of this script. Compile and run it without parameters.
 
-drawROCandWP.C: this script draws the ROC and up to three sets of 
-     working points. The settings are controlled by constants in the beginning
-     of the file.
-     - The ROC is taken from the specified file (TMVA output).
-     - Each set of cuts is taken from the list of files given (one can run with
-      only one set and not worry about the content of other constants for other sets).
+drawROCandWP.py: this script draws the ROC and up to three sets of 
+     working points.
+     - The ROC is taken from the specified TMVA files
+     - Each set of cuts is taken from the list of files defined in common.workingpoints
      - The efficiencies for working points are computed right in this script,
       using the signal and background ntuples specfied explicitly in the beginning
       of the file and preselection cuts taken from OptimizationConstants.hh
-      - Compile and run it without parameters.
 
 drawKinematics.C: the script draws unweighted and weighted pt and eta distributions.
 
@@ -386,19 +383,13 @@ pass2 between 75 and 90% of the signal efficiency.
    The markers are drawn based on the TestTree from the TMVA file, the
 same tree which (to our best guess) used to build the ROCs, so the WP markers
 should really be sitting on the final composite ROC. 
-   Note that right now there is one extra cut applied in the script
+   Note that plots are made with and without an extra cut 
 that is not applied in TMVA preselection and not tuned by the TMVA:
-the cut on the expected missing inner hits. This cut can be disabled. The 
-cut as it is there at the moment of this writing is fairly loose.
-  The script is run separately for the barrel and separately for the endcap,
-there is a boolean flag in the beginning of the script that controls that.
+the cut on the expected missing inner hits.
   The script computes the efficiencies for the signal with exactly the same
 weights that TMVA used to tune the cuts.
-  To run the script to draw the ROC and the working points one needs to
-run from ROOT prompt in the main package directory:
 
-  root -b -q 'drawROCandWPv4.C(true)'
-  root -b -q 'drawROCandWPv4.C(false)'
+  ./drawROCandWPv4.py
 
 The output, a presentation-grade figure, is saved into a file with the 
 name like
