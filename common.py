@@ -1,4 +1,4 @@
-import ROOT,os
+import ROOT,os,shutil,numpy
 ROOT.gROOT.SetBatch(True)
 
 #
@@ -60,3 +60,11 @@ def getCuts(wp, barrel, selectVar):
   selectionCuts  = ROOT.TCut(cuts.getCut(selectVar))
   selectionCuts += ROOT.TCut('expectedMissingInnerHits<='+str(wp.missingHitsBarrel if barrel else wp.missingHitsEndcap))
   return selectionCuts
+
+def makeSubDirs(fileName):
+  listOfSubDirs = fileName.split('/')[:-1]
+  dirName = os.path.join(*listOfSubDirs)
+  try:    os.makedirs(dirName)
+  except: pass
+  for i in range(2,len(listOfSubDirs)+1): shutil.copy("figures/index.php", os.path.join(*listOfSubDirs[:i]))
+  return fileName

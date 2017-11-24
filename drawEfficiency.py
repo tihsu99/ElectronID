@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import ROOT,os,numpy,shutil
-from common import loadClasses, workingPoints, getTreeFromFile
+from common import loadClasses, workingPoints, getTreeFromFile, drawFromTree, getCuts, makeSubDirs
 loadClasses('VarCut.cc', 'OptimizationConstants.hh')
 
 dateTag = "2017-11-16"
@@ -35,24 +35,6 @@ def getEtaBins():
 
 def getNvtxBins():
   return [0., 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 30, 35, 40, 45, 50]
-
-def drawFromTree(tree, selectionCuts, varName, histName, binning, wp):
-  hist = ROOT.TH1F(histName, histName, len(binning)-1, numpy.array(binning))
-  hist.Sumw2()
-  cutString  = "genWeight*kinWeight*(%s)" % selectionCuts.GetTitle()
-  command    = varName + '>>' + histName
-  if '2017-11-16' in wp.cutsFileBarrel or 'retuned' in wp.cutsFileBarrel: 
-    cutString = cutString.replace('hOverE','hOverEscaled')
-    command   = command.replace('hOverE','hOverEscaled')
-  tree.Draw(command, cutString, "goff")
-  return hist
-
-def getCuts(wp, barrel, selectVar):
-  file           = ROOT.TFile('cut_repository/' + (wp.cutsFileBarrel if barrel else wp.cutsFileEndcap) + '.root')
-  cuts           = file.Get('cuts')
-  selectionCuts  = ROOT.TCut(cuts.getCut(selectVar))
-  selectionCuts += ROOT.TCut('expectedMissingInnerHits<='+str(wp.missingHitsBarrel if barrel else wp.missingHitsEndcap))
-  return selectionCuts
 
 #
 # Calculating the efficiency histogram with correct errors
@@ -179,21 +161,10 @@ def drawEfficiency(mode, tag, region, selectVar):
   lat.SetNDC(True);
   lat.Draw("same");
 
-  def createSubDirs(listOfSubDirs):
-    dirName = os.path.join(*listOfSubDirs)
-    try:    os.makedirs(dirName)
-    except: pass
-    for i in range(2,len(listOfSubDirs)+1): shutil.copy("figures/index.php", os.path.join(*listOfSubDirs[:i]))
-    return dirName
-
-  subDirs = ['figures','efficiencies']
-  if(selectVar != ""): subDirs.append(selectVar)
-  if(tag!='default'):  subDirs.append(tag)
-  dirName = createSubDirs(subDirs)
-
+  dirName  = os.path.join('figures', 'efficiencies', selectVar, tag if tag!='default' else '')
   fileName = os.path.join(dirName, "eff_" + ((region + '_') if mode != 'eta' else '') + mode + '.png')
   if '2017-11-16' in wp.cutsFileBarrel or 'retuned' in wp.cutsFileBarrel: fileName.replace('hOverE','hOverEscaled')
-  c1.Print(fileName) 
+  c1.Print(makeSubDirs(fileName))
 
 
 import argparse
