@@ -82,7 +82,7 @@ if ($_GET['noplots']) {
         if ($others) print "<p>Also as ".implode(', ',$others)."</p>";
         print "</div>";
     }
-    $other_exts = array('.pdf', '.cxx', '.eps', '.root', '.txt', '.C');
+    $other_exts = array('.pdf', '.cxx', '.eps', '.root', '.txt', '.C', '.tex');
     $filenames = glob("*.png"); sort($filenames);
     foreach ($filenames as $filename) {
         if (isset($_GET['match']) && !fnmatch('*'.$_GET['match'].'*', $filename)) continue;
@@ -96,7 +96,7 @@ if ($_GET['noplots']) {
             $other_filename = str_replace('.png', $ex, $filename);
             if (file_exists($other_filename)) {
                 array_push($others, "<a class=\"file\" href=\"$other_filename\">[" . $ex . "]</a>");
-                if ($ex != '.txt') array_push($displayed, $other_filename);
+                array_push($displayed, $other_filename);
             }
         }
         print "<p> Last changed: " . date ("F d Y H:i:s.", filemtime($filename)) . " </p>";
