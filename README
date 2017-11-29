@@ -105,7 +105,7 @@ drawROCandWP.py: this script draws the ROC and up to three sets of
       using the signal and background ntuples specfied explicitly in the beginning
       of the file and preselection cuts taken from OptimizationConstants.hh
 
-drawKinematics.C: the script draws unweighted and weighted pt and eta distributions.
+drawKinematics.py: the script draws unweighted and weighted pt and eta distributions.
 
 drawEfficiency.py: the script draws efficiencies for all working points as a function
       of pt, eta, Nvtx.
@@ -368,7 +368,7 @@ above with appropriate changes to the flags in the converting script.
 Then, change the input ntuple names for the drawing script below and
 run it as:
 
-  ./compileAndRun.sh drawKinematics
+  ./drawKinematics.py
 
 b) Draw ROC and display the working points in the ROC space. In the
 script that does this one needs to specify locations of the TMVA output
