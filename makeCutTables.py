@@ -5,7 +5,7 @@ from common      import loadClasses, workingPoints, compareWP
 from collections import OrderedDict
 #loadClasses('VarCut.cc', 'OptimizationConstants.hh')
 
-latexVars = {'full5x5_sigmaIetaIeta' : 'full $5\\times5 \\sigma_{i\\eta i\\eta} <$',
+latexVars = {'full5x5_sigmaIetaIeta' : 'full 5$\\times$5 $\\sigma_{i\\eta i\\eta} <$',
              'dEtaSeed'              : '$|$dEtaInSeed$|$ $<$',
              'dPhiIn'                : '$|$dPhiIn$|$ $<$',
              'hOverE'                : '$H/E <$',
