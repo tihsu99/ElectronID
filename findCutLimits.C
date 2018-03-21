@@ -13,7 +13,7 @@
 #include "VarCut.hh"
 
 // Define unique part of the file name for saving the cuts
-TString dateTag = "2017-11-16";
+TString dateTag = "2018-03-18";
 
 // Forward declarations
 void findVarLimits(TString var, bool isBarrel, float &xmin, float &xmax);
