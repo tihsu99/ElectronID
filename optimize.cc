@@ -19,7 +19,7 @@ void optimize(TString cutMaxFileName, TString cutsOutFileNameBase, TString train
 
   TTree *signalTree     = getTreeFromFile(fnameSignal,     Opt::signalTreeName,     &Opt::fileSignal);
   TTree *backgroundTree = getTreeFromFile(fnameBackground, Opt::backgroundTreeName, &Opt::fileBackground);
-  
+
   // Configure output details
   TString trainingOutputDir = TString("trainingData/") + trainingDataOutputBase;
   printf("The directory where the xml results of the training is:\n");
@@ -64,8 +64,8 @@ void optimize(TString cutMaxFileName, TString cutsOutFileNameBase, TString train
   // Set individual event weights (the variables must exist in the original TTree)
   // -  for signal    : `dataloader->SetSignalWeightExpression    ("weight1*weight2");`
   // -  for background: `dataloader->SetBackgroundWeightExpression("weight1*weight2");`
-  dataloader->SetSignalWeightExpression("genWeight*kinWeight");
-  dataloader->SetBackgroundWeightExpression("genWeight*kinWeight");
+  dataloader->SetSignalWeightExpression("abs(genWeight*kinWeight)");
+  dataloader->SetBackgroundWeightExpression("abs(genWeight*kinWeight)");
 
   // Configure training and test trees  
   TString trainAndTestOptions = getTrainAndTestOptions(useBarrel);
