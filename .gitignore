@@ -49,6 +49,7 @@ trainingData/*
 *.sh.e*
 *.sh.o*
 figures/*
+tables/*
 syncPlots.sh
 computeKinematicWeights
 convert_EventStrNtuple_To_FlatNtuple
