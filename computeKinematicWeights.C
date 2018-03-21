@@ -8,8 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const TString tagDir = "2017-11-16";
-
 const TCut trueEleCut       = "isTrue == 1";
 const TCut fakeEleCut       = "isTrue == 0 || isTrue == 3";
 const TCut preselectionCuts = "passConversionVeto && abs(dz)<1";
@@ -29,7 +27,7 @@ const bool smallEventCount = false;
 const int smallMaxEvents = 100000;
 
 const TString getFileName(TString type){
-  return "/user/tomc/eleIdTuning/tuples/" + type + "_cutID_tuning_92X_v1.root";
+  return "/user/tomc/eleIdTuning/tuples/" + type + "_cutID_tuning_94X_v3.root";
 }
 // Tree Name (file IN):
 const TString treeName = "ntupler/ElectronTree";
@@ -55,7 +53,7 @@ TH2D *getPtEtaHist(TString name, TTree* tree, double* ptBinLimits, TCut preselec
 }
 
 // Main function
-void computeKinematicWeights(){
+void computeKinematicWeights(TString tagDir){
 
   gStyle->SetPalette(1);
 
@@ -129,5 +127,5 @@ TTree *getTree(TString fname, TString tname){
 // Compiled
 int main(int argc, char *argv[]){
   gROOT->SetBatch();
-  computeKinematicWeights();
+  computeKinematicWeights("2018-03-18");
 }
