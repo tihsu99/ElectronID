@@ -1,16 +1,15 @@
 #! /usr/bin/env python
 
 import ROOT,os,numpy,shutil
-from common import loadClasses, workingPoints, getTreeFromFile, drawFromTree, getCuts, makeSubDirs, compareWP
+from common import loadClasses, workingPoints, getTreeFromFile, drawFromTree, getCuts, makeSubDirs, compareWP, setColors
 loadClasses('VarCut.cc', 'OptimizationConstants.hh')
 
-dateTag = "2017-11-16"
+dateTag = "2018-03-18"
 
 
 #
 # Helper functions for trees and binning
 #
-
 def getPtBins(longPtRange):
   bins = [20.]
   for i in range(20): bins.append(bins[-1] + 1)
@@ -28,7 +27,7 @@ def getEtaBins():
   xmin  = -2.5
   xmax  = 2.5
   delta = (xmax - xmin)/nBins
-  
+
   bins = []
   for i in range(0, nBins+1): bins.append(xmin + i*delta);
   return bins
@@ -78,15 +77,17 @@ def setHistogram(hist, wp, isSignal):
 #
 def drawEfficiency(mode, tag, region, selectVar):
   if '2TeV' in mode: signalFileName = dateTag + '/' + "DoubleEleFlat_flat_ntuple_trueAndFake_alleta_full.root"
-  else:              signalFileName = dateTag + '/' + "DYJetsToLL_flat_ntuple_true_alleta_full.root" 
+  else:              signalFileName = dateTag + '/' + "DYJetsToLL_flat_ntuple_true_alleta_full.root"
   signalTree     = getTreeFromFile(signalFileName,                                                    ROOT.Opt.signalTreeName)
-  backgroundTree = getTreeFromFile(dateTag + '/' + "TTJets_flat_ntuple_trueAndFake_alleta_full.root", ROOT.Opt.backgroundTreeName)
+  backgroundTree = getTreeFromFile(dateTag + '/' + "TTJets_flat_ntuple_trueAndFake_alleta_full.root", ROOT.Opt.backgroundTreeName) if '2TeV' not in mode else None
 
-  if('pt' in mode):     binning = getPtBins(mode=="pt_2TeV")
+  if('genPt' in mode):  binning = getPtBins(mode.count("2TeV"))
+  elif('pt' in mode):   binning = getPtBins(mode.count("2TeV"))
   elif('eta' in mode):  binning = getEtaBins()
   elif('nvtx' in mode): binning = getNvtxBins()
 
-  if('pt' in mode):     axisLabel = "p_{T} [GeV]"
+  if('genPt' in mode):  axisLabel = "generator p_{T} [GeV]"
+  elif('pt' in mode):   axisLabel = "p_{T} [GeV]"
   elif('eta' in mode):  axisLabel = "#eta_{SC}"
   elif('nvtx' in mode): axisLabel = "Nvtx"
 
@@ -98,8 +99,8 @@ def drawEfficiency(mode, tag, region, selectVar):
   elif(region == "barrel"): preselectionCuts += ROOT.Opt.etaCutBarrel
   else:                     preselectionCuts += ROOT.Opt.etaCutEndcap
 
-  signalCuts     = preselectionCuts + (ROOT.Opt.trueEleCut if not mode == 'pt_2TeV' else ROOT.TCut())
-  backgroundCuts = preselectionCuts + ROOT.Opt.fakeEleCut;
+  signalCuts     = preselectionCuts + (ROOT.Opt.trueEleCut if not 'DoubleEle' in signalFileName else ROOT.TCut())
+  backgroundCuts = preselectionCuts + ROOT.Opt.fakeEleCut
 
   c1 = ROOT.TCanvas("c1","c1",10,10,600,600)
   ROOT.gStyle.SetOptStat(0)
@@ -114,44 +115,56 @@ def drawEfficiency(mode, tag, region, selectVar):
 
   sigEff = {}
   bgEff = {}
+  setColors(workingPoints[tag])
   for wp in workingPoints[tag]:
     is2016 = '2016' in wp.name
+    print selectVar
     wpCutsBarrel = getCuts(wp, True,  selectVar)
     wpCutsEndcap = getCuts(wp, False, selectVar)
 
-    selectionCutsBarrel = wpCutsBarrel + ROOT.Opt.etaCutBarrel
-    selectionCutsEndcap = wpCutsEndcap + ROOT.Opt.etaCutEndcap
+    barrel_CE = 1.12
+    barrel_Cr = 0.0368
+    endcap_CE = 0.5
+    endcap_Cr = 0.201
+    if any(i in wp.cutsFileBarrel for i in ['2017-11-16', 'retuned', 'prelim2017']):
+      wpCutsBarrel = wpCutsBarrel.GetTitle().replace('hOverE', 'hOverE-' + str(barrel_CE) + '/eSC-' + str(barrel_Cr) + '*rho/eSC')
+      wpCutsEndcap = wpCutsEndcap.GetTitle().replace('hOverE', 'hOverE-' + str(endcap_CE) + '/eSC-' + str(endcap_Cr) + '*rho/eSC')
+
+    selectionCutsBarrel = ROOT.TCut(wpCutsBarrel) + ROOT.Opt.etaCutBarrel
+    selectionCutsEndcap = ROOT.TCut(wpCutsEndcap) + ROOT.Opt.etaCutEndcap
     selectionCuts       = ROOT.TCut('(' + selectionCutsBarrel.GetTitle() + ')||(' + selectionCutsEndcap.GetTitle() + ')')
 
-    if('pt' in mode):     varName = "pt"
+    if('genPt' in mode):  varName = "genPt"
+    elif('pt' in mode):   varName = "pt"
     elif('eta' in mode):  varName = "etaSC"
     elif('nvtx' in mode): varName = "nPV"
 
     sigNum = drawFromTree(signalTree,     (signalCuts + selectionCuts),     varName, 'sigNum'+ wp.name.split()[0], binning, wp)
     sigDen = drawFromTree(signalTree,     (signalCuts),                     varName, 'sigDen'+ wp.name.split()[0], binning, wp)
-    bgNum  = drawFromTree(backgroundTree, (backgroundCuts + selectionCuts), varName, 'bgNum' + wp.name.split()[0], binning, wp)
-    bgDen  = drawFromTree(backgroundTree, (backgroundCuts),                 varName, 'bgDen' + wp.name.split()[0], binning, wp)
+    bgNum  = drawFromTree(backgroundTree, (backgroundCuts + selectionCuts), varName, 'bgNum' + wp.name.split()[0], binning, wp) if backgroundTree else 1
+    bgDen  = drawFromTree(backgroundTree, (backgroundCuts),                 varName, 'bgDen' + wp.name.split()[0], binning, wp) if backgroundTree else 1
 
     sigEff[wp] = calculateEffAndErrors(sigNum, sigDen, 'sigEff' + wp.name, binning)
-    bgEff[wp]  = calculateEffAndErrors(bgNum,  bgDen,  'bgEff'  + wp.name, binning)
+    bgEff[wp]  = calculateEffAndErrors(bgNum,  bgDen,  'bgEff'  + wp.name, binning) if backgroundTree else None
 
     setHistogram(sigEff[wp], wp, True)
-    setHistogram( bgEff[wp], wp, False)
-
     sigEff[wp].Draw("same,pe")
-    if('2TeV' not in mode): bgEff[wp].Draw("same,pe")
+
+    if backgroundTree:
+      setHistogram( bgEff[wp], wp, False)
+      bgEff[wp].Draw("same,pe")
     c1.Update()
-  
-  if('pt' in mode):     leg = ROOT.TLegend(0.2, 0.3, 0.6, 0.7)
-  elif('eta' in mode):  leg = ROOT.TLegend(0.38, 0.2, 0.75, 0.6)
-  elif('nvtx' in mode): leg = ROOT.TLegend(0.2, 0.2, 0.6, 0.6)
+
+  if('pt' in mode or 'Pt' in mode): leg = ROOT.TLegend(0.2, 0.3, 0.6, 0.7)
+  elif('eta' in mode):              leg = ROOT.TLegend(0.38, 0.2, 0.75, 0.6)
+  elif('nvtx' in mode):             leg = ROOT.TLegend(0.2, 0.2, 0.6, 0.6)
 
   leg.SetFillStyle(0);
   leg.SetBorderSize(0);
   leg.AddEntry(0, "Signal:", "")
   for wp in workingPoints[tag]: leg.AddEntry(sigEff[wp], wp.name, "pl")
 
-  if('2TeV' not in mode):
+  if backgroundTree:
     leg.AddEntry(0, "", "")
     leg.AddEntry(0, "Background:", "")
     for wp in workingPoints[tag]: leg.AddEntry(bgEff[wp], wp.name, "pl")
@@ -163,7 +176,8 @@ def drawEfficiency(mode, tag, region, selectVar):
 
   dirName  = os.path.join('figures', 'efficiencies', selectVar, tag if tag!='default' else '')
   fileName = os.path.join(dirName, "eff_" + ((region + '_') if mode != 'eta' else '') + mode + '.png')
-  if '2017-11-16' in wp.cutsFileBarrel or 'retuned' in wp.cutsFileBarrel: fileName.replace('hOverE','hOverEscaled')
+  if any(i in wp.cutsFileBarrel for i in ['2017-11-16', 'retuned', 'prelim2017']):
+    fileName.replace('hOverE','hOverEscaled')
   c1.Print(makeSubDirs(fileName))
 
 
@@ -184,11 +198,11 @@ args = argParser.parse_args()
 if args.mode and args.region and args.selectVar != 'all':
   drawEfficiency(args.mode, args.tag, args.region, args.selectVar)
 elif not args.subJob:
-  for mode in ([args.mode] if args.mode else ['eta','pt', 'pt_2TeV', 'nvtx']):
+  for mode in ([args.mode] if args.mode else ['eta','pt', 'genPt', 'pt_2TeV', 'genPt_2TeV', 'nvtx']):
     for region in ([args.region] if args.region else (['endcap','barrel'] if mode != 'eta' else ['full'])):
       for selectVar in [args.selectVar] if args.selectVar!='all' else ["", "expectedMissingInnerHits", "full5x5_sigmaIetaIeta", "dEtaSeed", "dPhiIn", "hOverE", "relIsoWithEA", "ooEmooP"]:
         if args.runLocal: drawEfficiency(mode, args.tag, region, selectVar)
-        else:             
+        else:
           command = './drawEfficiency.py --subJob --mode=%s --tag=%s --region=%s --selectVar=%s' % (mode, args.tag, region, selectVar)
           logFile = 'log/%s-%s-%s-%s.log' % (mode, args.tag, region, selectVar)
           os.system('mkdir -p log')
