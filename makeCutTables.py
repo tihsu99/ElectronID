@@ -59,7 +59,7 @@ def makeTables(outFileName, wps):
 
 try:    os.makedirs('tables')
 except: pass
-for tag in ['training94']:
+for tag in ['training94','prelim2017']:
   makeTables(tag, workingPoints[tag])
 
 
