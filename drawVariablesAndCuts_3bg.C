@@ -17,7 +17,7 @@
 const bool useSmallEventCount = false;
 // Draw barrel or endcap
 const bool drawBarrel = true;
-const TString dateTag = "2017-11-07";
+const TString dateTag = "2018-03-18";
 
 const bool doOverlayCuts = true;
 
@@ -91,17 +91,17 @@ void drawVariablesAndCuts_3bg(bool drawBarrel){
   //
   // Open files
   //
-  TString fname1 = "DYJetsToLL_flat_ntuple_trueAndFake_alleta_full.root";
+  TString fname1 = dateTag + "/DYJetsToLL_flat_ntuple_trueAndFake_alleta_full.root";
   TFile  *input1 = new TFile( fname1 );
   //  input1->cd("wp3");
   TTree *signalTree = (TTree*) input1->Get("electronTree");
 
-  TString fname2 = "TTJets_flat_ntuple_trueAndFake_alleta_full.root";
+  TString fname2 = dateTag + "/TTJets_flat_ntuple_trueAndFake_alleta_full.root";
   TFile  *input2 = new TFile( fname2 );
   //  input2->cd("wp3");
   TTree *backgroundTree = (TTree*) input2->Get("electronTree");
   
-  TString fname3 = "GJet_DoubleEM_flat_ntuple_trueAndFake_alleta_full.root";
+  TString fname3 = dateTag + "/GJ_flat_ntuple_trueAndFake_alleta_full.root";
   TFile *input3 = new TFile( fname3 );
   //  input3->cd("wp3");
   TTree *backgroundTreeAdditional = 0;
