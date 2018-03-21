@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import ROOT,os
-from common import loadClasses, workingPoints, getTreeFromFile, drawFromTree, makeSubDirs
+from common import loadClasses, workingPoints, getTreeFromFile, drawFromTree, makeSubDirs, setColors
 loadClasses('VarCut.cc', 'OptimizationConstants.hh')
 
 def tmvaFileName(wp, region, tag):
@@ -9,8 +9,9 @@ def tmvaFileName(wp, region, tag):
   if 'Loose'  in wp.name: wpPass = 'pass2'
   if 'Medium' in wp.name: wpPass = 'pass3'
   if 'Tight'  in wp.name: wpPass = 'pass4'
-  if   tag=='default':   name = 'training_results_' + region + '_' + wpPass + '_2017-11-07'
-  elif tag=='retuneMVA': name = 'training_results_' + region + '_' + wpPass + '_2017-11-16'
+  if   tag=='default':    name = 'training_results_' + region + '_' + wpPass + '_2017-11-07'
+  elif tag=='retuneMVA':  name = 'training_results_' + region + '_' + wpPass + '_2017-11-16'
+  elif tag=='training94': name = 'training_results_' + region + '_' + wpPass + '_2018-03-18'
   return './trainingData/' + name + '/TMVA_' + name + '.root'
 
 def findEfficiencies(signalTree, backgroundTree, cuts, wp, barrel, missingHits):
@@ -44,6 +45,7 @@ def drawROCandWP(region, missingHits, tag):
   leg.SetBorderSize(0)
 
   markers = {}
+  setColors(workingPoints[tag])
   for wp in reversed(workingPoints[tag]):
     file = ROOT.TFile('cut_repository/' + (wp.cutsFileBarrel if region=='barrel' else wp.cutsFileEndcap) + '.root')
     cuts = file.Get('cuts')
@@ -55,7 +57,7 @@ def drawROCandWP(region, missingHits, tag):
     markers[wp].SetMarkerSize(2)
     markers[wp].SetMarkerColor(wp.sColor)
 
-    leg.AddEntry(markers[wp], wp[0], "p")
+    leg.AddEntry(markers[wp], wp.name, "p")
 
     tmvaFile = ROOT.TFile(tmvaFileName(wp, region, tag))
     wpROC    = tmvaFile.Get("dataset/Method_Cuts/Cuts/MVA_Cuts_rejBvsS")
@@ -90,7 +92,7 @@ def drawROCandWP(region, missingHits, tag):
   c1.Print(makeSubDirs(fileName))
 
 
-for tag in ['default','retuneMVA']:
+for tag in ['training94']:
   for region in ['endcap','barrel']:
     for missingHits in [True, False]:
       drawROCandWP(region, missingHits, tag)
