@@ -3,7 +3,7 @@
 import ROOT,os,glob,shutil
 from common      import loadClasses, workingPoints, compareWP
 from collections import OrderedDict
-#loadClasses('VarCut.cc', 'OptimizationConstants.hh')
+loadClasses('VarCut.cc', 'OptimizationConstants.hh')
 
 latexVars = {'full5x5_sigmaIetaIeta' : 'full 5$\\times$5 $\\sigma_{i\\eta i\\eta} <$',
              'dEtaSeed'              : '$|$dEtaInSeed$|$ $<$',
@@ -25,7 +25,7 @@ twikiVars = {'full5x5_sigmaIetaIeta' : 'full5x5_sigmaIetaIeta <',
              'missingHits'           : 'expected missing inner hits <=',
              'conversionVeto'        : 'pass conversion veto'}
 
-def writeTwikiLine(f, *args): f.write(('|  %-40s  ' + '|  %20s  '*(len(args)-1) + '| \n')     % args) 
+def writeTwikiLine(f, *args): f.write(('|  %-40s  ' + '|  %20s  '*(len(args)-1) + '| \n')     % args)
 def writeLatexLine(f, *args): f.write(('   %-40s  ' + '&  %20s  '*(len(args)-1) + ' \\\\ \n') % args)
 
 def writeTwikiTable(f, cutValues):
@@ -47,9 +47,9 @@ def makeTables(outFileName, wps):
     for wp in wps:
       file = ROOT.TFile('cut_repository/' + (wp.cutsFileBarrel if barrel else wp.cutsFileEndcap) + '.root')
       cuts = file.Get('cuts')
-      
+
       cutValues[wp] = OrderedDict()
-      for var in ["full5x5_sigmaIetaIeta", "dEtaSeed", "dPhiIn", "hOverEscaled" if outFileName.count('etune') else "hOverE", "relIsoWithEA", "ooEmooP"]:
+      for var in ["full5x5_sigmaIetaIeta", "dEtaSeed", "dPhiIn", "hOverEscaled" if outFileName.count('etune') or outFileName.count('prelim') else "hOverE", "relIsoWithEA", "ooEmooP"]:
         cutValues[wp][var] = '%.3g' % cuts.getCutValue(var.replace('scaled',''))
       cutValues[wp]['missingHits'] = str(wp.missingHitsBarrel if barrel else wp.missingHitsEndcap)
       cutValues[wp]['conversionVeto'] = 'yes'
@@ -59,8 +59,8 @@ def makeTables(outFileName, wps):
 
 try:    os.makedirs('tables')
 except: pass
-#for tag in ['default', 'retuneMVA', 'retuneEff','2016', 'compare2016','compareRetuneEff']:
-#  makeTables(tag, workingPoints[tag])
+for tag in ['training94']:
+  makeTables(tag, workingPoints[tag])
 
 
 def compileLatex():
