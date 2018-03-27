@@ -5,15 +5,10 @@ from common import loadClasses, workingPoints, getTreeFromFile, drawFromTree
 loadClasses('VarCut.cc', 'OptimizationConstants.hh')
 
 
-def findSignalEfficiency(signalTree, cuts, wp, barrel, missingHits, tuneC0=None, C_E=None, C_rho=None):
+def findSignalEfficiency(signalTree, cuts, wp, barrel, missingHits):
   preselectionCuts = ROOT.TCut(ROOT.Opt.ptCut) + (ROOT.Opt.etaCutBarrel if barrel else ROOT.Opt.etaCutEndcap) + ROOT.Opt.otherPreselectionCuts;
   signalCuts       = preselectionCuts + ROOT.Opt.trueEleCut;
-  
-  if tuneC0:
-    selectionCuts  = ROOT.TCut('&&'.join(['(' + var + '<' + str(cuts.getCutValue(var)) + ')' for var in ["full5x5_sigmaIetaIeta", "dEtaSeed", "dPhiIn", "relIsoWithEA", "ooEmooP"]]))
-    selectionCuts += ROOT.TCut('hOverE<' + str(tuneC0) + '+' + str(C_E) + '/eSC+' + str(C_rho) + '*rho/eSC')
-  else:
-    selectionCuts  = cuts.getCut()
+  selectionCuts    = cuts.getCut()
 
   if missingHits:
     selectionCuts += ROOT.TCut('expectedMissingInnerHits<='+str(wp.missingHitsBarrel if barrel else wp.missingHitsEndcap))
@@ -25,36 +20,58 @@ def findSignalEfficiency(signalTree, cuts, wp, barrel, missingHits, tuneC0=None,
 
 
 def tuneC0(region, tag):
-  C_E   = 1.63   if region=='barrel' else 2.65
-  C_rho = 0.0368 if region=='barrel' else 0.201
+  C_E   = 1.59   if region=='barrel' else 2.96
+  C_rho = 0.0451 if region=='barrel' else 0.251
+  C_pt  = 0.506  if region=='barrel' else 0.963
 
-  signalTree = getTreeFromFile('2017-11-16/DYJetsToLL_flat_ntuple_true_' + region + '_full.root', ROOT.Opt.signalTreeName)
+  signalTree = getTreeFromFile('2018-03-18/DYJetsToLL_flat_ntuple_true_' + region + '_full.root', ROOT.Opt.signalTreeName)
 
   for wp in workingPoints[tag]:
-    fileName = os.path.join('cut_repository', wp.cutsFileBarrel if region=='barrel' else wp.cutsFileEndcap)
+    fileName = os.path.join('cut_repository', (wp.cutsFileBarrel if region=='barrel' else wp.cutsFileEndcap) + '.root')
     file     = ROOT.TFile(fileName)
     cuts     = file.Get('cuts')
 
     effSignal = findSignalEfficiency(signalTree, cuts, wp, region=='barrel', True)
     print wp.name + ' --> tuning for ' + str(effSignal)
 
+    # HoverE tuning
+    cuts.setConstantValue('C_E',   C_E)
+    cuts.setConstantValue('C_rho', C_rho)
     C_0  = 0.05
     step = 0.02
     while True:
-      effTemp     = findSignalEfficiency(signalTree, cuts, wp, region=='barrel', True, C_0, C_E, C_rho)
-      print 'Using  ' + str(C_0) + ' --> eff: ' + str(effTemp)
-      if   abs(effTemp - effSignal) < 0.001: break
+      cuts.setCutValue('hOverE', C_0)
+      effTemp = findSignalEfficiency(signalTree, cuts, wp, region=='barrel', True)
+      print 'hOverE tuning with C_0=' + str(C_0) + ' --> eff: ' + str(effTemp)
+      if abs(effTemp - effSignal) < 0.0005: break
+      if C_0 > 0.06: break
       if effTemp < effSignal:
         C_0  += step
         step *= 2./3.
       C_0 -= step
 
     cuts.setCutValue('hOverE', min(C_0,0.05))
+
+    # relIso tuning
+    cuts.setConstantValue('C_pt', C_pt)
+    C_0  = cuts.getCutValue('relIsoWithEA')
+    step = 0.02
+    while True:
+      cuts.setCutValue('relIsoWithEA', C_0)
+      effTemp = findSignalEfficiency(signalTree, cuts, wp, region=='barrel', True)
+      print 'relIso tuning with C_0=' + str(C_0) + ' --> eff: ' + str(effTemp)
+      if abs(effTemp - effSignal) < 0.0005: break
+      if effTemp < effSignal:
+        C_0  += step
+        step *= 2./3.
+      C_0 -= step
+
     cuts.printCuts()
 
-    file = ROOT.TFile(fileName.replace('WP', 'retuned_WP'), 'recreate')
+    tag = 'retuned_WP'
+    file = ROOT.TFile(fileName.replace('WP', tag), 'recreate')
     cuts.Write("cuts")
     file.Close()
 
 for region in ['barrel','endcap']:
-  tuneC0(region, 'default')
+  tuneC0(region, 'training94')
