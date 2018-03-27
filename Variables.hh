@@ -7,6 +7,7 @@ namespace Vars {
 
   const int nVariables = 6;
   const int nSpectatorVariables = 5;
+  const int nConstants = 3;
   
   struct Variables{
     TString name;
@@ -34,7 +35,14 @@ namespace Vars {
     new Variables("dz"                      ,"abs(dz)"                 ,'F',true),
     new Variables("expectedMissingInnerHits","expectedMissingInnerHits",'I',false)
   };
-  
+
+  Variables *constants [nConstants] = {
+    new Variables("C_rho"                   ,"C_rho"                   ,'F',false),
+    new Variables("C_E"                     ,"C_E"                     ,'F',false),
+    new Variables("C_pt"                    ,"C_pt"                    ,'F',false),
+  };
+
+
 };
 
 #endif
