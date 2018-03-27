@@ -1,8 +1,9 @@
 #! /usr/bin/env python
 
 import ROOT, numpy
-from common import getTreeFromFile, makeSubDirs
+from common import getTreeFromFile, makeSubDirs, loadClasses
 from math import sqrt
+loadClasses('OptimizationConstants.hh')
 
 dateTag = "2018-03-18"
 
@@ -77,14 +78,12 @@ def findCutoff(hist, cutOffFraction):
 
   return xcutoff, xcutoffUp, xcutoffDown
 
-def findDependence(region, option): 
-  signalTree = getTreeFromFile('~/eleIdTuning/tuples/DYJetsToLL_cutID_tuning_94X_v3.root', 'ntupler/ElectronTree')
-
-  cut = 'isTrue==1 && pt>10 && hOverE>0'
-  if region=='barrel': cut += '&& abs(etaSC)<1.4442'
-  else:                cut += '&& abs(etaSC)>1.566 && abs(etaSC)<2.5'
+def findDependence(region, option):
+  signalTree = getTreeFromFile('2018-03-18/DYJetsToLL_flat_ntuple_true_' + region + '_full.root', ROOT.Opt.signalTreeName)
+  cuts       = []
 
   if option=='hoeVsE':
+    cuts          += ['hOverE>0']
     xAxisTitle     = 'E_{SC}'
     yAxisTitle     = 'H/E'
     binning        = (1000, 0, 1000, 1000, 0, .5)
@@ -94,7 +93,9 @@ def findDependence(region, option):
     funcText       = 'f(E)=A+B/E, B=%.2e #pm %.2e' 
     fitMin, fitMax = 20, 1000
     cutOffFraction = None
+    text           = "markers: mean of H/E in E_{SC} slices"
   elif option=='hVsRho':
+    cuts          += ['hOverE>0']
     yAxisTitle     = 'HCAL energy [GeV]'
     xAxisTitle     = '#rho'
     binning        = (51, -0.5, 50.5, 1000, 0, 1000)
@@ -102,10 +103,12 @@ def findDependence(region, option):
     command        = 'hOverE*eSC:rho'
     fitFunc        = '[0]+[1]*x'
     funcText       = 'slope %.2e #pm %.2e'
-    fitMin, fitMax = 5, 30
+    fitMin, fitMax = 5, 40
     cutOffFraction = 0.90
+    text           = "contours at %.0f" % (100*cutOffFraction)
   elif option=='hoeCorrVsE':
-    Crho           = (0.0368 if region == 'barrel' else 0.201)
+    cuts          += ['hOverE>0']
+    Crho           = (0.0483 if region == 'barrel' else 0.250)
     xAxisTitle     = 'E_{SC}'
     yAxisTitle     = 'H/E-%.4f#rho/E' % Crho 
     binning        = (1000, 0, 1000, 1000, 0, .5)
@@ -115,9 +118,34 @@ def findDependence(region, option):
     funcText       = 'f(E)=A+B/E, B=%.2e #pm %.2e' 
     fitMin, fitMax = 20, 1000
     cutOffFraction = None
+    text           = "markers: mean of H/E in E_{SC} slices"
+  elif option=='isoVsE':
+    cuts          += []
+    xAxisTitle     = 'E_{SC}'
+    yAxisTitle     = 'relIsoWithEA'
+    binning        = (1000, 0, 1000, 1000, 0, .5)
+    specialBinning = True
+    command        = 'relIsoWithEA:eSC'
+    fitFunc        = '[0]+[1]/x'
+    funcText       = 'f(E)=A+B/E, B=%.2e #pm %.2e'
+    fitMin, fitMax = 20, 1000
+    cutOffFraction = None
+    text           = "markers: mean of relIso in E_{SC} slices"
+  elif option=='isoVsPt':
+    cuts          += []
+    xAxisTitle     = 'p_{T}'
+    yAxisTitle     = 'relIsoWithEA'
+    binning        = (1000, 0, 1000, 1000, 0, .5)
+    specialBinning = True
+    command        = 'relIsoWithEA:pt'
+    fitFunc        = '[0]+[1]/x'
+    funcText       = 'f(E)=A+B/pt, B=%.2e #pm %.2e'
+    fitMin, fitMax = 10, 500
+    cutOffFraction = None
+    text           = "markers: mean of relIso in pt slices"
 
   hist2D = ROOT.TH2F(option, '', *binning)
-  signalTree.Draw(command + '>>' + option, cut, 'colz')
+  signalTree.Draw(command + '>>' + option, '&&'.join(cuts), 'colz')
 
   if specialBinning:
     varBinIndex, varBinWeightedCenters, varBinRangeNeg, varBinRangePos = mergeBinning(hist2D)
@@ -155,8 +183,8 @@ def findDependence(region, option):
   graph.SetMarkerSize(1.0)
   graph.Draw("P,same")
 
-  lat1 = ROOT.TLatex(0.15, 0.8, region)
-  lat2 = ROOT.TLatex(0.15, 0.75, "contours at %.0f" % (100*cutOffFraction) if cutOffFraction else "markers: mean of H/E in E_{SC} slices")
+  lat1 = ROOT.TLatex(0.15, 0.8,  region)
+  lat2 = ROOT.TLatex(0.15, 0.75, text)
   lat3 = ROOT.TLatex(0.15, 0.7,  funcText % (func.GetParameter(1), func.GetParError(1)))
 
   for l in [lat2,lat3]:        l.SetTextSize(0.03)
@@ -169,3 +197,5 @@ for region in ['barrel', 'endcap']:
   findDependence(region, 'hVsRho')
   findDependence(region, 'hoeVsE')
   findDependence(region, 'hoeCorrVsE')
+  findDependence(region, 'isoVsE')
+  findDependence(region, 'isoVsPt')
