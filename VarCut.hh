@@ -14,9 +14,11 @@ public:
   // Set value of the variable in the internal array based on its name,
   // using the regular name or the name known to TMVA (may include abs())
   void  setCutValue(TString varName, float val);
+  void  setConstantValue(TString varName, float val);
 
   // Look up cut value for given variable (regular name)
   float getCutValue(TString var);
+  float getConstantValue(TString var);
 
   // Get the full TCut object with cuts on all variables
   // Get the TCut for a given variable if selectVar is specified
@@ -25,6 +27,7 @@ public:
   // Get index of the variable in the internal array from its name,
   // using the regular name or the name known to TMVA (may include abs())
   int getVariableIndex(TString var);
+  int getConstantIndex(TString var);
 
   // Does the cut involve abs()? i.e., is the cut symmetric wrt 0?
   bool isSymmetric(TString variable);
@@ -36,8 +39,9 @@ private:
   // The actual list of variables for which cuts are stored here
   // is found in Variables.hh
   float _cuts[Vars::nVariables];
+  float _constants[Vars::nConstants];
 
-  ClassDef(VarCut,1)
+  ClassDef(VarCut,2)
 };
 
 #endif
