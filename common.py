@@ -13,7 +13,7 @@ def loadClasses(*args):
 # Listing workingpoints to compare
 #
 class workingPoint:
-  def __init__(self, name, cutsFileBarrel, missingHitsBarrel, missingHitsEndcap):
+  def __init__(self, name, cutsFile, missingHitsBarrel, missingHitsEndcap):
     self.name              = name
     self.cutsFileBarrel    = cutsFile.replace('region','barrel')
     self.cutsFileEndcap    = cutsFile.replace('region','endcap')
