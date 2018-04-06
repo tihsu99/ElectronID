@@ -122,14 +122,6 @@ def drawEfficiency(mode, tag, region, selectVar):
     wpCutsBarrel = getCuts(wp, True,  selectVar)
     wpCutsEndcap = getCuts(wp, False, selectVar)
 
-    barrel_CE = 1.12
-    barrel_Cr = 0.0368
-    endcap_CE = 0.5
-    endcap_Cr = 0.201
-    if any(i in wp.cutsFileBarrel for i in ['2017-11-16', 'retuned', 'prelim2017']):
-      wpCutsBarrel = wpCutsBarrel.GetTitle().replace('hOverE', 'hOverE-' + str(barrel_CE) + '/eSC-' + str(barrel_Cr) + '*rho/eSC')
-      wpCutsEndcap = wpCutsEndcap.GetTitle().replace('hOverE', 'hOverE-' + str(endcap_CE) + '/eSC-' + str(endcap_Cr) + '*rho/eSC')
-
     selectionCutsBarrel = ROOT.TCut(wpCutsBarrel) + ROOT.Opt.etaCutBarrel
     selectionCutsEndcap = ROOT.TCut(wpCutsEndcap) + ROOT.Opt.etaCutEndcap
     selectionCuts       = ROOT.TCut('(' + selectionCutsBarrel.GetTitle() + ')||(' + selectionCutsEndcap.GetTitle() + ')')
