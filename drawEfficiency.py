@@ -118,7 +118,6 @@ def drawEfficiency(mode, tag, region, selectVar):
   setColors(workingPoints[tag])
   for wp in workingPoints[tag]:
     is2016 = '2016' in wp.name
-    print selectVar
     wpCutsBarrel = getCuts(wp, True,  selectVar)
     wpCutsEndcap = getCuts(wp, False, selectVar)
 
@@ -166,10 +165,8 @@ def drawEfficiency(mode, tag, region, selectVar):
   lat.SetNDC(True);
   lat.Draw("same");
 
-  dirName  = os.path.join('figures', 'efficiencies', selectVar, tag if tag!='default' else '')
+  dirName  = os.path.join('figures', 'efficiencies', tag if tag!='default' else '', selectVar)
   fileName = os.path.join(dirName, "eff_" + ((region + '_') if mode != 'eta' else '') + mode + '.png')
-  if any(i in wp.cutsFileBarrel for i in ['2017-11-16', 'retuned', 'prelim2017']):
-    fileName.replace('hOverE','hOverEscaled')
   c1.Print(makeSubDirs(fileName))
 
 
