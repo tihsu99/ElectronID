@@ -50,19 +50,19 @@ workingPoints = {
                   workingPoint('Loose (tune C0, CE=0.5)',  'cuts_region_2017-11-07_retuned4_WP_Loose',  1, 1),
                   workingPoint('Medium (tune C0, CE=0.5)', 'cuts_region_2017-11-07_retuned4_WP_Medium', 1, 1),
                   workingPoint('Tight (tune C0, CE=0.5)',  'cuts_region_2017-11-07_retuned4_WP_Tight',  1, 1)],
-  'prelim2017':  [workingPoint('Veto',                     'cuts_region_2017-11-07_retuned5_WP_Veto',   2, 3),
-                  workingPoint('Loose',                    'cuts_region_2017-11-07_retuned5_WP_Loose',  1, 1),
-                  workingPoint('Medium',                   'cuts_region_2017-11-07_retuned5_WP_Medium', 1, 1),
-                  workingPoint('Tight',                    'cuts_region_2017-11-07_retuned5_WP_Tight',  1, 1)],
+  'prelim2017':  [workingPoint('Veto (92X)',               'cuts_region_2017-11-07_retuned5b_WP_Veto',  2, 3),
+                  workingPoint('Loose (92X)',              'cuts_region_2017-11-07_retuned5b_WP_Loose', 1, 1),
+                  workingPoint('Medium (92X)',             'cuts_region_2017-11-07_retuned5b_WP_Medium',1, 1),
+                  workingPoint('Tight (92X)',              'cuts_region_2017-11-07_retuned5b_WP_Tight', 1, 1)],
 
   'training94':  [workingPoint('Veto',                     'cuts_region_2018-03-18_WP_Veto',            2, 3),
                   workingPoint('Loose',                    'cuts_region_2018-03-18_WP_Loose',           1, 1),
                   workingPoint('Medium',                   'cuts_region_2018-03-18_WP_Medium',          1, 1),
                   workingPoint('Tight',                    'cuts_region_2018-03-18_WP_Tight',           1, 1)],
-  'retuned94':   [workingPoint('Veto',                     'cuts_region_2018-03-18_retuned_WP_Veto',    2, 3),
-                  workingPoint('Loose',                    'cuts_region_2018-03-18_retuned_WP_Loose',   1, 1),
-                  workingPoint('Medium',                   'cuts_region_2018-03-18_retuned_WP_Medium',  1, 1),
-                  workingPoint('Tight',                    'cuts_region_2018-03-18_retuned_WP_Tight',   1, 1)],
+  'retuned94':   [workingPoint('Veto (94X)',               'cuts_region_2018-03-18_retuned_WP_Veto',    2, 3),
+                  workingPoint('Loose (94X)',              'cuts_region_2018-03-18_retuned_WP_Loose',   1, 1),
+                  workingPoint('Medium (94X)',             'cuts_region_2018-03-18_retuned_WP_Medium',  1, 1),
+                  workingPoint('Tight (94X)',              'cuts_region_2018-03-18_retuned_WP_Tight',   1, 1)],
 
 }
 
@@ -77,6 +77,9 @@ workingPoints['compareRetuneEff'] = compareWP('default',  'retuneEff',  ['Loose'
 workingPoints['compareRetune2']   = compareWP('retuneEff','retuneEff2', ['Medium','Tight'])
 workingPoints['compareRetune4']   = compareWP('retuneEff','retuneEff4', ['Medium','Tight'])
 workingPoints['compareRetune4a']  = compareWP('retuneEff','retuneEff4', ['Veto','Loose'])
+
+workingPoints['compare94']        = compareWP('prelim2017','retuned94', ['Veto','Medium'])
+workingPoints['compare94b']        = compareWP('prelim2017','retuned94', ['Loose','Tight'])
 
 def setColors(set):
   sColors  = [2, 4, 6, 8]
