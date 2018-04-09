@@ -9,7 +9,6 @@ latexVars = {'full5x5_sigmaIetaIeta' : 'full 5$\\times$5 $\\sigma_{i\\eta i\\eta
              'dEtaSeed'              : '$|$dEtaInSeed$|$ $<$',
              'dPhiIn'                : '$|$dPhiIn$|$ $<$',
              'hOverE'                : '$H/E <$',
-             'hOverEscaled'          : '$C_0 <$',
              'relIsoWithEA'          : 'relIsoWithEA $<$',
              'ooEmooP'               : '$|1/E-1/p| <$',
              'missingHits'           : 'expected missing inner hits $<=$',
@@ -19,14 +18,13 @@ twikiVars = {'full5x5_sigmaIetaIeta' : 'full5x5_sigmaIetaIeta <',
              'dEtaSeed'              : 'abs(dEtaSeed) <',
              'dPhiIn'                : 'abs(dPhiIn) <',
              'hOverE'                : 'H/E <',
-             'hOverEscaled'          : 'C_0 <',
              'relIsoWithEA'          : 'relIsoWithEA <',
              'ooEmooP'               : 'abs(1/E-1/p) <',
              'missingHits'           : 'expected missing inner hits <=',
              'conversionVeto'        : 'pass conversion veto'}
 
-def writeTwikiLine(f, *args): f.write(('|  %-40s  ' + '|  %20s  '*(len(args)-1) + '| \n')     % args)
-def writeLatexLine(f, *args): f.write(('   %-40s  ' + '&  %20s  '*(len(args)-1) + ' \\\\ \n') % args)
+def writeTwikiLine(f, *args): f.write(('|  %-40s  ' + '|  %35s  '*(len(args)-1) + '| \n')     % args)
+def writeLatexLine(f, *args): f.write(('   %-40s  ' + '&  %35s  '*(len(args)-1) + ' \\\\ \n') % args)
 
 def writeTwikiTable(f, cutValues):
   writeTwikiLine(f, '', *(wp.name for wp in cutValues.keys()))
@@ -49,8 +47,11 @@ def makeTables(outFileName, wps):
       cuts = file.Get('cuts')
 
       cutValues[wp] = OrderedDict()
-      for var in ["full5x5_sigmaIetaIeta", "dEtaSeed", "dPhiIn", "hOverEscaled" if outFileName.count('etune') or outFileName.count('prelim') else "hOverE", "relIsoWithEA", "ooEmooP"]:
-        cutValues[wp][var] = '%.3g' % cuts.getCutValue(var.replace('scaled',''))
+      for var in ["full5x5_sigmaIetaIeta", "dEtaSeed", "dPhiIn", "hOverE", "relIsoWithEA", "ooEmooP"]:
+        cutValues[wp][var] = '%.3g' % cuts.getCutValue(var)
+        if var=='hOverE'       and cuts.getConstantValue('C_E')   > 0: cutValues[wp][var] += '+$%.3g/E_{SC}$' %cuts.getConstantValue('C_E')
+        if var=='hOverE'       and cuts.getConstantValue('C_rho') > 0: cutValues[wp][var] += '+$%.3g*\\rho/E_{SC}$' %cuts.getConstantValue('C_rho')
+        if var=='relIsoWithEA' and cuts.getConstantValue('C_pt')  > 0: cutValues[wp][var] += '+$%.3g/p_{T}$' %cuts.getConstantValue('C_pt')
       cutValues[wp]['missingHits'] = str(wp.missingHitsBarrel if barrel else wp.missingHitsEndcap)
       cutValues[wp]['conversionVeto'] = 'yes'
 
@@ -59,7 +60,7 @@ def makeTables(outFileName, wps):
 
 try:    os.makedirs('tables')
 except: pass
-for tag in ['training94','prelim2017']:
+for tag in ['retuned94','prelim2017']:
   makeTables(tag, workingPoints[tag])
 
 
