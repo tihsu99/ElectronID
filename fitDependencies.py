@@ -79,8 +79,9 @@ def findCutoff(hist, cutOffFraction):
   return xcutoff, xcutoffUp, xcutoffDown
 
 def findDependence(region, option):
-  signalTree = getTreeFromFile('2018-03-18/DYJetsToLL_flat_ntuple_true_' + region + '_full.root', ROOT.Opt.signalTreeName)
-  cuts       = []
+ #signalTree = getTreeFromFile('2018-03-18/DYJetsToLL_flat_ntuple_true_' + region + '_full.root', ROOT.Opt.signalTreeName)
+  signalTree = getTreeFromFile('~/eleIdTuning/tuples/DYJetsToLL_cutID_tuning_94X_v3.root', 'ntupler/ElectronTree') 
+  cuts       = ['isTrue==1', 'pt>10', 'abs(etaSC)<1.4442' if region=='barrel' else 'abs(etaSC)>1.566 && abs(etaSC)<2.5']
 
   if option=='hoeVsE':
     cuts          += ['hOverE>0']
@@ -108,7 +109,7 @@ def findDependence(region, option):
     text           = "contours at %.0f" % (100*cutOffFraction)
   elif option=='hoeCorrVsE':
     cuts          += ['hOverE>0']
-    Crho           = (0.0483 if region == 'barrel' else 0.250)
+    Crho           = (0.0324 if region == 'barrel' else 0.183)
     xAxisTitle     = 'E_{SC}'
     yAxisTitle     = 'H/E-%.4f#rho/E' % Crho 
     binning        = (1000, 0, 1000, 1000, 0, .5)
@@ -191,7 +192,7 @@ def findDependence(region, option):
   for l in [lat1, lat2, lat3]: l.SetNDC(True)
   for l in [lat1, lat2, lat3]: l.Draw()
 
-  c1.Print(makeSubDirs('figures/hOverEdependence/' + option + '_' + region + '.png'))
+  c1.Print(makeSubDirs('figures/hOverEdependence2/' + option + '_' + region + '.png'))
 
 for region in ['barrel', 'endcap']:
   findDependence(region, 'hVsRho')

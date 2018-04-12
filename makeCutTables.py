@@ -60,7 +60,7 @@ def makeTables(outFileName, wps):
 
 try:    os.makedirs('tables')
 except: pass
-for tag in ['retuned94','prelim2017']:
+for tag in ['retuned94','retuned94b','retuned94c','prelim2017']:
   makeTables(tag, workingPoints[tag])
 
 

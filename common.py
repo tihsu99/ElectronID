@@ -26,10 +26,10 @@ workingPoints = {
                   workingPoint('Medium (2016)',            'cuts_region_2016_WP_Loose',                 1, 1),
                   workingPoint('Tight (2016)',             'cuts_region_2016_WP_Loose',                 1, 1)],
 
-  'default':     [workingPoint('Veto',                     'cuts_region_2017-11-07_WP_Veto',            2, 3),
-                  workingPoint('Loose',                    'cuts_region_2017-11-07_WP_Loose',           1, 1),
-                  workingPoint('Medium',                   'cuts_region_2017-11-07_WP_Medium',          1, 1),
-                  workingPoint('Tight',                    'cuts_region_2017-11-07_WP_Tight',           1, 1)],
+  'training92':  [workingPoint('Veto (92X)',               'cuts_region_2017-11-07_WP_Veto',            2, 3),
+                  workingPoint('Loose (92X)',              'cuts_region_2017-11-07_WP_Loose',           1, 1),
+                  workingPoint('Medium (92X)',             'cuts_region_2017-11-07_WP_Medium',          1, 1),
+                  workingPoint('Tight (92X)',              'cuts_region_2017-11-07_WP_Tight',           1, 1)],
   'retuneMVA':   [workingPoint('Veto (retune MVA)',        'cuts_region_2017-11-16_WP_Veto',            2, 3),
                   workingPoint('Loose (retune MVA)',       'cuts_region_2017-11-16_WP_Loose',           1, 1),
                   workingPoint('Medium (retune MVA)',      'cuts_region_2017-11-16_WP_Medium',          1, 1),
@@ -55,14 +55,22 @@ workingPoints = {
                   workingPoint('Medium (92X)',             'cuts_region_2017-11-07_retuned5b_WP_Medium',1, 1),
                   workingPoint('Tight (92X)',              'cuts_region_2017-11-07_retuned5b_WP_Tight', 1, 1)],
 
-  'training94':  [workingPoint('Veto',                     'cuts_region_2018-03-18_WP_Veto',            2, 3),
-                  workingPoint('Loose',                    'cuts_region_2018-03-18_WP_Loose',           1, 1),
-                  workingPoint('Medium',                   'cuts_region_2018-03-18_WP_Medium',          1, 1),
-                  workingPoint('Tight',                    'cuts_region_2018-03-18_WP_Tight',           1, 1)],
+  'training94':  [workingPoint('Veto (94X)',               'cuts_region_2018-03-18_WP_Veto',            2, 3),
+                  workingPoint('Loose (94X)',              'cuts_region_2018-03-18_WP_Loose',           1, 1),
+                  workingPoint('Medium (94X)',             'cuts_region_2018-03-18_WP_Medium',          1, 1),
+                  workingPoint('Tight (94X)',              'cuts_region_2018-03-18_WP_Tight',           1, 1)],
   'retuned94':   [workingPoint('Veto (94X)',               'cuts_region_2018-03-18_retuned_WP_Veto',    2, 3),
                   workingPoint('Loose (94X)',              'cuts_region_2018-03-18_retuned_WP_Loose',   1, 1),
                   workingPoint('Medium (94X)',             'cuts_region_2018-03-18_retuned_WP_Medium',  1, 1),
                   workingPoint('Tight (94X)',              'cuts_region_2018-03-18_retuned_WP_Tight',   1, 1)],
+  'retuned94b':  [workingPoint('Veto (94X)',               'cuts_region_2018-03-18_retuned_WP2_Veto',   2, 3),
+                  workingPoint('Loose (94X)',              'cuts_region_2018-03-18_retuned_WP2_Loose',  1, 1),
+                  workingPoint('Medium (94X)',             'cuts_region_2018-03-18_retuned_WP2_Medium', 1, 1),
+                  workingPoint('Tight (94X)',              'cuts_region_2018-03-18_retuned_WP2_Tight',  1, 1)],
+  'retuned94c':  [workingPoint('Veto (94X)',               'cuts_region_2018-03-18_retuned_WP3_Veto',   2, 3),
+                  workingPoint('Loose (94X)',              'cuts_region_2018-03-18_retuned_WP3_Loose',  1, 1),
+                  workingPoint('Medium (94X)',             'cuts_region_2018-03-18_retuned_WP3_Medium', 1, 1),
+                  workingPoint('Tight (94X)',              'cuts_region_2018-03-18_retuned_WP3_Tight',  1, 1)],
 
 }
 
@@ -71,15 +79,14 @@ def compareWP(set1, set2, selectPoints):
   zippedList = list(chain(*zip(workingPoints[set1], workingPoints[set2])))
   return [wp for wp in zippedList if wp.name.split()[0] in selectPoints]
 
-workingPoints['compare2016']      = compareWP('default',  '2016',       ['Loose','Tight'])
-workingPoints['compareRetuneMVA'] = compareWP('default',  'retuneMVA',  ['Loose','Tight'])
-workingPoints['compareRetuneEff'] = compareWP('default',  'retuneEff',  ['Loose','Tight'])
-workingPoints['compareRetune2']   = compareWP('retuneEff','retuneEff2', ['Medium','Tight'])
-workingPoints['compareRetune4']   = compareWP('retuneEff','retuneEff4', ['Medium','Tight'])
-workingPoints['compareRetune4a']  = compareWP('retuneEff','retuneEff4', ['Veto','Loose'])
-
-workingPoints['compare94']        = compareWP('prelim2017','retuned94', ['Veto','Medium'])
-workingPoints['compare94b']        = compareWP('prelim2017','retuned94', ['Loose','Tight'])
+workingPoints['compareTrainingVM']  = compareWP('training92','training94', ['Veto','Medium'])
+workingPoints['compareTrainingLT']  = compareWP('training92','training94', ['Loose','Tight'])
+workingPoints['compare94VM']        = compareWP('prelim2017','retuned94',  ['Veto','Medium'])
+workingPoints['compare94LT']        = compareWP('prelim2017','retuned94',  ['Loose','Tight'])
+workingPoints['compare94bVM']       = compareWP('prelim2017','retuned94b', ['Veto','Medium'])
+workingPoints['compare94bLT']       = compareWP('prelim2017','retuned94b', ['Loose','Tight'])
+workingPoints['compare94cVM']       = compareWP('prelim2017','retuned94c', ['Veto','Medium'])
+workingPoints['compare94cLT']       = compareWP('prelim2017','retuned94c', ['Loose','Tight'])
 
 def setColors(set):
   sColors  = [2, 4, 6, 8]

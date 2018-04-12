@@ -165,14 +165,14 @@ def drawEfficiency(mode, tag, region, selectVar):
   lat.SetNDC(True);
   lat.Draw("same");
 
-  dirName  = os.path.join('figures', 'efficiencies', tag if tag!='default' else '', selectVar)
+  dirName  = os.path.join('figures', 'efficiencies', tag, selectVar)
   fileName = os.path.join(dirName, "eff_" + ((region + '_') if mode != 'eta' else '') + mode + '.png')
   c1.Print(makeSubDirs(fileName))
 
 
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
-argParser.add_argument('--tag',       action='store',      default='default')
+argParser.add_argument('--tag',       action='store',      default='prelim2017')
 argParser.add_argument('--mode',      action='store',      default=None)
 argParser.add_argument('--region',    action='store',      default=None)
 argParser.add_argument('--selectVar', action='store',      default='all')
@@ -195,6 +195,4 @@ elif not args.subJob:
           command = './drawEfficiency.py --subJob --mode=%s --tag=%s --region=%s --selectVar=%s' % (mode, args.tag, region, selectVar)
           logFile = 'log/%s-%s-%s-%s.log' % (mode, args.tag, region, selectVar)
           os.system('mkdir -p log')
-          os.system("qsub -v dir=" + os.getcwd() + ",command=\"" + command + "\" -q localgrid@cream02 -o " + logFile + " -e " + logFile + " -l walltime=1:00:00 $CMSSW_BASE/src/ElectronID/runOnCream02.sh")
-
-
+          os.system("qsub -v dir=" + os.getcwd() + ",command=\"" + command + "\" -q localgrid@cream02 -o " + logFile + " -e " + logFile + " -l walltime=2:00:00 $CMSSW_BASE/src/ElectronID/runOnCream02.sh")
