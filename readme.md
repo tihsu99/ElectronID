@@ -1,34 +1,32 @@
 
 This directory contains a package for rectangular cut optimization
-with TMVA.
+with TMVA. Scroll down for step by step instructions.
 
-//-------------------------------------------------------
-         Files and their content
-//-------------------------------------------------------
+# Files and their content
 
-Variables.hh: This file contains the list of the variables
+- Variables.hh: This file contains the list of the variables
      for TMVA optimization and the list of spectators. The
      list of variables is structured so that it contains the
      variable name exactly as in the input ntuple, the variable
 expression as it is passed to TMVA (such as "abs(d0)"),
 
-VariableLimits.hh: This file defines sets of user-imposed limits
+- VariableLimits.hh: This file defines sets of user-imposed limits
      for cut optimization. One may want to, e.g., enforce that
      the H/E cut is no looser than 0.15 for whatever reason, or 
      one may want to make some of the cuts to be no looser than 
      HLT cuts. These limitations are defined here, and passed
      as a parameter into optimize.cc code from a higher-level script.
 
-OptimizationConstants.hh: this file contains about all settings
+- OptimizationConstants.hh: this file contains about all settings
      for optimization (except for the variable list): input files/trees, 
      working points specs, TMVA options, etc.
 
-VarCut.hh/.cc: The class that contains a single set of cut values.
+- VarCut.hh/.cc: The class that contains a single set of cut values.
      It is a writable ROOT object. It has the same number of
      variables as specified in Variables.hh, and one should refer
      to Variables.hh to find out which variable has which name.
 
-optimize.hh/.cc: This is not a class, but plaine code with the main
+- optimize.hh/.cc: This is not a class, but plaine code with the main
      function optimize(...). It runs a single optimization of rectangular cuts.
      The parameters passed in:
         - the location of the ROOT file with VarCut object that defines
@@ -42,17 +40,17 @@ optimize.hh/.cc: This is not a class, but plaine code with the main
            to this function above (usually 99.9% or the previous working point)
            and these user-predefined cut restrictions (see VariableLimits.hh).
 
-rootlogon.C: automatically builds and loads several pieces of code
+- rootlogon.C: automatically builds and loads several pieces of code
      such as VarCut.cc, etc.
 
-simpleOptimization.C: runs simple one-pass optimization calling optimize().
+- simpleOptimization.C: runs simple one-pass optimization calling optimize().
      Presently, it is suggested to run this code without compiling
      (it compiles, but on exit ROOT gives segv, most likely while trying
      to delete factories).
         The output cuts for working points are found in the cut_repository/
      subdirectory with the names configured in the code.
 
-fourPointOptimization.C: runs optimization in four passes. The first
+- fourPointOptimization.C: runs optimization in four passes. The first
      pass uses 99.9% efficient cut range for optimization, the second
      uses WP Veto cuts as cut limits, the third uses WP Loose as cut
      limits, etc.
@@ -68,10 +66,10 @@ fourPointOptimization.C: runs optimization in four passes. The first
      subdirectory with the names configured in the code.
        
 
-fillCuts.py: an example of how to create ROOT files with VarCut objects
+- fillCuts.py: an example of how to create ROOT files with VarCut objects
      if cuts are known from somewhere else.
 
-findCutLimits.C: this code determines cut values that correspond to
+- findCutLimits.C: this code determines cut values that correspond to
      99.9% efficiency for each variable separately. It uses all definitions
      the same as the optimization: what is the preselection, what is the
      signal ntuple, where to write cut object filled with 99.9% efficient cuts,
@@ -81,7 +79,7 @@ findCutLimits.C: this code determines cut values that correspond to
      the present electron variables in findVarLimits(..) function and
      need to be updated if other variables are added.
 
-computeSingleCutEfficiency.C: this script computes the signal and background
+- computeSingleCutEfficiency.C: this script computes the signal and background
      efficiency of a single cut for a variable from the list defined in Variables.hh 
      using preselection defined in OptimizationConstants.hh.
      Use it as follows:
@@ -90,14 +88,14 @@ computeSingleCutEfficiency.C: this script computes the signal and background
         float cutValue = 0.2;
         computeSingleCutEfficiency("d0",cutValue, forBarrel);
 
-drawVariablesAndCuts.C: this script draws distributions of all variables
+- drawVariablesAndCuts.C: this script draws distributions of all variables
      and if requested also draws cuts corresponding to four working points.
      The behavior is controlled by global parameters in the beginning of
      the script (barrel or endcap, which cuts to draw, etc). Some of the info
      is taken from OptimizationConstants.hh, but the names of the ntuples
      are inside of this script. Compile and run it without parameters.
 
-drawROCandWP.py: this script draws the ROC and up to three sets of 
+- drawROCandWP.py: this script draws the ROC and up to three sets of 
      working points.
      - The ROC is taken from the specified TMVA files
      - Each set of cuts is taken from the list of files defined in common.workingpoints
@@ -105,24 +103,24 @@ drawROCandWP.py: this script draws the ROC and up to three sets of
       using the signal and background ntuples specfied explicitly in the beginning
       of the file and preselection cuts taken from OptimizationConstants.hh
 
-drawKinematics.py: the script draws unweighted and weighted pt and eta distributions.
+- drawKinematics.py: the script draws unweighted and weighted pt and eta distributions.
 
-drawEfficiency.py: the script draws efficiencies for all working points as a function
+- drawEfficiency.py: the script draws efficiencies for all working points as a function
       of pt, eta, Nvtx.
      
-correlations.C and tmvaglob.C: these are the standard pieces of code that come
+- correlations.C and tmvaglob.C: these are the standard pieces of code that come
       from TMVA examples directory without any changes. To draw correlations, do:
       .L correlations.C
       correlations("path/to/your/TMVA.root");
 
-convert_EventStrNtuple_To_FlatNtuple.C: converts event-structured ntuple to
+- convert_EventStrNtuple_To_FlatNtuple.C: converts event-structured ntuple to
       the flat ntuple for ID tuning
 
-computeHLTBounds.C: applies UCCOM method to find the offline cut bounds on isolation
+- computeHLTBounds.C: applies UCCOM method to find the offline cut bounds on isolation
       from the HLT cuts and variables. Requires a special ntuple that contains
       HLT-like ecal/hcal/trk isolations.
 
-repackageCuts.C: this script loads VarCut objects with cuts, and changes some of them,
+- repackageCuts.C: this script loads VarCut objects with cuts, and changes some of them,
       those that are adjusted by hand. The script writes out new files with adjusted
       VarCut objects.
 
@@ -130,19 +128,20 @@ repackageCuts.C: this script loads VarCut objects with cuts, and changes some of
 
 Directories:
   
-   cut_repository/: created to contain ROOT files with individual cut sets
+- cut_repository/: created to contain ROOT files with individual cut sets
       saved as VarCut objects.
 
-   trainingData/: created to contain subdirectories with the standard
+- trainingData/: created to contain subdirectories with the standard
       output of TMVA (weights xml, ROOT file with training diagnostics).
       WARNING: this directory can become large if not cleaned up
       occasionally, because TMVA usually saves full testing and training
       trees.
 
 
-//-------------------------------------------------------
-         Usage
-//-------------------------------------------------------
+
+
+
+# Usage
 
 To run cut optimization, first look through contents of the
 OptimizationConstants.hh and Variables.hh and adjust as necessary
@@ -166,13 +165,21 @@ exampleFillCuts.C, and then run:
   root -b -q exampleFillCuts.C+
 and the files with cuts will appear in the cut_repository/.
 
-//-----------------------------------------------------------
-      Electron ID tuning steps for fall 2017
-//-----------------------------------------------------------
+
+
+# Electron ID tuning steps for Run III studies
 
 1. Ntuples are made for the DY, TT, GJ datasets (the last one is 
 just for comparison plots). The effective area does not have to be
 up to date for the ntuple maker. The ntuples are made with (c++, python, crab):
+
+```
+cmsrel CMSSW_10_6_2
+cd CMSSW_10_6_2/src/
+cmsenv
+git clone https://github.com/UAEDF-tomc/EgammaWork.git
+git checkout ntupler_and_VID_benchmarks_9XX # to check
+```
 
 https://github.com/ikrav/EgammaWork/blob/ntupler_and_VID_benchmarks_9XX/ElectronNtupler/plugins/SimpleElectronNtupler.cc
 https://github.com/ikrav/EgammaWork/blob/ntupler_and_VID_benchmarks_9XX/ElectronNtupler/test/runElectrons.py
