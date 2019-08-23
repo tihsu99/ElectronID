@@ -27,7 +27,7 @@ const bool smallEventCount = false;
 const int smallMaxEvents = 100000;
 
 const TString getFileName(TString type){
-  return "/user/tomc/eleIdTuning/tuples/" + type + "_cutID_tuning_94X_v3.root";
+  return "/user/tomc/eleIdTuning/tuples/" + type + ".root";
 }
 // Tree Name (file IN):
 const TString treeName = "ntupler/ElectronTree";
@@ -60,8 +60,8 @@ void computeKinematicWeights(TString tagDir){
   //
   // Load the signal and background trees
   //
-  TTree *treeS = getTree(getFileName("DYJetsToLL"), treeName);
-  TTree *treeB = getTree(getFileName("TTJets"),     treeName);
+  TTree *treeS = getTree(getFileName("DY"), treeName);
+  TTree *treeB = getTree(getFileName("TT"), treeName);
 
   // 
   // Book weight histograms
@@ -127,5 +127,5 @@ TTree *getTree(TString fname, TString tname){
 // Compiled
 int main(int argc, char *argv[]){
   gROOT->SetBatch();
-  computeKinematicWeights("2018-03-18");
+  computeKinematicWeights("2019-08-23");
 }

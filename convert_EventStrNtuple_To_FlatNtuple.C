@@ -37,8 +37,9 @@ const float C_e_endcap   = 2.35;
 const float C_rho_endcap = 0.201;
 
 
+const TString tagDir = "2019-08-23";
 const TString getFileName(TString type){
-  return "/user/tomc/eleIdTuning/tuples/" + type + "_cutID_tuning_94X_v3.root";
+  return "/user/tomc/eleIdTuning/tuples/" + type + ".root";
 }
 
 // Preselection cuts: must match or be looser than
@@ -54,7 +55,6 @@ const bool talkativeRegime = true;
 const bool smallEventCount = false;
 const int maxEventsSmall = 20000000;
 // output dir of tuples
-const TString tagDir = "2018-03-18";
 
 // Tree name input
 const TString treeName = "ntupler/ElectronTree";
@@ -71,13 +71,13 @@ namespace EffectiveAreas {
     2.2, 2.3, 2.4, 2.5
   };
   const float effectiveAreaValues[nEtaBins] = {
-    0.1566,
-    0.1626,
-    0.1073,
-    0.0854,
-    0.1051,
-    0.1204,
-    0.1524
+    0.0978,
+    0.1033,
+    0.0552,
+    0.0247,
+    0.0255,
+    0.0208,
+    0.0960,
   };
 }
 
@@ -127,8 +127,8 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
   // Input/output file names
   TString inputFileName = "";
   TString flatNtupleFileNameBase = "Undefined";
-  if(sample == SAMPLE_DY)                        inputFileName = "DYJetsToLL";
-  else if( sample == SAMPLE_TT )                 inputFileName = "TTJets";
+  if(sample == SAMPLE_DY)                        inputFileName = "DY";
+  else if( sample == SAMPLE_TT )                 inputFileName = "TT";
   else if( sample == SAMPLE_GJ )                 inputFileName = "GJ";
   else if( sample == SAMPLE_DoubleEle1to300 )    inputFileName = "DoubleEleFlat1to300";
   else if( sample == SAMPLE_DoubleEle300to6500 ) inputFileName = "DoubleEleFlat300to6500";
@@ -526,7 +526,7 @@ int main(int argc, char *argv[]){
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY,                 MATCH_TRUE, ETA_FULL);
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY,                 MATCH_ANY,  ETA_FULL);
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_TT,                 MATCH_ANY,  ETA_FULL);
-  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_GJ,                 MATCH_ANY,  ETA_FULL);
-  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle1to300,    MATCH_ANY,  ETA_FULL);
-  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle300to6500, MATCH_ANY,  ETA_FULL);
+//  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_GJ,                 MATCH_ANY,  ETA_FULL);
+//  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle1to300,    MATCH_ANY,  ETA_FULL);
+//  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle300to6500, MATCH_ANY,  ETA_FULL);
 }

@@ -196,6 +196,8 @@ Submit them using crabSubmit.py
 Effective areas are prepared with the ElectronWork/EffectiveAreas
 package, see https://github.com/UAEDF-tomc/ElectronWork
 
+*todo:* move the relevant computeEffectiveAreaWithIsoCutoffs script to this package
+
 
 ## 3. 
 Since 2016, we are reweighting signal (DY) to background (TTbar)
