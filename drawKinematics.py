@@ -4,12 +4,12 @@ import ROOT
 from common import loadClasses, getTreeFromFile
 loadClasses('OptimizationConstants.hh')
 
-dateTag = "2018-03-18"
+dateTag = "2019-08-23"
 
 
 def drawKinematics(var):
-  signalTree     = getTreeFromFile(dateTag + '/' + "DYJetsToLL_flat_ntuple_true_alleta_full.root",    ROOT.Opt.signalTreeName)
-  backgroundTree = getTreeFromFile(dateTag + '/' + "TTJets_flat_ntuple_trueAndFake_alleta_full.root", ROOT.Opt.backgroundTreeName)
+  signalTree     = getTreeFromFile(dateTag + '/' + "DY_flat_ntuple_true_alleta_full.root", ROOT.Opt.signalTreeName)
+  backgroundTree = getTreeFromFile(dateTag + '/' + "TT_flat_ntuple_trueAndFake_alleta_full.root", ROOT.Opt.backgroundTreeName)
 
   c1 = ROOT.TCanvas("c1","c1",10,10,600,600)
   ROOT.gStyle.SetOptStat(0)

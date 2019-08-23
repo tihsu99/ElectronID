@@ -379,15 +379,14 @@ loads all libraries) and execute, e.g.L
 Review the optimization results. Note that all the scripts here
 produce plots that can go straight into the presentations.
 
-### a) Draw pt and eta spectra of the signal and background electrons,
-with and without reweighting.
-   Before running this script one may want to create flat ntuples
-that contain both barrel and endcap, following the full->flat step
-above with appropriate changes to the flags in the converting script.
-Then, change the input ntuple names for the drawing script below and
-run it as:
-
+#### a)
+Draw pt and eta spectra of the signal and background electrons,
+with and without reweighting. This script uses the flat ntuples
+that contain both barrel and endcap (i.e. "alleta").
+Change the datetag and run:
+```
   ./drawKinematics.py
+```
 
 #### b) Draw ROC and display the working points in the ROC space. In the
 script that does this one needs to specify locations of the TMVA output
@@ -415,7 +414,7 @@ name like
 
    figures/plot_ROCandWP_barrel.png
 
-### c) Draw distributions of all ID variables. This script draws distributions
+#### c) Draw distributions of all ID variables. This script draws distributions
 of all ID variables and overlays cuts for all working points. 
 In this script one has to set up the names of all relevant flat ntuples
 and the barrel/endcap flag. The drawn variables include both the variables
@@ -449,7 +448,7 @@ Note that some distributions might be better displayed in the log-Y mode.
 For that, one can change the script or just change it interactively on
 the desired canvas and save the figure manually.
 
-### d) Draw the ID efficiencies as a function of pt, eta, and the number
+#### d) Draw the ID efficiencies as a function of pt, eta, and the number
 of vertices. In drawEfficiency(mode, tag), mode is pt, pt_2TeV, eta or nvtx;
 tag is the set of workingpoints used in plotting, as defined on top of the file.
   Note that even though one selects only the barrel or endcap
