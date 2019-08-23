@@ -199,12 +199,14 @@ package, see https://github.com/UAEDF-tomc/ElectronWork
 
 ## 3. 
 Since 2016, we are reweighting signal (DY) to background (TTbar)
-in 2D, pt and eta. Weights need to be prepared, To do this,
-edit the beginning of the script (file names) and run it like this once:
+in 2D, pt and eta. Weights need to be prepared. To do this,
+edit the beginning of the script (file names), change the datetime tag at the bottom of the script,
+and run it like this once:
 
-  ./compileAndRun.sh computeKinematicWeights
+```
+./compileAndRun.sh computeKinematicWeights
+```
 
-rename the kinematicWeights.root into something if desired (e.g. add date).
 
 ## 4. 
 Convert the full ntuples with event structure into much reduced flat (one entry
@@ -224,14 +226,13 @@ are set to meaningful values only for the sample DY and matching choice TRUE. Fo
 other combination of flags set in the beginning of the convert... script, kinematic
 weights are 1 for all events. Therefore, for tuning one has to run this convert script
 once with choices DY, TRUE, and any choice of eta (barrel, endcap, or any eta), and
-feed the resulting ntuple to TMVA as described below.
-    Thus, this step has to be run after all of the above steps. To run this
-step, after all adjustements, execute as many times as needed (typically four times,
-changing the code each time):
+feed the resulting ntuple to TMVA as described below. See the main function at the bottom
+of the script for which cases the script is ran.
 
-  ./compileAndRun.sh convert_EventStrNtuple_To_FlatNtuple
-
-##5. 
+```
+./compileAndRun.sh convert_EventStrNtuple_To_FlatNtuple
+```
+## 5. 
 Edit the file that contain the varialbles that will go into tuning (if needed):
 
   Variables.hh
@@ -260,9 +261,9 @@ for 99.9% efficient range for each variable of the ID. The script requires
 only the change of the name string in the beginning. It takes all other
 info from header files with constants, such as Variables.hh and OptimizationConstants.hh.
 Run it as:
-
+```
   root -q -b findCutLimits.C+
-
+```
 The output of the script is printed on the screen, and is also saved 
 in ROOT files with names like:
 
@@ -297,10 +298,10 @@ than HLT.
  - check that "user defined cut limits" do what is needed. In 2016,
       these extra limits were used to make some working points tighter
       than HLT. See above comments for VariableLimits.hh
-
+```
   root -b -q 'fourPointOptimization.C(true)'  &> barrel.log &
   root -b -q 'fourPointOptimization.C(false)' &> endcap.log &
-
+```
 one can prepend the root command with "nohup" and come and check
 it next day, since it may take awhile. On lxplus this might not work,
 and the job may be gone without completing.
