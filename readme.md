@@ -169,7 +169,8 @@ and the files with cuts will appear in the cut_repository/.
 
 # Electron ID tuning steps for Run III studies
 
-1. Ntuples are made for the DY, TT, GJ datasets (the last one is 
+## 1. 
+Ntuples are made for the DY, TT, GJ datasets (the last one is 
 just for comparison plots). The effective area does not have to be
 up to date for the ntuple maker. The ntuples are made with (c++, python, crab):
 
@@ -178,19 +179,26 @@ cmsrel CMSSW_10_6_2
 cd CMSSW_10_6_2/src/
 cmsenv
 git clone https://github.com/UAEDF-tomc/EgammaWork.git
-git checkout ntupler_and_VID_benchmarks_9XX # to check
+cd EgammaWork/
+git checkout ntupler_106X
+scram build -j 10
 ```
 
-https://github.com/ikrav/EgammaWork/blob/ntupler_and_VID_benchmarks_9XX/ElectronNtupler/plugins/SimpleElectronNtupler.cc
-https://github.com/ikrav/EgammaWork/blob/ntupler_and_VID_benchmarks_9XX/ElectronNtupler/test/runElectrons.py
-https://github.com/ikrav/EgammaWork/blob/ntupler_and_VID_benchmarks_9XX/ElectronNtupler/test/crab_config_electrons_DY.py
+The cmsRun executables are in EgammaWork/ElectronNtupler/test:
+runElectrons_AOD.py
+runElectrons.py
+(they only differ by a boolean)
 
-2. Effective areas are prepared with the ElectronWork/EffectiveAreas
-package, see README there
+Submit them using crabSubmit.py
 
-https://github.com/ikrav/ElectronWork/tree/effective_area_fall17/EffectiveArea
 
-3. Since 2016, we are reweighting signal (DY) to background (TTbar)
+## 2. 
+Effective areas are prepared with the ElectronWork/EffectiveAreas
+package, see https://github.com/UAEDF-tomc/ElectronWork
+
+
+## 3. 
+Since 2016, we are reweighting signal (DY) to background (TTbar)
 in 2D, pt and eta. Weights need to be prepared, To do this,
 edit the beginning of the script (file names) and run it like this once:
 
@@ -198,7 +206,8 @@ edit the beginning of the script (file names) and run it like this once:
 
 rename the kinematicWeights.root into something if desired (e.g. add date).
 
-4. Convert the full ntuples with event structure into much reduced flat (one entry
+## 4. 
+Convert the full ntuples with event structure into much reduced flat (one entry
 is an electron, not an event with vectors) ntuples for TMVA. The smaller are the final 
 ntuples,  the faster is the tuning. What was done so far is to create one flat
 ntuple for each of the following: signal barrel, signal endcap, background barrel,
@@ -222,7 +231,8 @@ changing the code each time):
 
   ./compileAndRun.sh convert_EventStrNtuple_To_FlatNtuple
 
-5. Edit the file that contain the varialbles that will go into tuning (if needed):
+##5. 
+Edit the file that contain the varialbles that will go into tuning (if needed):
 
   Variables.hh
 
@@ -244,7 +254,8 @@ Review here:
   - set barrel/endcap flag to the desired value that you expect to need in
        the first tuning a few steps down these instructions
 
-6. Compute limits within which TMVA will look for optimal cuts, aiming
+## 6. 
+Compute limits within which TMVA will look for optimal cuts, aiming
 for 99.9% efficient range for each variable of the ID. The script requires
 only the change of the name string in the beginning. It takes all other
 info from header files with constants, such as Variables.hh and OptimizationConstants.hh.
@@ -260,7 +271,8 @@ in ROOT files with names like:
 
 These files will be used directly in the steps below.
 
-7. Run optimization of four working points.
+## 7. 
+Run optimization of four working points.
 
  Before doing that, check that OptimizationConstants.hh have the 
 desired settings. In the first attempt, one may want to do a quick
@@ -364,7 +376,8 @@ loads all libraries) and execute, e.g.L
   .ls
   cuts->Print()
 
-8. Review the optimization results. Note that all the scripts here
+## 8. 
+Review the optimization results. Note that all the scripts here
 produce plots that can go straight into the presentations.
 
 a) Draw pt and eta spectra of the signal and background electrons,
@@ -467,7 +480,8 @@ as the signal efficiency. There is an option in the beginning
 of the script to scale up the background efficiency by, say, x5
 for a better visibility.
 
-9. Tune several cuts by manually. These include the expected missing
+## 9. 
+Tune several cuts by manually. These include the expected missing
 inner hits cuts and the impact parameter cuts. All of this is usually 
 chosen to be fairly loose. Impact parameter cuts can then be changed
 by individual analyses if needed.
@@ -483,7 +497,8 @@ https://indico.cern.ch/event/545076/contributions/2212238/attachments/1295178/19
 https://indico.cern.ch/event/482675/contributions/2221671/attachments/1300610/1941558/talk_electron_ID_spring16_update.pdf
 https://indico.cern.ch/event/482677/contributions/2259342/attachments/1316731/1972911/talk_electron_ID_spring16_update.pdf
  
-10. The H/E cut tuned as a flat cut in this proceedure may need to be
+## 10. 
+The H/E cut tuned as a flat cut in this proceedure may need to be
 reviewed, and scaling with rho and pt introduced along the lines discussed
 in 
 https://indico.cern.ch/event/662749/contributions/2763092/attachments/1545209/2425054/talk_electron_ID_2017.pdf
