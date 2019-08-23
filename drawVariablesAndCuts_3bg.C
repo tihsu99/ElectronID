@@ -17,7 +17,7 @@
 const bool useSmallEventCount = false;
 // Draw barrel or endcap
 const bool drawBarrel = true;
-const TString dateTag = "2018-03-18";
+const TString dateTag = "2019-08-23";
 
 const bool doOverlayCuts = true;
 

@@ -71,7 +71,19 @@ workingPoints = {
                   workingPoint('Loose (94X)',              'cuts_region_2018-03-18_retuned_WP3_Loose',  1, 1),
                   workingPoint('Medium (94X)',             'cuts_region_2018-03-18_retuned_WP3_Medium', 1, 1),
                   workingPoint('Tight (94X)',              'cuts_region_2018-03-18_retuned_WP3_Tight',  1, 1)],
+  'retuned94d':  [workingPoint('Veto (94X)',               'cuts_region_2018-03-18_retuned_WP4_Veto',   2, 3),
+                  workingPoint('Loose (94X)',              'cuts_region_2018-03-18_retuned_WP4_Loose',  1, 1),
+                  workingPoint('Medium (94X)',             'cuts_region_2018-03-18_retuned_WP4_Medium', 1, 1),
+                  workingPoint('Tight (94X)',              'cuts_region_2018-03-18_retuned_WP4_Tight',  1, 1)],
+  'retuned94e':  [workingPoint('Veto (94X)',               'cuts_region_2018-03-18_retuned_WP5_Veto',   2, 3),
+                  workingPoint('Loose (94X)',              'cuts_region_2018-03-18_retuned_WP5_Loose',  1, 1),
+                  workingPoint('Medium (94X)',             'cuts_region_2018-03-18_retuned_WP5_Medium', 1, 1),
+                  workingPoint('Tight (94X)',              'cuts_region_2018-03-18_retuned_WP5_Tight',  1, 1)],
 
+  'training106': [workingPoint('Veto (106X)',               'cuts_region_2019-08-23_WP_Veto',           2, 3),
+                  workingPoint('Loose (106X)',              'cuts_region_2019-08-23_WP_Loose',          1, 1),
+                  workingPoint('Medium (106X)',             'cuts_region_2019-08-23_WP_Medium',         1, 1),
+                  workingPoint('Tight (106X)',              'cuts_region_2019-08-23_WP_Tight',          1, 1)],
 }
 
 from itertools import chain
@@ -87,6 +99,10 @@ workingPoints['compare94bVM']       = compareWP('prelim2017','retuned94b', ['Vet
 workingPoints['compare94bLT']       = compareWP('prelim2017','retuned94b', ['Loose','Tight'])
 workingPoints['compare94cVM']       = compareWP('prelim2017','retuned94c', ['Veto','Medium'])
 workingPoints['compare94cLT']       = compareWP('prelim2017','retuned94c', ['Loose','Tight'])
+workingPoints['compare94dVM']       = compareWP('prelim2017','retuned94d', ['Veto','Medium'])
+workingPoints['compare94dLT']       = compareWP('prelim2017','retuned94d', ['Loose','Tight'])
+workingPoints['compare94eVM']       = compareWP('prelim2017','retuned94e', ['Veto','Medium'])
+workingPoints['compare94eLT']       = compareWP('prelim2017','retuned94e', ['Loose','Tight'])
 
 def setColors(set):
   sColors  = [2, 4, 6, 8]

@@ -9,9 +9,10 @@ def tmvaFileName(wp, region, tag):
   if 'Loose'  in wp.name: wpPass = 'pass2'
   if 'Medium' in wp.name: wpPass = 'pass3'
   if 'Tight'  in wp.name: wpPass = 'pass4'
-  if   tag=='default':    name = 'training_results_' + region + '_' + wpPass + '_2017-11-07'
-  elif tag=='retuneMVA':  name = 'training_results_' + region + '_' + wpPass + '_2017-11-16'
-  elif tag=='training94': name = 'training_results_' + region + '_' + wpPass + '_2018-03-18'
+  if   tag=='default':     name = 'training_results_' + region + '_' + wpPass + '_2017-11-07'
+  elif tag=='retuneMVA':   name = 'training_results_' + region + '_' + wpPass + '_2017-11-16'
+  elif tag=='training94':  name = 'training_results_' + region + '_' + wpPass + '_2018-03-18'
+  elif tag=='training106': name = 'training_results_' + region + '_' + wpPass + '_2019-08-23'
   return './trainingData/' + name + '/TMVA_' + name + '.root'
 
 def findEfficiencies(signalTree, backgroundTree, cuts, wp, barrel, missingHits):
@@ -92,7 +93,7 @@ def drawROCandWP(region, missingHits, tag):
   c1.Print(makeSubDirs(fileName))
 
 
-for tag in ['training94']:
+for tag in ['training106']:
   for region in ['endcap','barrel']:
     for missingHits in [True, False]:
       drawROCandWP(region, missingHits, tag)

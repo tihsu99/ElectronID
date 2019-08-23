@@ -388,7 +388,8 @@ Change the datetag and run:
   ./drawKinematics.py
 ```
 
-#### b) Draw ROC and display the working points in the ROC space. In the
+#### b) 
+Draw ROC and display the working points in the ROC space. In the
 script that does this one needs to specify locations of the TMVA output
 for all four passes, as well as the files with the final cut objects.
 Typically one just needs to edit in the file the date string, the rest
@@ -404,30 +405,40 @@ should really be sitting on the final composite ROC.
    Note that plots are made with and without an extra cut 
 that is not applied in TMVA preselection and not tuned by the TMVA:
 the cut on the expected missing inner hits.
+
   The script computes the efficiencies for the signal with exactly the same
 weights that TMVA used to tune the cuts.
-
+First add the workingpoints to common.py and then modify drawROCandWPv4.py
+in order to plot these new workingpoints.
+```
   ./drawROCandWPv4.py
-
+```
 The output, a presentation-grade figure, is saved into a file with the 
 name like
 
    figures/plot_ROCandWP_barrel.png
+   figures/plot_ROCandWP_barrel_noMissingHits.png
 
-#### c) Draw distributions of all ID variables. This script draws distributions
+Typically you show the second plot which does not include the missing hits
+cut such that the workingpoints are perfectly overlayed with the ROC curve.
+
+#### c) 
+Draw distributions of all ID variables. This script draws distributions
 of all ID variables and overlays cuts for all working points. 
 In this script one has to set up the names of all relevant flat ntuples
 and the barrel/endcap flag. The drawn variables include both the variables
 tuned by TMVA and other ID variables where the cut is chosen manually
 (thus these manual cuts need to be reviewed during tuning). At this 
 moment the "mannual" cuts include: d0, dz, and the expected missing inner hits.
+
    The script draws fake electron background from three sources for each
 variable: from the TTJets sample (which is what was used in the TMVA tunning,
 and contains both jets faking electrons and secondary electrons from heavy flavor),
 from the DYJetsToLL sample (which is mostly light jets faking electrons) and
 from the GJet_something sample (which is jets or energetic photons faking
 electrons).
-   Run this script as:
+
+   Run this script as (for barrel and endcap respectively):
 ```
   root -b -q 'drawVariablesAndCuts_3bg.C(true)'
   root -b -q 'drawVariablesAndCuts_3bg.C(false)'
@@ -448,7 +459,8 @@ Note that some distributions might be better displayed in the log-Y mode.
 For that, one can change the script or just change it interactively on
 the desired canvas and save the figure manually.
 
-#### d) Draw the ID efficiencies as a function of pt, eta, and the number
+#### d) 
+Draw the ID efficiencies as a function of pt, eta, and the number
 of vertices. In drawEfficiency(mode, tag), mode is pt, pt_2TeV, eta or nvtx;
 tag is the set of workingpoints used in plotting, as defined on top of the file.
   Note that even though one selects only the barrel or endcap
