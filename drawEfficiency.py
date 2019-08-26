@@ -1,10 +1,10 @@
 #! /usr/bin/env python
 
 import ROOT,os,numpy,shutil
-from common import loadClasses, workingPoints, getTreeFromFile, drawFromTree, getCuts, makeSubDirs, compareWP, setColors
+from common import loadClasses, workingPoints, getTreeFromFile, drawFromTree, getCuts, makeSubDirs, setColors
 loadClasses('VarCut.cc', 'OptimizationConstants.hh')
 
-dateTag = "2018-03-18"
+dateTag = "2019-08-23"
 
 
 #
@@ -76,10 +76,12 @@ def setHistogram(hist, wp, isSignal):
 # Main function
 #
 def drawEfficiency(mode, tag, region, selectVar):
-  if '2TeV' in mode: signalFileName = dateTag + '/' + "DoubleEleFlat_flat_ntuple_trueAndFake_alleta_full.root"
-  else:              signalFileName = dateTag + '/' + "DYJetsToLL_flat_ntuple_true_alleta_full.root"
-  signalTree     = getTreeFromFile(signalFileName,                                                    ROOT.Opt.signalTreeName)
-  backgroundTree = getTreeFromFile(dateTag + '/' + "TTJets_flat_ntuple_trueAndFake_alleta_full.root", ROOT.Opt.backgroundTreeName) if '2TeV' not in mode else None
+  if '2TeV' in mode:
+    return # not available
+    signalFileName = dateTag + '/' + "DoubleEleFlat_flat_ntuple_trueAndFake_alleta_full.root"
+  else:              signalFileName = dateTag + '/' + "DY_flat_ntuple_true_alleta_full.root"
+  signalTree     = getTreeFromFile(signalFileName,                                                ROOT.Opt.signalTreeName)
+  backgroundTree = getTreeFromFile(dateTag + '/' + "TT_flat_ntuple_trueAndFake_alleta_full.root", ROOT.Opt.backgroundTreeName) if '2TeV' not in mode else None
 
   if('genPt' in mode):  binning = getPtBins(mode.count("2TeV"))
   elif('pt' in mode):   binning = getPtBins(mode.count("2TeV"))

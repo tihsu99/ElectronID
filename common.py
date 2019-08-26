@@ -103,6 +103,8 @@ workingPoints['compare94dVM']       = compareWP('prelim2017','retuned94d', ['Vet
 workingPoints['compare94dLT']       = compareWP('prelim2017','retuned94d', ['Loose','Tight'])
 workingPoints['compare94eVM']       = compareWP('prelim2017','retuned94e', ['Veto','Medium'])
 workingPoints['compare94eLT']       = compareWP('prelim2017','retuned94e', ['Loose','Tight'])
+workingPoints['compare106VM']       = compareWP('training106','training94', ['Veto','Medium'])
+workingPoints['compare106LT']       = compareWP('training106','training94', ['Loose','Tight'])
 
 def setColors(set):
   sColors  = [2, 4, 6, 8]

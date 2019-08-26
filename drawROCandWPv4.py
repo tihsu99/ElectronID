@@ -77,7 +77,7 @@ def drawROCandWP(region, missingHits, tag):
   hROC.GetYaxis().SetTitle("background rejection")
   hROC.GetYaxis().SetTitleOffset(1.4)
   hROC.GetXaxis().SetRangeUser(0.6, 1.0)
-  hROC.GetYaxis().SetRangeUser(0.951 if region=='barrel' else 0.8, 1.0)
+  hROC.GetYaxis().SetRangeUser(0.931 if region=='barrel' else 0.8, 1.0)
 
   c1.cd()
   hROC.Draw("L")

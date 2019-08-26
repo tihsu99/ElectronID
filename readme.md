@@ -385,7 +385,7 @@ with and without reweighting. This script uses the flat ntuples
 that contain both barrel and endcap (i.e. "alleta").
 Change the datetag and run:
 ```
-  ./drawKinematics.py
+./drawKinematics.py
 ```
 
 #### b) 
@@ -411,8 +411,9 @@ weights that TMVA used to tune the cuts.
 First add the workingpoints to common.py and then modify drawROCandWPv4.py
 in order to plot these new workingpoints.
 ```
-  ./drawROCandWPv4.py
+./drawROCandWPv4.py
 ```
+
 The output, a presentation-grade figure, is saved into a file with the 
 name like
 
@@ -440,11 +441,13 @@ electrons).
 
    Run this script as (for barrel and endcap respectively):
 ```
-  root -b -q 'drawVariablesAndCuts_3bg.C(true)'
-  root -b -q 'drawVariablesAndCuts_3bg.C(false)'
+root -b -q 'drawVariablesAndCuts_3bg.C(true)'
+root -b -q 'drawVariablesAndCuts_3bg.C(false)'
 ```
+
 The output of the script, plots for a presentation, goes to files like:
 
+```
    figures/plot_barrel_3BGs_full5x5_sigmaIetaIeta.png
    figures/plot_barrel_3BGs_dEtaSeed.png
    figures/plot_barrel_3BGs_dPhiIn.png
@@ -454,41 +457,42 @@ The output of the script, plots for a presentation, goes to files like:
    figures/plot_barrel_3BGs_d0.png
    figures/plot_barrel_3BGs_dz.png
    figures/plot_barrel_3BGs_expectedMissingInnerHits.png
-
+```
 Note that some distributions might be better displayed in the log-Y mode.
 For that, one can change the script or just change it interactively on
 the desired canvas and save the figure manually.
 
 #### d) 
 Draw the ID efficiencies as a function of pt, eta, and the number
-of vertices. In drawEfficiency(mode, tag), mode is pt, pt_2TeV, eta or nvtx;
-tag is the set of workingpoints used in plotting, as defined on top of the file.
-  Note that even though one selects only the barrel or endcap
-for one run of the script, all cut object files, both barrel and endcap,
-have to exist. Kinematic reweighting is applied in the script.
-   The script is run as follows:
+of vertices. At the bottom of the drawEfficiency.py script, a loop is
+made over the different x-axis options:
+ - eta
+ - pt
+ - generator pt
+ - pt extended range up to 2 TeV (needs a Flat DoubleElectron sample)
+ - generator pt extended range up to 2 TeV (needs a Flat DoubleElectron sample)
+ - number of primary vertices
 
-   ./drawEfficiency.py
+The plots are made separately for barrel and endcap, and for the full workingpoint
+and each of its individual cuts. The "tag" argument is specifies the workingpoints
+for which the efficiency has to be drawn (see the defined workingpoint sets in common.py)
+The script is run as follows:
 
+```
+   ./drawEfficiency.py --tag=training106
+```
+
+Kinematic reweighting is applied in the script.
 The output of the scripts is plots with names like:
-
-  figures/efficiencies/plot_eff_barrel_pt.png
-  figures/efficiencies/plot_eff_etaSC.png
-  figures/efficiencies/plot_eff_barrel_nPV.pn
+```
+  figures/efficiencies/WORKINGPOINTSET/plot_eff_barrel_pt.png
+  figures/efficiencies/WORKINGPOINTSET/plot_eff_etaSC.png
+  figures/efficiencies/WORKINGPOINTSET/plot_eff_barrel_nPV.pn
+```
 
 A couple of caveats regarding the cuts. The missing hits cuts are added
-by hand, one needs to review and adjust them as needed. The impact parameter
-cuts d0 and dz are not there at all. These cuts are presently selected 
-manually and not part of TMVA tuning. Additionally, the cuts on IP have
-sample-dependent efficiency. There is a fairly large fraction of Drell-Yan
-events in which the primary vertex is not well measured. For seemingly
-reasonable cuts that have 99% efficiency on true prompt electrons from
-a TTbar sample, one may observe 93%-level efficiency in the Drell-Yan
-sample. 
-   Note that the background efficiency is drawn on the same canvas
-as the signal efficiency. There is an option in the beginning
-of the script to scale up the background efficiency by, say, x5
-for a better visibility.
+by hand, one needs to review and adjust them as needed.
+
 
 ## 9. 
 Tune several cuts by manually. These include the expected missing
@@ -506,6 +510,7 @@ in 2016 can be found in these presentations:
 https://indico.cern.ch/event/545076/contributions/2212238/attachments/1295178/1930742/talk_electron_ID_spring16.pdf
 https://indico.cern.ch/event/482675/contributions/2221671/attachments/1300610/1941558/talk_electron_ID_spring16_update.pdf
 https://indico.cern.ch/event/482677/contributions/2259342/attachments/1316731/1972911/talk_electron_ID_spring16_update.pdf
+
  
 ## 10. 
 The H/E cut tuned as a flat cut in this proceedure may need to be

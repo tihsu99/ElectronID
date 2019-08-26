@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import ROOT,os,glob,shutil
-from common      import loadClasses, workingPoints, compareWP
+from common      import loadClasses, workingPoints
 from collections import OrderedDict
 loadClasses('VarCut.cc', 'OptimizationConstants.hh')
 
@@ -60,7 +60,7 @@ def makeTables(outFileName, wps):
 
 try:    os.makedirs('tables')
 except: pass
-for tag in ['retuned94','retuned94b','retuned94c','prelim2017']:
+for tag in ['training106']:
   makeTables(tag, workingPoints[tag])
 
 

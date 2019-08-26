@@ -10,9 +10,9 @@ namespace Opt {
   // Events to test and train. 
   // To use ALL available events, split 50/50, set
   // all of the nTrain and nTest to 0
-  const int nTrain_SignalBarrel     = 500000;
+  const int nTrain_SignalBarrel     = 100000;
   const int nTrain_BackgroundBarrel = 0;
-  const int nTest_SignalBarrel      = 1000000;
+  const int nTest_SignalBarrel      = 500000;
   const int nTest_BackgroundBarrel  = 0;
   const int nTrain_SignalEndcap     = 0;
   const int nTrain_BackgroundEndcap = 0;

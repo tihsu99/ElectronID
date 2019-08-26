@@ -91,12 +91,12 @@ void drawVariablesAndCuts_3bg(bool drawBarrel){
   //
   // Open files
   //
-  TString fname1 = dateTag + "/DYJetsToLL_flat_ntuple_trueAndFake_alleta_full.root";
+  TString fname1 = dateTag + "/DY_flat_ntuple_trueAndFake_alleta_full.root";
   TFile  *input1 = new TFile( fname1 );
   //  input1->cd("wp3");
   TTree *signalTree = (TTree*) input1->Get("electronTree");
 
-  TString fname2 = dateTag + "/TTJets_flat_ntuple_trueAndFake_alleta_full.root";
+  TString fname2 = dateTag + "/TT_flat_ntuple_trueAndFake_alleta_full.root";
   TFile  *input2 = new TFile( fname2 );
   //  input2->cd("wp3");
   TTree *backgroundTree = (TTree*) input2->Get("electronTree");
@@ -164,7 +164,7 @@ void drawVariablesAndCuts_3bg(bool drawBarrel){
     c1 = drawOneVariable(signalTree, signalTree, backgroundTree,backgroundTreeAdditional,
        		 signalCuts, backgroundCuts,
        		 variable, nbins, xmin, xmax,
-       		 "signal DYJetsToLL", "fakes from DYJetsToLL", "fakes from TTJets","fakes from GJets" ,comment, logY);
+       		 "signal DY", "fakes from DY", "fakes from TT","fakes from GJets" ,comment, logY);
     if(doOverlayCuts) overlayCuts(c1, variable, drawBarrel);
 
     TString outname = (TString) "figures/plot_" + (drawBarrel ? "barrel" : "endcap") + "_3BGs_";
@@ -267,9 +267,9 @@ TCanvas *drawOneVariable(TTree *signalTree, TTree *backgroundTree1, TTree *backg
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->AddEntry(hsig, sigLegend, "lf");
-  leg->AddEntry(hbg1, bg1Legend, "lf");
-  leg->AddEntry(hbg2, bg2Legend, "lf");
-  leg->AddEntry(hbg3, bg3Legend, "lf");
+  if(hbg1) leg->AddEntry(hbg1, bg1Legend, "lf");
+  if(hbg2) leg->AddEntry(hbg2, bg2Legend, "lf");
+  if(hbg3) leg->AddEntry(hbg3, bg3Legend, "lf");
   leg->Draw("same");
 
   TLatex *lat = new TLatex(0.5, 0.95, comment); // 0.85
