@@ -194,7 +194,7 @@ Submit them using crabSubmit.py
 
 ## 2. 
 Effective areas are prepared with the ElectronWork/EffectiveAreas
-package, see https://github.com/UAEDF-tomc/ElectronWork
+package, see https://github.com/tomcornelis/ElectronWork
 
 *todo:* move the relevant computeEffectiveAreaWithIsoCutoffs script to this package
 
