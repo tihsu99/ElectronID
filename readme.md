@@ -178,7 +178,7 @@ up to date for the ntuple maker. The ntuples are made with (c++, python, crab):
 cmsrel CMSSW_10_6_2
 cd CMSSW_10_6_2/src/
 cmsenv
-git clone https://github.com/UAEDF-tomc/EgammaWork.git
+git clone https://github.com/tomcornelis/EgammaWork.git
 cd EgammaWork/
 git checkout ntupler_106X
 scram build -j 10
