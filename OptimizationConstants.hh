@@ -10,14 +10,18 @@ namespace Opt {
   // Events to test and train. 
   // To use ALL available events, split 50/50, set
   // all of the nTrain and nTest to 0
-  const int nTrain_SignalBarrel     = 100000;
-  const int nTrain_BackgroundBarrel = 0;
-  const int nTest_SignalBarrel      = 500000;
-  const int nTest_BackgroundBarrel  = 0;
-  const int nTrain_SignalEndcap     = 0;
-  const int nTrain_BackgroundEndcap = 0;
-  const int nTest_SignalEndcap      = 0;
-  const int nTest_BackgroundEndcap  = 0;
+  const int nTrain_SignalBarrel     = 300000;
+  const int nTrain_BackgroundBarrel = 300000;
+  const int nTest_SignalBarrel      = 1000000;
+  const int nTest_BackgroundBarrel  = 1000000;
+  const int nTrain_SignalEndcap     = 300000;
+  const int nTrain_BackgroundEndcap = 300000;
+  const int nTest_SignalEndcap      = 672000;
+  const int nTest_BackgroundEndcap  = 237000;
+  const int nTrain_SignalExtend     = 0;
+  const int nTrain_BackgroundExtend = 0;
+  const int nTest_SignalExtend      = 0;
+  const int nTest_BackgroundExtend  = 0;
 
   const TString tagDir = "2019-08-23";
 
@@ -34,6 +38,7 @@ namespace Opt {
   const float effBarrel[nWP]       = {0.95      , 0.90       , 0.80      , 0.70     };
   // Make it possible to have a lower target efficieny for endcap:
   const float effEndcap[nWP]       = {0.95      , 0.90       , 0.80      , 0.70     };
+  const float effExtend[nWP]       = {0.95      , 0.90       , 0.80      , 0.70     };
   const TString wpNames[nWP] = {"WP_Veto", "WP_Loose", "WP_Medium", "WP_Tight"};
   enum WorkingPointIndex       {WP_VETO  , WP_LOOSE  , WP_MEDIUM  , WP_TIGHT  };
   
@@ -44,11 +49,13 @@ namespace Opt {
   //
   TFile *fileSignal = 0;
   TFile *fileBackground = 0;
-  const TString fnameSignalBarrel = tagDir + "/DY_flat_ntuple_true_barrel_full.root";
-  const TString fnameSignalEndcap = tagDir + "/DY_flat_ntuple_true_endcap_full.root";
+  const TString fnameSignalBarrel = tagDir + "/DY_ext_flat_ntuple_true_barrel_full.root";
+  const TString fnameSignalEndcap = tagDir + "/DY_ext_flat_ntuple_true_endcap_full.root";
+  const TString fnameSignalExtend = tagDir + "/DY_ext_flat_ntuple_true_extend_full.root";
   const TString signalTreeName = "electronTree";
   const TString fnameBackgroundBarrel = tagDir + "/TT_flat_ntuple_fake_barrel_full.root";
   const TString fnameBackgroundEndcap = tagDir + "/TT_flat_ntuple_fake_endcap_full.root";
+  const TString fnameBackgroundExtend = tagDir + "/TT_flat_ntuple_fake_extend_full.root";
   const TString backgroundTreeName = "electronTree";
   
   //
@@ -59,9 +66,10 @@ namespace Opt {
   const TCut fakeEleCut = "isTrueEle == 0 || isTrueEle == 3";
   
   // Kinematics
-  const TCut ptCut = "pt>=20";
+  const TCut ptCut = "pt>=10";
   const TCut etaCutBarrel = " abs(etaSC) < 1.4442 " ;
   const TCut etaCutEndcap = " abs(etaSC) > 1.566 && abs(etaSC)<2.5" ;
+  const TCut etaCutExtend = " abs(etaSC)>= 2.5   && abs(etaSC)<3.0" ;
   
   // Anything else
   const TCut otherPreselectionCuts = "passConversionVeto && abs(dz)<1";
