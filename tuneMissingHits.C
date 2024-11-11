@@ -23,17 +23,24 @@ const int hitsMin = 0;
 const int hitsMax = 3;
 
 const TString cutFileNamesBarrel[Opt::nWP] = {
-  "cut_repository/cuts_barrel_20160616_200000_WP_Veto.root",
-  "cut_repository/cuts_barrel_20160616_200000_WP_Loose.root",
-  "cut_repository/cuts_barrel_20160616_200000_WP_Medium.root",
-  "cut_repository/cuts_barrel_20160616_200000_WP_Tight.root"
+  "cut_repository/cuts_barrel_2019-08-23_WP_Veto.root",
+  "cut_repository/cuts_barrel_2019-08-23_WP_Loose.root",
+  "cut_repository/cuts_barrel_2019-08-23_WP_Medium.root",
+  "cut_repository/cuts_barrel_2019-08-23_WP_Tight.root"
 };
   
 const TString cutFileNamesEndcap[Opt::nWP] = {
-  "cut_repository/cuts_endcap_20160616_200000_WP_Veto.root",
-  "cut_repository/cuts_endcap_20160616_200000_WP_Loose.root",
-  "cut_repository/cuts_endcap_20160616_200000_WP_Medium.root",
-  "cut_repository/cuts_endcap_20160616_200000_WP_Tight.root"
+  "cut_repository/cuts_endcap_2019-08-23_WP_Veto.root",
+  "cut_repository/cuts_endcap_2019-08-23_WP_Loose.root",
+  "cut_repository/cuts_endcap_2019-08-23_WP_Medium.root",
+  "cut_repository/cuts_endcap_2019-08-23_WP_Tight.root"
+};
+
+const TString cutFileNamesExtend[Opt::nWP] = {
+  "cut_repository/cuts_extend_2019-08-23_WP_Veto.root",
+  "cut_repository/cuts_extend_2019-08-23_WP_Loose.root",
+  "cut_repository/cuts_extend_2019-08-23_WP_Medium.root",
+  "cut_repository/cuts_extend_2019-08-23_WP_Tight.root"
 };
 
 const int markerColors[nHitsValues] = {kRed, kBlue, kMagenta, kBlack};
@@ -41,7 +48,7 @@ const int markerStyles[Opt::nWP]    = {20, 21, 22, 23};
 
 // Forward declarations
 TTree *getTreeFromFile(TString fname, TString tname);
-void findEfficiencies(bool doBarrel, TTree *signalTree, TTree *backgroundTree,
+void findEfficiencies(int region, TTree *signalTree, TTree *backgroundTree,
 		      float &effSignal, float &effBackground, VarCut *cutObject, TCut hitsCut);
 
 // Main function
@@ -53,6 +60,9 @@ void tuneMissingHits(){
 
   TTree *signalTreeEndcap = getTreeFromFile( Opt::fnameSignalEndcap, Opt::signalTreeName);
   TTree *backgroundTreeEndcap = getTreeFromFile( Opt::fnameBackgroundEndcap, Opt::backgroundTreeName);
+
+  TTree *signalTreeExtend = getTreeFromFile( Opt::fnameSignalExtend, Opt::signalTreeName);
+  TTree *backgroundTreeExtend = getTreeFromFile( Opt::fnameBackgroundExtend, Opt::backgroundTreeName);
 
   // Set up the main canvas
   TCanvas *c1 = new TCanvas("c1","",10,10,600,600);
@@ -67,7 +77,7 @@ void tuneMissingHits(){
   for(int iWP=0; iWP<Opt::nWP; iWP++){
 
     // Load the working point from a ROOT file
-    TFile *cutFile = new TFile(cutFileNamesEndcap[iWP]);
+    TFile *cutFile = new TFile(cutFileNamesExtend[iWP]);
     if( !cutFile )
       assert(0);
     VarCut *cutObject = (VarCut*)cutFile->Get("cuts");
@@ -80,11 +90,11 @@ void tuneMissingHits(){
     
       TCut hitsCut = TString::Format("expectedMissingInnerHits<=%d",ihits).Data();
       
-      bool doBarrel = false;
-      findEfficiencies(doBarrel, signalTreeEndcap, backgroundTreeEndcap, effSignal, effBackground,
+      int region = 2;
+      findEfficiencies(region, signalTreeExtend, backgroundTreeExtend, effSignal, effBackground,
 		       cutObject, hitsCut);
       printf("Eff for cut %s with base ID %s      effS= %.5f effB= %.5f\n",
-	     hitsCut.GetTitle(), cutFileNamesEndcap[iWP].Data(), effSignal, effBackground);  
+	     hitsCut.GetTitle(), cutFileNamesExtend[iWP].Data(), effSignal, effBackground);  
 
       // Make a marker and draw it.
       TMarker *marker = new TMarker(effSignal, 1.0-effBackground, 20);
@@ -100,15 +110,18 @@ void tuneMissingHits(){
 }
 
 // Compute signal and background efficiencies for given cuts
-void findEfficiencies(bool doBarrel, TTree *signalTree, TTree *backgroundTree,
+void findEfficiencies(int region, TTree *signalTree, TTree *backgroundTree,
 		      float &effSignal, float &effBackground, VarCut *cutObject, TCut hitsCut){
 
   TCut etaCut = "";
-  if( doBarrel ){
+  if(region == 0){
     etaCut = Opt::etaCutBarrel;
-  }else{
+  }
+  else if(region == 1){
     etaCut = Opt::etaCutEndcap;
   }
+  else etaCut = Opt::etaCutExtend;
+
   TCut kinematicCuts = Opt::ptCut && etaCut;
 
   TCut preselectionCuts = kinematicCuts && Opt::otherPreselectionCuts;
