@@ -91,7 +91,7 @@ void drawVariablesAndCuts_3bg(bool drawBarrel){
   //
   // Open files
   //
-  TString fname1 = dateTag + "/DY_flat_ntuple_trueAndFake_alleta_full.root";
+  TString fname1 = dateTag + "/DY_ext_flat_ntuple_trueAndFake_alleta_full.root";
   TFile  *input1 = new TFile( fname1 );
   //  input1->cd("wp3");
   TTree *signalTree = (TTree*) input1->Get("electronTree");
@@ -101,7 +101,7 @@ void drawVariablesAndCuts_3bg(bool drawBarrel){
   //  input2->cd("wp3");
   TTree *backgroundTree = (TTree*) input2->Get("electronTree");
   
-  TString fname3 = dateTag + "/GJ_flat_ntuple_trueAndFake_alleta_full.root";
+  TString fname3 = dateTag + "/GJet_10to40_flat_ntuple_trueAndFake_alleta_full.root";
   TFile *input3 = new TFile( fname3 );
   //  input3->cd("wp3");
   TTree *backgroundTreeAdditional = 0;
