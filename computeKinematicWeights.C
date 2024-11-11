@@ -12,9 +12,9 @@ const TCut trueEleCut       = "isTrue == 1";
 const TCut fakeEleCut       = "isTrue == 0 || isTrue == 3";
 const TCut preselectionCuts = "passConversionVeto && abs(dz)<1";
 
-const float etaMin = -2.5;
-const float etaMax = +2.5;
-const int nEtaBins = 50;
+const float etaMin = -3.0;
+const float etaMax = +3.0;
+const int nEtaBins = 60;
 
 // We are interested to start with pt from 20 GeV, but we actually start
 // from 14 GeV so that there is data for interpolation
@@ -27,7 +27,8 @@ const bool smallEventCount = false;
 const int smallMaxEvents = 100000;
 
 const TString getFileName(TString type){
-  return "/user/tomc/eleIdTuning/tuples/" + type + ".root";
+//  return "/user/tomc/eleIdTuning/tuples/" + type + ".root";
+  return "/eos/user/t/tihsu/Ele_cutbasedID_ntuple/122X/"+type+"/"+type+".root";
 }
 // Tree Name (file IN):
 const TString treeName = "ntupler/ElectronTree";
@@ -60,7 +61,7 @@ void computeKinematicWeights(TString tagDir){
   //
   // Load the signal and background trees
   //
-  TTree *treeS = getTree(getFileName("DY"), treeName);
+  TTree *treeS = getTree(getFileName("DY_ext"), treeName);
   TTree *treeB = getTree(getFileName("TT"), treeName);
 
   // 
