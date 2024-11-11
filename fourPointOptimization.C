@@ -5,14 +5,20 @@
 #include "VariableLimits.hh"
 #include "optimize.hh"
 
-void fourPointOptimization(bool useBarrel){
+void fourPointOptimization(int region){
 
   // Define source for the initial cut range
   TString dateTag = "2019-08-23";
   TString startingCutMaxFileName        = "cuts_barrel_eff_0999_" + dateTag + ".root";
-  if(!useBarrel) startingCutMaxFileName = "cuts_endcap_eff_0999_" + dateTag + ".root";
+  if(region == 0)      startingCutMaxFileName = "cuts_barrel_eff_0999_" + dateTag + ".root";
+  else if(region == 1) startingCutMaxFileName = "cuts_endcap_eff_0999_" + dateTag + ".root";
+  else                 startingCutMaxFileName = "cuts_extend_eff_0999_" + dateTag + ".root";
 
-  TString namePrefix = useBarrel ? "cuts_barrel_" : "cuts_endcap_";
+  TString namePrefix = "cuts_barrel_";
+  if(region == 0)       namePrefix = "cuts_barrel_";
+  else if(region == 1)  namePrefix = "cuts_endcap_";
+  else                  namePrefix = "cuts_extend_";
+
   TString namePass[Opt::nWP] = {"pass1_","pass2_","pass3_","pass4_"};
   TString nameTime = dateTag;
 
@@ -34,8 +40,9 @@ void fourPointOptimization(bool useBarrel){
     // This string will be used to construct the dir for the output
     // of TMVA: the dir for weights and the filename for diagnostics
     TString trainingDataOutputBase = "training_results_";
-    if(useBarrel) trainingDataOutputBase += "barrel_";
-    else          trainingDataOutputBase += "endcap_";
+    if(region==0)      trainingDataOutputBase += "barrel_";
+    else if(region==1) trainingDataOutputBase += "endcap_";
+    else               trainingDataOutputBase += "extend_";
 
     trainingDataOutputBase += namePass[ipass];
     trainingDataOutputBase += nameTime;
@@ -56,7 +63,7 @@ void fourPointOptimization(bool useBarrel){
     printf(" %s\n", cutOutputBase.Data());
     printf("------------------------------------------------------------------\n\n");
     
-    optimize(cutMaxFileName, cutOutputBase, trainingDataOutputBase, userDefinedCutLimits, useBarrel);    
+    optimize(cutMaxFileName, cutOutputBase, trainingDataOutputBase, userDefinedCutLimits, region);    
   }
  
   // Finally, create the files containing the working point

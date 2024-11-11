@@ -16,7 +16,7 @@
 TString dateTag = "2019-08-23";
 
 // Forward declarations
-void findVarLimits(TString var, bool isBarrel, float &xmin, float &xmax);
+void findVarLimits(TString var, int region, float &xmin, float &xmax);
 
 //
 // A helper class VarInfo
@@ -84,12 +84,12 @@ double VarInfo::findUpperCut(TTree *tree, TCut &preselectionCut, double eff){
   return cut;
 }
 
-void writeCutAtEff(float eff, bool useBarrel, TTree* tree, TCut preselectionCuts, TString name){
+void writeCutAtEff(float eff, int region, TTree* tree, TCut preselectionCuts, TString name){
   VarCut *cutAtEff = new VarCut();
   for(int i=0; i<Vars::nVariables; i++){
     float xlow = 0;
     float xhigh = 1000; // just a large number, overwritten below
-    findVarLimits(Vars::variables[i]->name, useBarrel, xlow, xhigh);
+    findVarLimits(Vars::variables[i]->name, region, xlow, xhigh);
     // Note: use nameTmva below, so that the var string will contain
     // the abs() as needed.
     VarInfo var(Vars::variables[i]->nameTmva, xlow, xhigh);
@@ -116,16 +116,22 @@ void findCutLimits(){
   TFile *inputEndcap = new TFile( Opt::fnameSignalEndcap );
   TTree *treeEndcap = (TTree*)inputEndcap->Get(Opt::signalTreeName);
   if( !treeEndcap ) assert(0);
-
+  TFile *inputExtend = new TFile( Opt::fnameSignalExtend );
+  TTree *treeExtend = (TTree*)inputExtend->Get(Opt::signalTreeName);
+  if( !treeExtend ) assert(0);
   //
   // Barrel first
   //
-  writeCutAtEff(0.999, true,  treeBarrel, Opt::ptCut && Opt::etaCutBarrel && Opt::otherPreselectionCuts && Opt::trueEleCut, TString("cuts_barrel_eff_0999_") + dateTag + ".root");
-  writeCutAtEff(0.999, false, treeEndcap, Opt::ptCut && Opt::etaCutEndcap && Opt::otherPreselectionCuts && Opt::trueEleCut, TString("cuts_endcap_eff_0999_") + dateTag + ".root");
+  writeCutAtEff(0.999, 0,  treeBarrel, Opt::ptCut && Opt::etaCutBarrel && Opt::otherPreselectionCuts && Opt::trueEleCut, TString("cuts_barrel_eff_0999_") + dateTag + ".root");
+  writeCutAtEff(0.999, 1,  treeEndcap, Opt::ptCut && Opt::etaCutEndcap && Opt::otherPreselectionCuts && Opt::trueEleCut, TString("cuts_endcap_eff_0999_") + dateTag + ".root");
+  writeCutAtEff(0.999, 2,  treeExtend, Opt::ptCut && Opt::etaCutExtend && Opt::otherPreselectionCuts && Opt::trueEleCut, TString("cuts_extend_eff_0999_") + dateTag + ".root");
 }
 
-void findVarLimits(TString var, bool useBarrel, float &xlow, float &xhigh){
+void findVarLimits(TString var, int region, float &xlow, float &xhigh){
   xlow = 0;
+  bool useBarrel = true;
+  if(region > 0) useBarrel = false;
+
   if ( var == "full5x5_sigmaIetaIeta" )        xhigh = useBarrel ? 0.03 : 0.1;
   else if ( var == "dEtaSeed"         )        xhigh = useBarrel ? 0.05 : 0.1;
   else if ( var == "dPhiIn"         )          xhigh = 0.4;
