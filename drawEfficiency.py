@@ -11,8 +11,8 @@ dateTag = "2019-08-23"
 # Helper functions for trees and binning
 #
 def getPtBins(longPtRange):
-  bins = [20.]
-  for i in range(20): bins.append(bins[-1] + 1)
+  bins = [10.]
+  for i in range(30): bins.append(bins[-1] + 1)
   for i in range(30): bins.append(bins[-1] + 2)
   for i in range(10): bins.append(bins[-1] + 5)
   for i in range(5):  bins.append(bins[-1] + 10)
@@ -23,9 +23,9 @@ def getPtBins(longPtRange):
   return bins;
 
 def getEtaBins():
-  nBins = 50
-  xmin  = -2.5
-  xmax  = 2.5
+  nBins = 60
+  xmin  = -3.0
+  xmax  = 3.0
   delta = (xmax - xmin)/nBins
 
   bins = []
@@ -33,7 +33,7 @@ def getEtaBins():
   return bins
 
 def getNvtxBins():
-  return [0., 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 30, 35, 40, 45, 50]
+  return [0., 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 30, 35, 40, 45, 50, 60, 70, 90]
 
 #
 # Calculating the efficiency histogram with correct errors
@@ -77,14 +77,18 @@ def setHistogram(hist, wp, isSignal):
 #
 def drawEfficiency(mode, tag, region, selectVar):
   if '2TeV' in mode:
-    return # not available
+#    return # not available
     signalFileName = dateTag + '/' + "DoubleEleFlat_flat_ntuple_trueAndFake_alleta_full.root"
-  else:              signalFileName = dateTag + '/' + "DY_flat_ntuple_true_alleta_full.root"
+  elif '1to500GeV' in mode:
+    signalFileName = dateTag + '/' + "DoubleEle1to500_flat_ntuple_trueAndFake_alleta_full.root"
+  elif '500to1000GeV' in mode:
+    signalFileName = dateTag + '/' + "DoubleEle500to1000_flat_ntuple_trueAndFake_alleta_full.root"
+  else:              signalFileName = dateTag + '/' + "DY_ext_flat_ntuple_true_alleta_full.root"
   signalTree     = getTreeFromFile(signalFileName,                                                ROOT.Opt.signalTreeName)
-  backgroundTree = getTreeFromFile(dateTag + '/' + "TT_flat_ntuple_trueAndFake_alleta_full.root", ROOT.Opt.backgroundTreeName) if '2TeV' not in mode else None
+  backgroundTree = getTreeFromFile(dateTag + '/' + "TT_flat_ntuple_trueAndFake_alleta_full.root", ROOT.Opt.backgroundTreeName) #if '2TeV' not in mode else None
 
-  if('genPt' in mode):  binning = getPtBins(mode.count("2TeV"))
-  elif('pt' in mode):   binning = getPtBins(mode.count("2TeV"))
+  if('genPt' in mode):  binning = getPtBins(mode.count("eV"))
+  elif('pt' in mode):   binning = getPtBins(mode.count("eV"))
   elif('eta' in mode):  binning = getEtaBins()
   elif('nvtx' in mode): binning = getNvtxBins()
 
@@ -97,9 +101,10 @@ def drawEfficiency(mode, tag, region, selectVar):
   else:              comment = region + ' electrons'
 
   preselectionCuts = ROOT.Opt.ptCut + ROOT.Opt.otherPreselectionCuts
-  if(mode == "eta"):        preselectionCuts += ROOT.TCut('abs(etaSC)<2.5')
+  if(mode == "eta"):        preselectionCuts += ROOT.TCut('abs(etaSC)<3.0')
   elif(region == "barrel"): preselectionCuts += ROOT.Opt.etaCutBarrel
-  else:                     preselectionCuts += ROOT.Opt.etaCutEndcap
+  elif(region == "endcap"): preselectionCuts += ROOT.Opt.etaCutEndcap
+  else:                     preselectionCuts += ROOT.Opt.etaCutExtend
 
   signalCuts     = preselectionCuts + (ROOT.Opt.trueEleCut if not 'DoubleEle' in signalFileName else ROOT.TCut())
   backgroundCuts = preselectionCuts + ROOT.Opt.fakeEleCut
@@ -120,12 +125,14 @@ def drawEfficiency(mode, tag, region, selectVar):
   setColors(workingPoints[tag])
   for wp in workingPoints[tag]:
     is2016 = '2016' in wp.name
-    wpCutsBarrel = getCuts(wp, True,  selectVar)
-    wpCutsEndcap = getCuts(wp, False, selectVar)
+    wpCutsBarrel = getCuts(wp, 'barrel', selectVar)
+    wpCutsEndcap = getCuts(wp, 'endcap', selectVar)
+    wpCutsExtend = getCuts(wp, 'extend', selectVar)
 
     selectionCutsBarrel = ROOT.TCut(wpCutsBarrel) + ROOT.Opt.etaCutBarrel
     selectionCutsEndcap = ROOT.TCut(wpCutsEndcap) + ROOT.Opt.etaCutEndcap
-    selectionCuts       = ROOT.TCut('(' + selectionCutsBarrel.GetTitle() + ')||(' + selectionCutsEndcap.GetTitle() + ')')
+    selectionCutsExtend = ROOT.TCut(wpCutsExtend) + ROOT.Opt.etaCutExtend
+    selectionCuts       = ROOT.TCut('(' + selectionCutsBarrel.GetTitle() + ')||(' + selectionCutsEndcap.GetTitle() + ')||(' + selectionCutsExtend.GetTitle() + ')')
 
     if('genPt' in mode):  varName = "genPt"
     elif('pt' in mode):   varName = "pt"
@@ -155,20 +162,36 @@ def drawEfficiency(mode, tag, region, selectVar):
   leg.SetFillStyle(0);
   leg.SetBorderSize(0);
   leg.AddEntry(0, "Signal:", "")
-  for wp in workingPoints[tag]: leg.AddEntry(sigEff[wp], wp.name, "pl")
+  for wp in workingPoints[tag]: leg.AddEntry(sigEff[wp], wp.name.replace('106X','run3'), "pl")
 
   if backgroundTree:
     leg.AddEntry(0, "", "")
     leg.AddEntry(0, "Background:", "")
-    for wp in workingPoints[tag]: leg.AddEntry(bgEff[wp], wp.name, "pl")
+    for wp in workingPoints[tag]: leg.AddEntry(bgEff[wp], wp.name.replace('106X','run3'), "pl")
   leg.Draw("same");
 
-  lat = ROOT.TLatex(0.5, 0.95, comment);
+  lat = ROOT.TLatex(0.53, 0.93, comment);
   lat.SetNDC(True);
   lat.Draw("same");
 
+  cmsText = ROOT.TLatex()
+  cmsText.SetNDC();
+  cmsText.SetTextAlign(11);
+  cmsText.SetTextFont(61);
+  cmsText.SetTextSize(0.04);
+  cmsText.DrawLatex(0.12, 0.93, "CMS");
+
+  extraText = ROOT.TLatex()
+  extraText.SetNDC();
+  extraText.SetTextAlign(11);
+  extraText.SetTextFont(52);
+  extraText.SetTextSize(0.04);
+  extraText.DrawLatex(0.21, 0.93, "Preliminary");
+
   dirName  = os.path.join('figures', 'efficiencies', tag, selectVar)
   fileName = os.path.join(dirName, "eff_" + ((region + '_') if mode != 'eta' else '') + mode + '.png')
+  c1.Print(makeSubDirs(fileName))
+  fileName = os.path.join(dirName, "eff_" + ((region + '_') if mode != 'eta' else '') + mode + '.pdf')
   c1.Print(makeSubDirs(fileName))
 
 
@@ -189,8 +212,8 @@ args = argParser.parse_args()
 if args.mode and args.region and args.selectVar != 'all':
   drawEfficiency(args.mode, args.tag, args.region, args.selectVar)
 elif not args.subJob:
-  for mode in ([args.mode] if args.mode else ['eta','pt', 'genPt', 'pt_2TeV', 'genPt_2TeV', 'nvtx']):
-    for region in ([args.region] if args.region else (['endcap','barrel'] if mode != 'eta' else ['full'])):
+  for mode in ([args.mode] if args.mode else ['eta','pt', 'genPt', 'pt_2TeV', 'genPt_2TeV', 'nvtx', 'pt_1to500GeV','pt_500to1000GeV']):
+    for region in ([args.region] if args.region else (['barrel','endcap','extend'] if mode != 'eta' else ['full'])):
       for selectVar in [args.selectVar] if args.selectVar!='all' else ["", "expectedMissingInnerHits", "full5x5_sigmaIetaIeta", "dEtaSeed", "dPhiIn", "hOverE", "relIsoWithEA", "ooEmooP"]:
         if args.runLocal: drawEfficiency(mode, args.tag, region, selectVar)
         else:
