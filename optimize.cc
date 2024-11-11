@@ -9,10 +9,19 @@ const TString datasetname = "dataset";
 //
 // Main method
 //
-void optimize(TString cutMaxFileName, TString cutsOutFileNameBase, TString trainingDataOutputBase, VarLims::VariableLimits **userDefinedCutLimits, bool useBarrel){
+void optimize(TString cutMaxFileName, TString cutsOutFileNameBase, TString trainingDataOutputBase, VarLims::VariableLimits **userDefinedCutLimits, int region){
 
-  TString fnameSignal     = useBarrel ? Opt::fnameSignalBarrel     : Opt::fnameSignalEndcap;
-  TString fnameBackground = useBarrel ? Opt::fnameBackgroundBarrel : Opt::fnameBackgroundEndcap;
+  // region: 0->barrel ; 1->endcap; 2(else)->extend;
+
+  TString fnameSignal     = Opt::fnameSignalBarrel;
+  if (region == 0)     fnameSignal = Opt::fnameSignalBarrel;
+  else if(region == 1) fnameSignal = Opt::fnameSignalEndcap;
+  else                 fnameSignal = Opt::fnameSignalExtend;
+
+  TString fnameBackground = Opt::fnameBackgroundBarrel;
+  if (region == 0)     fnameBackground = Opt::fnameBackgroundBarrel;
+  else if(region == 1) fnameBackground = Opt::fnameBackgroundEndcap;
+  else                 fnameBackground = Opt::fnameBackgroundExtend;
 
   printf("\n Take true electrons from %s tree %s\n\n",       fnameSignal.Data(),     Opt::signalTreeName.Data());
   printf("\n Take background electrons from %s tree %s\n\n", fnameBackground.Data(), Opt::backgroundTreeName.Data());
@@ -68,12 +77,12 @@ void optimize(TString cutMaxFileName, TString cutsOutFileNameBase, TString train
   dataloader->SetBackgroundWeightExpression("abs(genWeight*kinWeight)");
 
   // Configure training and test trees  
-  TString trainAndTestOptions = getTrainAndTestOptions(useBarrel);
+  TString trainAndTestOptions = getTrainAndTestOptions(region);
 
   // Apply additional cuts on the signal and background samples (can be different)
   TCut signalCuts = "";
   TCut backgroundCuts = "";
-  configureCuts(signalCuts, backgroundCuts, useBarrel);
+  configureCuts(signalCuts, backgroundCuts, region);
 
   // Tell the dataloader how to use the training and testing events
   dataloader->PrepareTrainingAndTestTree(signalCuts, backgroundCuts, trainAndTestOptions );
@@ -89,7 +98,7 @@ void optimize(TString cutMaxFileName, TString cutsOutFileNameBase, TString train
   factory->EvaluateAllMethods();
   
   // Save working points into files.
-  writeWorkingPoints(factory, cutsOutFileNameBase, useBarrel);
+  writeWorkingPoints(factory, cutsOutFileNameBase, region);
 
   // Clean up
 
@@ -142,17 +151,22 @@ void configureVariables(TMVA::DataLoader *dataloader){
   }
 }
 
-void configureCuts(TCut &signalCuts, TCut &backgroundCuts, bool useBarrel){
+void configureCuts(TCut &signalCuts, TCut &backgroundCuts, int region){
 
   // Define all cuts 
  
   TCut etaCut = "";
-  if(useBarrel){
+  if(region == 0){
     printf("\n\nTraining for BARREL electrons\n\n");
     etaCut = Opt::etaCutBarrel;
-  }else{
+  }
+  else if(region == 1){
     printf("\n\nTraining for ENDCAP electrons\n\n");
     etaCut = Opt::etaCutEndcap;
+  }
+  else{
+    printf("\n\nTraining for EXTEND electrons\n\n");
+    etaCut = Opt::etaCutExtend;
   }
   TCut kinematicCuts = Opt::ptCut && etaCut;
 
@@ -163,17 +177,29 @@ void configureCuts(TCut &signalCuts, TCut &backgroundCuts, bool useBarrel){
 
 }
 
-TString getTrainAndTestOptions(bool useBarrel){
+TString getTrainAndTestOptions(int region){
 
   TString options = "SplitMode=Random:!V";
   options += ":nTrain_Signal=";
-  options += useBarrel ? Opt::nTrain_SignalBarrel : Opt::nTrain_SignalEndcap;
+  //options += "2000";
+  if(region == 0)      options += Opt::nTrain_SignalBarrel;
+  else if(region == 1) options += Opt::nTrain_SignalEndcap;
+  else                 options += Opt::nTrain_SignalExtend;
   options += ":nTrain_Background=";
-  options += useBarrel ? Opt::nTrain_BackgroundBarrel : Opt::nTrain_BackgroundEndcap;
+  //options += "2000";
+  if(region == 0)      options += Opt::nTrain_BackgroundBarrel;
+  else if(region == 1) options += Opt::nTrain_BackgroundEndcap;
+  else                 options += Opt::nTrain_BackgroundExtend;
   options += ":nTest_Signal=";
-  options += useBarrel ? Opt::nTest_SignalBarrel : Opt::nTest_SignalEndcap;
+  //options += "2000";
+  if(region == 0)      options += Opt::nTest_SignalBarrel;
+  else if(region == 1) options += Opt::nTest_SignalEndcap;
+  else                 options += Opt::nTest_SignalExtend;
   options += ":nTest_Background=";
-  options += useBarrel ? Opt::nTest_BackgroundBarrel : Opt::nTest_BackgroundEndcap;
+  //options += "2000";
+  if(region == 0)      options += Opt::nTest_BackgroundBarrel;
+  else if(region == 1) options += Opt::nTest_BackgroundEndcap;
+  else                 options += Opt::nTest_BackgroundExtend;
  
   printf("INFO: training and test options: %s\n", options.Data());
   return options;
@@ -228,7 +254,7 @@ TString getMethodOptions(TString cutMaxFileName, VarLims::VariableLimits **userD
   return methodOptions;
 }
 
-void writeWorkingPoints(const TMVA::Factory *factory, TString cutsOutFileNameBase, bool useBarrel){
+void writeWorkingPoints(const TMVA::Factory *factory, TString cutsOutFileNameBase, int region){
 
   TString cutsFileName = Opt::cutRepositoryDir;
   cutsFileName += "/";
@@ -250,7 +276,9 @@ void writeWorkingPoints(const TMVA::Factory *factory, TString cutsOutFileNameBas
 
     std::vector <double> cutLo;
     std::vector <double> cutHi;
-    method->GetCuts(useBarrel ? Opt::effBarrel[iwp] : Opt::effEndcap[iwp], cutLo, cutHi);
+    if(region == 0)      method->GetCuts(Opt::effBarrel[iwp], cutLo, cutHi);
+    else if(region == 1) method->GetCuts(Opt::effEndcap[iwp], cutLo, cutHi);
+    else                 method->GetCuts(Opt::effExtend[iwp], cutLo, cutHi);
     // NOTE: this relies on filling the factory with AddVarilables
     // in exactly the same order (using the same loop) 
     // Start with a sanity check:
