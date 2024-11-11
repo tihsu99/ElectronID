@@ -28,27 +28,29 @@
 #include <stdlib.h>
 
 enum MatchType  {MATCH_TRUE, MATCH_FAKE, MATCH_ANY};
-enum SampleType {SAMPLE_UNDEF, SAMPLE_DY, SAMPLE_TT, SAMPLE_GJ, SAMPLE_DoubleEle1to300, SAMPLE_DoubleEle300to6500};
-enum EtaRegion  {ETA_EB, ETA_EE, ETA_FULL};
+enum SampleType {SAMPLE_UNDEF, SAMPLE_DY, SAMPLE_TT, SAMPLE_GJ, SAMPLE_DoubleEle1to500, SAMPLE_DoubleEle500to1000, SAMPLE_DoubleEle1000to1500, SAMPLE_DoubleEle1500to3000, SAMPLE_DoubleEle3000to4000, SAMPLE_DoubleEle4000to5000};
+enum EtaRegion  {ETA_EB, ETA_EE, ETA_EExt, ETA_FULL};
 
-const float C_e_barrel   = 1.12;
-const float C_rho_barrel = 0.0368;
-const float C_e_endcap   = 2.35;
-const float C_rho_endcap = 0.201;
+const float C_e_barrel   = 1.39;
+const float C_rho_barrel = 0.0422;
+const float C_e_endcap   = 2.28;
+const float C_rho_endcap = 0.266;
 
 
 const TString tagDir = "2019-08-23";
 const TString getFileName(TString type){
-  return "/user/tomc/eleIdTuning/tuples/" + type + ".root";
+//  return "/user/tomc/eleIdTuning/tuples/" + type + ".root";
+  return "/eos/user/t/tihsu/Ele_cutbasedID_ntuple/122X/"+type+"/"+type+".root";
 }
 
 // Preselection cuts: must match or be looser than
 // cuts in OptimizatioConstants.hh
-const float ptMin = 20;
-const float etaMax = 2.5;
+const float ptMin = 10;
+const float etaMax = 3.0;
 const float dzMax = 1.0;
 // Note: passConversionVeto is also applied
-const float boundaryEBEE = 1.479;
+const float boundaryEBEE    = 1.479;
+const float boundaryEEEExt = 2.5;
 
 //====================================================
 const bool talkativeRegime = true;
@@ -65,20 +67,9 @@ const TString histNameWeights = "hKinematicWeights";
 // Effective areas for electrons derived by Ilya for Fall17
 //  https://indico.cern.ch/event/662749/contributions/2763091/attachments/1545124/2424854/talk_electron_ID_fall17.pdf
 namespace EffectiveAreas {
-  const int nEtaBins = 7;
-  const float etaBinLimits[nEtaBins+1] = {
-    0.0, 1.0, 1.479, 2.0,
-    2.2, 2.3, 2.4, 2.5
-  };
-  const float effectiveAreaValues[nEtaBins] = {
-    0.0978,
-    0.1033,
-    0.0552,
-    0.0247,
-    0.0255,
-    0.0208,
-    0.0960,
-  };
+  const int nEtaBins = 11;
+  const float etaBinLimits[nEtaBins+1] = {0.0, 1.0, 1.479, 2.0, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 3.0  };
+  const float effectiveAreaValues[nEtaBins] = {0.1243,  0.1462,  0.1001,  0.0806,  0.0781,  0.0765,  0.1003,  0.2308,  0.2536,  0.2591,  0.2519};
 }
 
 
@@ -105,11 +96,19 @@ float getEntries(TString inputFileName){
 // Main program
 //
 void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType, EtaRegion etaRegion){
-  int N_1to300    = -1;
-  int N_300to6500 = -1;
-  if(sample == SAMPLE_DoubleEle1to300 or sample == SAMPLE_DoubleEle300to6500){
-    N_1to300    = getEntries(getFileName("DoubleEleFlat1to300"));
-    N_300to6500 = getEntries(getFileName("DoubleEleFlat300to6500"));
+  int N_1to500    = -1;
+  int N_500to1000 = -1;
+  int N_1000to1500= -1;
+  int N_1500to3000= -1;
+  int N_3000to4000= -1;
+  int N_4000to5000= -1;
+  if((sample == SAMPLE_DoubleEle1to500) or (sample == SAMPLE_DoubleEle500to1000) or (sample == SAMPLE_DoubleEle1000to1500) or (sample == SAMPLE_DoubleEle1500to3000) or (sample == SAMPLE_DoubleEle3000to4000) or (sample == SAMPLE_DoubleEle4000to5000)){
+    N_1to500    = getEntries(getFileName("DoubleEle1to500"));
+    N_500to1000 = getEntries(getFileName("DoubleEle500to1000"));
+    N_1000to1500= getEntries(getFileName("DoubleEle1000to1500"));
+    N_1500to3000= getEntries(getFileName("DoubleEle1500to3000"));
+    N_3000to4000= getEntries(getFileName("DoubleEle3000to4000"));
+    N_4000to5000= getEntries(getFileName("DoubleEle4000to5000"));
   }
 
 
@@ -127,11 +126,15 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
   // Input/output file names
   TString inputFileName = "";
   TString flatNtupleFileNameBase = "Undefined";
-  if(sample == SAMPLE_DY)                        inputFileName = "DY";
+  if(sample == SAMPLE_DY)                        inputFileName = "DY_ext";
   else if( sample == SAMPLE_TT )                 inputFileName = "TT";
-  else if( sample == SAMPLE_GJ )                 inputFileName = "GJ";
-  else if( sample == SAMPLE_DoubleEle1to300 )    inputFileName = "DoubleEleFlat1to300";
-  else if( sample == SAMPLE_DoubleEle300to6500 ) inputFileName = "DoubleEleFlat300to6500";
+  else if( sample == SAMPLE_GJ )                 inputFileName = "GJet_10to40";
+  else if( sample == SAMPLE_DoubleEle1to500 )    inputFileName = "DoubleEle1to500";
+  else if( sample == SAMPLE_DoubleEle500to1000 ) inputFileName = "DoubleEle500to1000";
+  else if( sample == SAMPLE_DoubleEle1000to1500) inputFileName = "DoubleEle1000to1500";
+  else if( sample == SAMPLE_DoubleEle1500to3000) inputFileName = "DoubleEle1500to3000";
+  else if( sample == SAMPLE_DoubleEle3000to4000) inputFileName = "DoubleEle3000to4000";
+  else if( sample == SAMPLE_DoubleEle4000to5000) inputFileName = "DoubleEle4000to5000";
   else {
     printf("Unknown sample requested\n");
     assert(0);
@@ -159,6 +162,7 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
   TString flatNtupleFileNameEtas = "";
   if(etaRegion == ETA_EB)        flatNtupleFileNameEtas = "_barrel";
   else if(etaRegion == ETA_EE)   flatNtupleFileNameEtas = "_endcap";
+  else if(etaRegion == ETA_EExt) flatNtupleFileNameEtas = "_extend";
   else if(etaRegion == ETA_FULL) flatNtupleFileNameEtas = "_alleta";
 
   TString flatNtupleFileNameEvents = eventCountString();
@@ -389,7 +393,11 @@ void convert_EventStrNtuple_To_FlatNtuple(SampleType sample, MatchType matchType
       etaSC_ = eleEtaSC->at(iele);
       // Reweight only signal electron of the DY sample
       if(sample == SAMPLE_DY && matchType == MATCH_TRUE) kweight_ = findKinematicWeight(hKinematicWeights, pt_, etaSC_);
-      else if(sample == SAMPLE_DoubleEle300to6500)       kweight_ = (6500 - 300)/(300 - 1)*N_1to300/N_300to6500;
+      else if(sample == SAMPLE_DoubleEle500to1000)       kweight_ = (1000 - 500)/(500 - 1)*N_1to500/N_500to1000;
+      else if(sample == SAMPLE_DoubleEle1000to1500)      kweight_ = (1500 -1000)/(500 - 1)*N_1to500/N_1000to1500;
+      else if(sample == SAMPLE_DoubleEle1500to3000)      kweight_ = (3000 -1500)/(500 - 1)*N_1to500/N_1500to3000;
+      else if(sample == SAMPLE_DoubleEle3000to4000)      kweight_ = (4000 -3000)/(500 - 1)*N_1to500/N_3000to4000;
+      else if(sample == SAMPLE_DoubleEle4000to5000)      kweight_ = (5000 -4000)/(500 - 1)*N_1to500/N_4000to5000;
       else                                               kweight_ = 1;
 
       float C_e                 = fabs(etaSC_) < 1.4442 ? C_e_barrel   : C_e_endcap;
@@ -466,7 +474,8 @@ bool passPreselection(int isTrue, float pt, float eta, int passConversionVeto, f
   if(matchType == MATCH_TRUE and !(isTrue==1))                                      return false;
   if(matchType == MATCH_FAKE and !(isTrue==0 || isTrue==3))                         return false;
   if(etaRegion == ETA_EB     and !(abs(eta) <= boundaryEBEE))                       return false;
-  if(etaRegion == ETA_EE     and !(abs(eta) >= boundaryEBEE && abs(eta) <= etaMax)) return false;
+  if(etaRegion == ETA_EE     and !(abs(eta) >= boundaryEBEE && abs(eta) <= boundaryEEEExt)) return false;
+  if(etaRegion == ETA_EExt   and !(abs(eta) >= boundaryEEEExt && abs(eta) <= etaMax))       return false;
   if(etaRegion == ETA_FULL   and !(abs(eta) < etaMax))                              return false;
   if(pt < ptMin)                                                                    return false;
   if(!passConversionVeto)                                                           return false;
@@ -519,14 +528,20 @@ int main(int argc, char *argv[]){
   // For tuning
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_TRUE, ETA_EB);
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_TRUE, ETA_EE);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY, MATCH_TRUE, ETA_EExt);
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_TT, MATCH_FAKE, ETA_EB);
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_TT, MATCH_FAKE, ETA_EE);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_TT, MATCH_FAKE, ETA_EExt);
 
   // For plotting
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY,                 MATCH_TRUE, ETA_FULL);
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DY,                 MATCH_ANY,  ETA_FULL);
   convert_EventStrNtuple_To_FlatNtuple(SAMPLE_TT,                 MATCH_ANY,  ETA_FULL);
-//  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_GJ,                 MATCH_ANY,  ETA_FULL);
-//  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle1to300,    MATCH_ANY,  ETA_FULL);
-//  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle300to6500, MATCH_ANY,  ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_GJ,                 MATCH_ANY,  ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle1to500,    MATCH_ANY,  ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle500to1000, MATCH_ANY,  ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle1000to1500,MATCH_ANY,  ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle1500to3000,MATCH_ANY,  ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle3000to4000,MATCH_ANY,  ETA_FULL);
+  convert_EventStrNtuple_To_FlatNtuple(SAMPLE_DoubleEle4000to5000,MATCH_ANY,  ETA_FULL);
 }
