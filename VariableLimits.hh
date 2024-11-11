@@ -19,7 +19,7 @@ namespace VarLims{
     new VariableLimits("full5x5_sigmaIetaIeta"   ,1e30),
     new VariableLimits("dEtaSeed"                ,1e30),
     new VariableLimits("dPhiIn"                  ,1e30),
-    new VariableLimits("hOverE"                  ,1e30),
+    new VariableLimits("hOverEscaled"            ,1e30),
     new VariableLimits("relIsoWithEA"            ,1e30),
     new VariableLimits("ooEmooP"                 ,1e30)
     //new VariableLimits("d0"                      ,1e30), // Removed from optimization
@@ -40,7 +40,7 @@ namespace VarLims{
     new VariableLimits("full5x5_sigmaIetaIeta"   ,1e30),
     new VariableLimits("dEtaSeed"                ,0.03), // Barrel/Endcap 99.9+%
     new VariableLimits("dPhiIn"                  ,0.25), // Barrel/Endcap 99.9+%
-    new VariableLimits("hOverE"                  ,0.35), // Barrel/Endcap 99,9%
+    new VariableLimits("hOverEscaled"                  ,0.35), // Barrel/Endcap 99,9%
     new VariableLimits("relIsoWithEA"            ,1.00), // Barrel/Endcap 99.9%
     new VariableLimits("ooEmooP"                 ,0.25)  // Barrel/Endcap 99.9%
     // new VariableLimits("d0"                      ,0.40), // Endcap 99.9%  // Removed from optimization
@@ -56,7 +56,7 @@ namespace VarLims{
     new VariableLimits("full5x5_sigmaIetaIeta"   ,1e30), // Disabled
     new VariableLimits("dEtaSeed"                ,1e30), // Disabled
     new VariableLimits("dPhiIn"                  ,1e30), // Disabled
-    new VariableLimits("hOverE"                  ,1e30), // Disabled
+    new VariableLimits("hOverEscaled"                  ,1e30), // Disabled
     new VariableLimits("relIsoWithEA"            ,1e30), // Disabled
     new VariableLimits("ooEmooP"                 ,1e30)  // Disabled
     // new VariableLimits("d0"                      ,1e30),  // Disabled
@@ -69,7 +69,7 @@ namespace VarLims{
     new VariableLimits("full5x5_sigmaIetaIeta"   ,1e30), // 
     new VariableLimits("dEtaSeed"                ,1e30), // 
     new VariableLimits("dPhiIn"                  ,1e30), // 
-    new VariableLimits("hOverE"                  ,1e30), // 
+    new VariableLimits("hOverEscaled"                  ,1e30), // 
     new VariableLimits("relIsoWithEA"            ,1e30), // 
     new VariableLimits("ooEmooP"                 ,1e30)  // 
     // new VariableLimits("d0"                      ,1e30),  // 
