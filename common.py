@@ -17,8 +17,23 @@ class workingPoint:
     self.name              = name
     self.cutsFileBarrel    = cutsFile.replace('region','barrel')
     self.cutsFileEndcap    = cutsFile.replace('region','endcap')
+    self.cutsFileExtend    = cutsFile.replace('region','extend')
     self.missingHitsBarrel = missingHitsBarrel
     self.missingHitsEndcap = missingHitsEndcap
+    self.missingHitsExtend = missingHitsEndcap # Set it to be the same with endcap in current stage
+
+HistoryData_barrel = {
+  'Tight (94X)': [0.696,0.9968, 16],
+  'Medium (94X)': [0.804, 0.993, 14],
+  'Loose (94X)' : [0.892, 0.984, 12],
+  'Veto (94X)' : [0.942, 0.964, 11]
+}
+HistoryData_endcap = {
+  'Veto (94X)': [0.941, 0.894, 11],
+  'Loose (94X)': [0.89, 0.945, 12],
+  'Medium (94X)' : [0.799, 0.974, 14],
+  'Tight (94X)': [0.689, 0.987, 16]
+}
 
 workingPoints = {
   '2016':        [workingPoint('Veto (2016)',              'cuts_region_2016_WP_Tight',                 2, 3),
@@ -84,6 +99,40 @@ workingPoints = {
                   workingPoint('Loose (106X)',              'cuts_region_2019-08-23_WP_Loose',          1, 1),
                   workingPoint('Medium (106X)',             'cuts_region_2019-08-23_WP_Medium',         1, 1),
                   workingPoint('Tight (106X)',              'cuts_region_2019-08-23_WP_Tight',          1, 1)],
+  'training106_tuneC0': [workingPoint('Veto (106X)',        'cuts_region_2019-08-23_training106_tuneC0_Veto',           2, 3),
+                  workingPoint('Loose (106X)',              'cuts_region_2019-08-23_training106_tuneC0_Loose',          1, 1),
+                  workingPoint('Medium (106X)',             'cuts_region_2019-08-23_training106_tuneC0_Medium',         1, 1),
+                  workingPoint('Tight (106X)',              'cuts_region_2019-08-23_training106_tuneC0_Tight',          1, 1)],
+  'training106_tuneC0CE_v3': [workingPoint('Veto (106X)',        'cuts_region_2019-08-23_training106_tuneC0CE_v3_Veto',           2, 3),
+                  workingPoint('Loose (106X)',              'cuts_region_2019-08-23_training106_tuneC0CE_v3_Loose',          1, 1),
+                  workingPoint('Medium (106X)',             'cuts_region_2019-08-23_training106_tuneC0CE_v3_Medium',         1, 1),
+                  workingPoint('Tight (106X)',              'cuts_region_2019-08-23_training106_tuneC0CE_v3_Tight',          1, 1)],
+ 'training106_tuneC0CE_v4': [workingPoint('Veto (106X)',        'cuts_region_2019-08-23_training106_tuneC0CE_v4_Veto',           2, 3),
+                  workingPoint('Loose (106X)',              'cuts_region_2019-08-23_training106_tuneC0CE_v4_Loose',          1, 1),
+                  workingPoint('Medium (106X)',             'cuts_region_2019-08-23_training106_tuneC0CE_v4_Medium',         1, 1),
+                  workingPoint('Tight (106X)',              'cuts_region_2019-08-23_training106_tuneC0CE_v4_Tight',          1, 1)],
+ 'training106_tuneC0CE_v5': [workingPoint('Veto (106X)',        'cuts_region_2019-08-23_training106_tuneC0CE_v5_Veto',           2, 3),
+                  workingPoint('Loose (106X)',              'cuts_region_2019-08-23_training106_tuneC0CE_v5_Loose',          1, 1),
+                  workingPoint('Medium (106X)',             'cuts_region_2019-08-23_training106_tuneC0CE_v5_Medium',         1, 1),
+                  workingPoint('Tight (106X)',              'cuts_region_2019-08-23_training106_tuneC0CE_v5_Tight',          1, 1)],
+   'training106_tuneCE_vs': [workingPoint('Veto (106X) (fix CE)',        'cuts_region_2019-08-23_training106_tuneC0_Veto',           2, 3),
+                  workingPoint('Loose (106X) (fix CE)',              'cuts_region_2019-08-23_training106_tuneC0_Loose',          1, 1),
+                  workingPoint('Medium (106X) (fix CE)',             'cuts_region_2019-08-23_training106_tuneC0_Medium',         1, 1),
+                  workingPoint('Tight (106X) (fix CE)',              'cuts_region_2019-08-23_training106_tuneC0_Tight',          1, 1),
+                  workingPoint('Veto (106X) (tune CE)',        'cuts_region_2019-08-23_training106_tuneC0CE_v3_Veto',           2, 3),
+                  workingPoint('Loose (106X) (tune CE)',              'cuts_region_2019-08-23_training106_tuneC0CE_v3_Loose',          1, 1),
+                  workingPoint('Medium (106X) (tune CE)',             'cuts_region_2019-08-23_training106_tuneC0CE_v3_Medium',         1, 1),
+                  workingPoint('Tight (106X) (tune CE)',              'cuts_region_2019-08-23_training106_tuneC0CE_v3_Tight',          1, 1)
+
+  ],
+  'training106_tuneC0_norel': [workingPoint('Veto (106X)',               'cuts_region_2019-08-23_training106_tuneC0_norel_Veto',           2, 3),
+                  workingPoint('Loose (106X)',              'cuts_region_2019-08-23_training106_tuneC0_norel_Loose',          1, 1),
+                  workingPoint('Medium (106X)',             'cuts_region_2019-08-23_training106_tuneC0_norel_Medium',         1, 1),
+                  workingPoint('Tight (106X)',              'cuts_region_2019-08-23_training106_tuneC0_norel_Tight',          1, 1)],
+  'training94_official': [workingPoint('Veto (94X)',       'cuts_region_2019-08-23_94X_Veto',           2, 3),
+                  workingPoint('Loose (94X)',              'cuts_region_2019-08-23_94X_Loose',          1, 1),
+                  workingPoint('Medium (94X)',             'cuts_region_2019-08-23_94X_Medium',         1, 1),
+                  workingPoint('Tight (94X)',              'cuts_region_2019-08-23_94X_Tight',          1, 1)],
 }
 
 from itertools import chain
@@ -105,10 +154,11 @@ workingPoints['compare94eVM']       = compareWP('prelim2017','retuned94e', ['Vet
 workingPoints['compare94eLT']       = compareWP('prelim2017','retuned94e', ['Loose','Tight'])
 workingPoints['compare106VM']       = compareWP('training106','training94', ['Veto','Medium'])
 workingPoints['compare106LT']       = compareWP('training106','training94', ['Loose','Tight'])
+workingPoints['compare106v94MT']    = compareWP('training106_tuneC0','training94_official',['Medium','Tight'])
 
 def setColors(set):
-  sColors  = [2, 4, 6, 8]
-  bgColors = [9, 46, 30, 42]
+  sColors  = [2, 4, 6, 8, 11 ,12, 14 ,16]
+  bgColors = [9, 46, 30, 42, 44, 48, 52, 56]
   for i, wp in enumerate(set):
     wp.sColor  = sColors[i]
     wp.bgColor = bgColors[i]
@@ -129,11 +179,40 @@ def drawFromTree(tree, selectionCuts, varName, histName, binning, wp):
   tree.Draw(command, cutString, "goff")
   return hist
 
-def getCuts(wp, barrel, selectVar):
-  file           = ROOT.TFile('cut_repository/' + (wp.cutsFileBarrel if barrel else wp.cutsFileEndcap) + '.root')
+def drawFromTree2D(tree, selectionCuts, varNameY, varNameX, histName, binningY, binningX, wp):
+  hist = ROOT.TH2F(histName, histName, len(binningX)-1, numpy.array(binningX), len(binningY)-1, numpy.array(binningY))
+  cutString  = "genWeight*kinWeight*(%s)" % selectionCuts.GetTitle()
+  command    = varNameY + ':' + varNameX + '>>' + histName
+  tree.Draw(command, cutString, "goff")
+  return hist
+
+def getCuts(wp, region, selectVar):
+
+  file           = ROOT.TFile('cut_repository/' + wp.cutsFileBarrel + '.root')
+  if(region == 'barrel'):
+    file = ROOT.TFile('cut_repository/' + wp.cutsFileBarrel + '.root')
+  elif(region == 'endcap'):
+    file = ROOT.TFile('cut_repository/' + wp.cutsFileEndcap + '.root')
+  else:
+    file = ROOT.TFile('cut_repository/' + wp.cutsFileExtend + '.root')
+
   cuts           = file.Get('cuts')
+  if(region == 'barrel'):
+    print('cut_repository/' + wp.cutsFileBarrel + '.root')
+  elif(region == 'endcap'):
+    print('cut_repository/' + wp.cutsFileEndcap + '.root')
+  else:
+    print('cut_repository/' + wp.cutsFileExtend + '.root')
+  cuts.printCuts()
+
   selectionCuts  = ROOT.TCut(cuts.getCut(selectVar))
-  selectionCuts += ROOT.TCut('expectedMissingInnerHits<='+str(wp.missingHitsBarrel if barrel else wp.missingHitsEndcap))
+
+  if(region == 'barrel'):
+    selectionCuts += ROOT.TCut('expectedMissingInnerHits<='+str(wp.missingHitsBarrel))
+  elif(region == 'endcap'):
+    selectionCuts += ROOT.TCut('expectedMissingInnerHits<='+str(wp.missingHitsEndcap))
+  else:
+    selectionCuts += ROOT.TCut('expectedMissingInnerHits<='+str(wp.missingHitsExtend))
   return selectionCuts
 
 def makeSubDirs(fileName):
